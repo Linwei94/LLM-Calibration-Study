@@ -1,6 +1,7 @@
 import json
 import argparse
 import pandas as pd
+import os
 from . import common
 from .drop_eval import DropEval
 from .gpqa_eval import GPQAEval
@@ -16,6 +17,7 @@ from .sampler.chat_completion_sampler import (
 )
 from .sampler.o_chat_completion_sampler import OChatCompletionSampler
 from .sampler.claude_sampler import ClaudeCompletionSampler, CLAUDE_SYSTEM_MESSAGE_LMSYS
+from .sampler.hfmodel_sampler import HFChatCompletionSampler
 
 
 def main():
@@ -42,6 +44,11 @@ def main():
         ),
         "gpt-4o-2024-11-20_chatgpt": ChatCompletionSampler(
             model="gpt-4o-2024-11-20",
+            system_message=OPENAI_SYSTEM_MESSAGE_CHATGPT,
+            max_tokens=2048,
+        ),
+        "gpt-4o-mini": ChatCompletionSampler(
+            model="gpt-4o-mini",
             system_message=OPENAI_SYSTEM_MESSAGE_CHATGPT,
             max_tokens=2048,
         ),
@@ -99,6 +106,27 @@ def main():
             model="claude-3-opus-20240229",
             system_message=CLAUDE_SYSTEM_MESSAGE_LMSYS,
         ),
+        "Llama-3.2-3B-Instruct": HFChatCompletionSampler(
+            model="meta-llama/Llama-3.2-3B-Instruct",
+            API_TOKEN=os.environ.get("HF_TOKEN", None),
+            system_message=None,
+            max_tokens=2048,
+            temperature=0.7,
+        ),
+        "Qwen2.5-3B-Instruct": HFChatCompletionSampler(
+            model="Qwen/Qwen2.5-3B-Instruct",
+            API_TOKEN=os.environ.get("HF_TOKEN", None),
+            system_message=None,
+            max_tokens=2048,
+            temperature=0.7,
+        ),
+        "Qwen2.5-7B-Instruct": HFChatCompletionSampler(
+            model="Qwen/Qwen2.5-7B-Instruct",
+            API_TOKEN=os.environ.get("HF_TOKEN", None),
+            system_message=None,
+            max_tokens=2048,
+            temperature=0.7,
+        )
     }
 
     if args.list_models:
@@ -154,7 +182,9 @@ def main():
 
     evals = {
         eval_name: get_evals(eval_name, args.debug)
-        for eval_name in ["simpleqa", "mmlu", "math", "gpqa", "mgsm", "drop", "humaneval"]
+        # for eval_name in ["simpleqa", "mmlu", "math", "gpqa", "mgsm", "drop", "humaneval"]
+        # for eval_name in ["simpleqa"]
+        for eval_name in ["mmlu"]
     }
     print(evals)
     debug_suffix = "_DEBUG" if args.debug else ""
@@ -165,13 +195,15 @@ def main():
             result = eval_obj(sampler)
             # ^^^ how to use a sampler
             file_stem = f"{eval_name}_{model_name}"
-            report_filename = f"/tmp/{file_stem}{debug_suffix}.html"
+            report_filename = f"simple-evals/results/{file_stem}{debug_suffix}.html"
+            if not os.path.exists("simple-evals/results"):
+                os.makedirs("simple-evals/results")
             print(f"Writing report to {report_filename}")
             with open(report_filename, "w") as fh:
                 fh.write(common.make_report(result))
             metrics = result.metrics | {"score": result.score}
             print(metrics)
-            result_filename = f"/tmp/{file_stem}{debug_suffix}.json"
+            result_filename = f"./results/{file_stem}{debug_suffix}.json"
             with open(result_filename, "w") as f:
                 f.write(json.dumps(metrics, indent=2))
             print(f"Writing results to {result_filename}")
