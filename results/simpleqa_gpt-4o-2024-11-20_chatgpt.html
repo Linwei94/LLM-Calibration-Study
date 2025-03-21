@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            .message {
+                padding: 8px 16px;
+                margin-bottom: 8px;
+                border-radius: 4px;
+            }
+            .message.user {
+                background-color: #B2DFDB;
+                color: #00695C;
+            }
+            .message.assistant {
+                background-color: #B39DDB;
+                color: #4527A0;
+            }
+            .message.system {
+                background-color: #EEEEEE;
+                color: #212121;
+            }
+            .role {
+                font-weight: bold;
+                margin-bottom: 4px;
+            }
+            .variant {
+                color: #795548;
+            }
+            table, th, td {
+                border: 1px solid black;
+            }
+            pre {
+                white-space: pre-wrap;
+            }
+        </style>
+    </head>
+    <body>
+    
+    <h1>Metrics</h1>
+    <table>
+    <tr>
+        <th>Metric</th>
+        <th>Value</th>
+    </tr>
+    <tr>
+        <td><b>Score</b></td>
+        <td>0.5</td>
+    </tr>
+    
+    <tr>
+        <td>is_correct</td>
+        <td>0.5</td>
+    </tr>
+    
+    <tr>
+        <td>is_correct:std</td>
+        <td>0.5</td>
+    </tr>
+    
+    <tr>
+        <td>is_incorrect</td>
+        <td>0.5</td>
+    </tr>
+    
+    <tr>
+        <td>is_incorrect:std</td>
+        <td>0.5</td>
+    </tr>
+    
+    <tr>
+        <td>is_not_attempted</td>
+        <td>0.0</td>
+    </tr>
+    
+    <tr>
+        <td>is_not_attempted:std</td>
+        <td>0.0</td>
+    </tr>
+    
+    <tr>
+        <td>score:std</td>
+        <td>0.5</td>
+    </tr>
+    
+    </table>
+    
+    <h1>Examples</h1>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>In which city of Pakistan was Muhammad Rafiq Tarar, a Pakistani politician, born?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Muhammad Rafiq Tarar, a Pakistani politician and former President of Pakistan, was born in **Gujranwala**, a city in Punjab, Pakistan.</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Mandi Bahauddin, Punjab</p>
+<p>Extracted Answer: Muhammad Rafiq Tarar, a Pakistani politician and former President of Pakistan, was born in **Gujranwala**, a city in Punjab, Pakistan.</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>How old was Aniol Serrasolses when he kayaked for the first time down the largest glacial waterfall ever recorded in Norway?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Aniol Serrasolses was **31 years old** when he kayaked down the largest glacial waterfall ever recorded in Norway. This event took place in 2022, and Serrasolses, born on February 11, 1991, accomplished this incredible feat at that age.</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 32</p>
+<p>Extracted Answer: Aniol Serrasolses was **31 years old** when he kayaked down the largest glacial waterfall ever recorded in Norway. This event took place in 2022, and Serrasolses, born on February 11, 1991, accomplished this incredible feat at that age.</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Who was Japan&#39;s Prime Minister after Ichirō Hatoyama left office on December 23, 1956?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>After Ichirō Hatoyama left office on December 23, 1956, **Nobusuke Kishi** became the Prime Minister of Japan. However, there was an interim period before Kishi officially took office.
+
+To clarify:
+- Ichirō Hatoyama resigned on December 23, 1956.
+- **Tanzan Ishibashi** succeeded him and served as Prime Minister from December 23, 1956, to February 25, 1957.
+- After Ishibashi resigned due to health reasons, Nobusuke Kishi became Prime Minister on February 25, 1957.
+
+So, the immediate successor to Hatoyama was **Tanzan Ishibashi**.</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Tanzan Ishibashi</p>
+<p>Extracted Answer: After Ichirō Hatoyama left office on December 23, 1956, **Nobusuke Kishi** became the Prime Minister of Japan. However, there was an interim period before Kishi officially took office.
+
+To clarify:
+- Ichirō Hatoyama resigned on December 23, 1956.
+- **Tanzan Ishibashi** succeeded him and served as Prime Minister from December 23, 1956, to February 25, 1957.
+- After Ishibashi resigned due to health reasons, Nobusuke Kishi became Prime Minister on February 25, 1957.
+
+So, the immediate successor to Hatoyama was **Tanzan Ishibashi**.</p>
+<p>Score: True</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>How many more votes did Freeman Freeman-Thomas win than George Sandys in the 1906 Bodmin by-election?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>In the 1906 Bodmin by-election, Freeman Freeman-Thomas (Liberal candidate) won **4,914 votes**, while George Sandys (Conservative candidate) won **4,213 votes**.
+
+To calculate how many more votes Freeman Freeman-Thomas won than George Sandys:
+
+\[
+4,914 - 4,213 = 701
+\]
+
+Freeman Freeman-Thomas won **701 more votes** than George Sandys.</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 1,093</p>
+<p>Extracted Answer: In the 1906 Bodmin by-election, Freeman Freeman-Thomas (Liberal candidate) won **4,914 votes**, while George Sandys (Conservative candidate) won **4,213 votes**.
+
+To calculate how many more votes Freeman Freeman-Thomas won than George Sandys:
+
+\[
+4,914 - 4,213 = 701
+\]
+
+Freeman Freeman-Thomas won **701 more votes** than George Sandys.</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>While Henri d&#39;Angoulême served as the governor of Provence, who was his secretary?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Henri d&#39;Angoulême, the illegitimate son of King Henri II of France, served as the governor of Provence from 1566 until his death in 1586. During his tenure, his secretary was **François de Malherbe**, who later became a renowned French poet and is often considered one of the founders of French classical poetry. Malherbe&#39;s role as Henri&#39;s secretary provided him with an opportunity to develop his literary skills and gain exposure to the political and cultural environment of the time.</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: François de Malherbe.</p>
+<p>Extracted Answer: Henri d&#39;Angoulême, the illegitimate son of King Henri II of France, served as the governor of Provence from 1566 until his death in 1586. During his tenure, his secretary was **François de Malherbe**, who later became a renowned French poet and is often considered one of the founders of French classical poetry. Malherbe&#39;s role as Henri&#39;s secretary provided him with an opportunity to develop his literary skills and gain exposure to the political and cultural environment of the time.</p>
+<p>Score: True</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>What year did Yohji Yamamoto&#39;s mother sell her dressmaking shop?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Yohji Yamamoto&#39;s mother sold her dressmaking shop in **1966** to support his decision to pursue a career in fashion. This was a pivotal moment in Yamamoto&#39;s journey, as it allowed him to attend Bunka Fashion College in Tokyo.</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 1972.</p>
+<p>Extracted Answer: Yohji Yamamoto&#39;s mother sold her dressmaking shop in **1966** to support his decision to pursue a career in fashion. This was a pivotal moment in Yamamoto&#39;s journey, as it allowed him to attend Bunka Fashion College in Tokyo.</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>In which country was the 4th edition of the ASEAN-India Grassroots Innovation Forum (AIGIF) launched?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>The 4th edition of the ASEAN-India Grassroots Innovation Forum (AIGIF) was launched in **Cambodia**. This forum serves as a platform to promote grassroots innovations and strengthen collaboration between ASEAN member states and India.</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Malaysia</p>
+<p>Extracted Answer: The 4th edition of the ASEAN-India Grassroots Innovation Forum (AIGIF) was launched in **Cambodia**. This forum serves as a platform to promote grassroots innovations and strengthen collaboration between ASEAN member states and India.</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Three years after joining Comme des Garçons, Junya Watanabe started designing which CdG line?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Three years after joining Comme des Garçons, Junya Watanabe started designing the **Tricot Comme des Garçons** line.</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Tricot line</p>
+<p>Extracted Answer: Three years after joining Comme des Garçons, Junya Watanabe started designing the **Tricot Comme des Garçons** line.</p>
+<p>Score: True</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>What was the name of the cannibal in the Whistleblower DLC of the 2013 video game &#34;Outlast&#34;?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>The name of the cannibal in the *Whistleblower* DLC of the 2013 video game *Outlast* is **Frank Manera**. He is one of the antagonists encountered in the DLC and is known for his gruesome habit of eating human flesh.</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Frank Manera</p>
+<p>Extracted Answer: The name of the cannibal in the *Whistleblower* DLC of the 2013 video game *Outlast* is **Frank Manera**. He is one of the antagonists encountered in the DLC and is known for his gruesome habit of eating human flesh.</p>
+<p>Score: True</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>What was the Sky EPG number of Game Network when it launched in the United Kingdom in May 2001?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>When Game Network launched in the United Kingdom in May 2001, it was assigned **Sky EPG channel 223**.</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 223.</p>
+<p>Extracted Answer: When Game Network launched in the United Kingdom in May 2001, it was assigned **Sky EPG channel 223**.</p>
+<p>Score: True</p>
+    <hr>
+    
+    </body>
+</html>

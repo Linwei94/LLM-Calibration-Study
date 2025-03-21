@@ -100,6 +100,7 @@ class MMLUEval(Eval):
                     content=format_multichoice_question(row), role="user"
                 )
             ]
+            print(prompt_messages)
             response_text = normalize_response(sampler(prompt_messages))
             extracted_answer = None
             for answer_regex in MULTILINGUAL_ANSWER_REGEXES:
