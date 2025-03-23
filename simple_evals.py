@@ -126,7 +126,44 @@ def main():
             system_message=None,
             max_tokens=2048,
             temperature=0.7,
+        ),
+        "Qwen2.5-32B-Instruct": HFChatCompletionSampler(
+            model="Qwen/Qwen2.5-32B-Instruct",
+            API_TOKEN=os.environ.get("HF_TOKEN", None),
+            system_message=None,
+            max_tokens=2048,
+            temperature=0.7,
+        ),
+        "Qwen2.5-72B-Instruct": HFChatCompletionSampler(
+            model="Qwen/Qwen2.5-72B-Instruct",
+            API_TOKEN=os.environ.get("HF_TOKEN", None),
+            system_message=None,
+            max_tokens=2048,
+            temperature=0.7,
+        ),
+        "Llama-3.1-405B-Instruct": HFChatCompletionSampler(
+            model="meta-llama/Llama-3.1-405B-Instruct",
+            API_TOKEN=os.environ.get("HF_TOKEN", None),
+            system_message=None,
+            max_tokens=2048,
+            temperature=0.7,
+        ),
+        "Llama-3.3-70B-Instruct": HFChatCompletionSampler(
+            model="meta-llama/Llama-3.3-70B-Instruct",
+            API_TOKEN=os.environ.get("HF_TOKEN", None),
+            system_message=None,
+            max_tokens=2048,
+            temperature=0.7,
         )
+        ,
+        "DeepSeek-R1": HFChatCompletionSampler(
+            model="deepseek-ai/DeepSeek-R1",
+            API_TOKEN=os.environ.get("HF_TOKEN", None),
+            system_message=None,
+            max_tokens=2048,
+            temperature=0.7,
+        )
+
     }
 
     if args.list_models:
