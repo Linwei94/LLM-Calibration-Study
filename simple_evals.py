@@ -106,63 +106,62 @@ def main():
             model="claude-3-opus-20240229",
             system_message=CLAUDE_SYSTEM_MESSAGE_LMSYS,
         ),
-        "Llama-3.2-3B-Instruct": HFChatCompletionSampler(
-            model="meta-llama/Llama-3.2-3B-Instruct",
-            API_TOKEN=os.environ.get("HF_TOKEN", None),
-            system_message=None,
-            max_tokens=2048,
-            temperature=0.7,
-        ),
-        "Qwen2.5-3B-Instruct": HFChatCompletionSampler(
-            model="Qwen/Qwen2.5-3B-Instruct",
-            API_TOKEN=os.environ.get("HF_TOKEN", None),
-            system_message=None,
-            max_tokens=2048,
-            temperature=0.7,
-        ),
-        "Qwen2.5-7B-Instruct": HFChatCompletionSampler(
-            model="Qwen/Qwen2.5-7B-Instruct",
-            API_TOKEN=os.environ.get("HF_TOKEN", None),
-            system_message=None,
-            max_tokens=2048,
-            temperature=0.7,
-        ),
-        "Qwen2.5-32B-Instruct": HFChatCompletionSampler(
-            model="Qwen/Qwen2.5-32B-Instruct",
-            API_TOKEN=os.environ.get("HF_TOKEN", None),
-            system_message=None,
-            max_tokens=2048,
-            temperature=0.7,
-        ),
-        "Qwen2.5-72B-Instruct": HFChatCompletionSampler(
-            model="Qwen/Qwen2.5-72B-Instruct",
-            API_TOKEN=os.environ.get("HF_TOKEN", None),
-            system_message=None,
-            max_tokens=2048,
-            temperature=0.7,
-        ),
-        "Llama-3.1-405B-Instruct": HFChatCompletionSampler(
-            model="meta-llama/Llama-3.1-405B-Instruct",
-            API_TOKEN=os.environ.get("HF_TOKEN", None),
-            system_message=None,
-            max_tokens=2048,
-            temperature=0.7,
-        ),
+        # "Llama-3.2-3B-Instruct": HFChatCompletionSampler(
+        #     model="meta-llama/Llama-3.2-3B-Instruct",
+        #     API_TOKEN=os.environ.get("HF_TOKEN", None),
+        #     system_message=None,
+        #     max_tokens=2048,
+        #     temperature=0.7,
+        # ),
+        # "Qwen2.5-3B-Instruct": HFChatCompletionSampler(
+        #     model="Qwen/Qwen2.5-3B-Instruct",
+        #     API_TOKEN=os.environ.get("HF_TOKEN", None),
+        #     system_message=None,
+        #     max_tokens=2048,
+        #     temperature=0.7,
+        # ),
+        # "Qwen2.5-7B-Instruct": HFChatCompletionSampler(
+        #     model="Qwen/Qwen2.5-7B-Instruct",
+        #     API_TOKEN=os.environ.get("HF_TOKEN", None),
+        #     system_message=None,
+        #     max_tokens=2048,
+        #     temperature=0.7,
+        # ),
+        # "Qwen2.5-32B-Instruct": HFChatCompletionSampler(
+        #     model="Qwen/Qwen2.5-32B-Instruct",
+        #     API_TOKEN=os.environ.get("HF_TOKEN", None),
+        #     system_message=None,
+        #     max_tokens=2048,
+        #     temperature=0.7,
+        # ),
+        # "Qwen2.5-72B-Instruct": HFChatCompletionSampler(
+        #     model="Qwen/Qwen2.5-72B-Instruct",
+        #     API_TOKEN=os.environ.get("HF_TOKEN", None),
+        #     system_message=None,
+        #     max_tokens=2048,
+        #     temperature=0.7,
+        # ),
+        # "Llama-3.1-405B-Instruct": HFChatCompletionSampler(
+        #     model="meta-llama/Llama-3.1-405B-Instruct",
+        #     API_TOKEN=os.environ.get("HF_TOKEN", None),
+        #     system_message=None,
+        #     max_tokens=2048,
+        #     temperature=0.7,
+        # ),
         "Llama-3.3-70B-Instruct": HFChatCompletionSampler(
             model="meta-llama/Llama-3.3-70B-Instruct",
             API_TOKEN=os.environ.get("HF_TOKEN", None),
             system_message=None,
             max_tokens=2048,
             temperature=0.7,
-        )
-        ,
-        "DeepSeek-R1": HFChatCompletionSampler(
-            model="deepseek-ai/DeepSeek-R1",
-            API_TOKEN=os.environ.get("HF_TOKEN", None),
-            system_message=None,
-            max_tokens=2048,
-            temperature=0.7,
-        )
+        ),
+        # "DeepSeek-R1": HFChatCompletionSampler(
+        #     model="deepseek-ai/DeepSeek-R1",
+        #     API_TOKEN=os.environ.get("HF_TOKEN", None),
+        #     system_message=None,
+        #     max_tokens=2048,
+        #     temperature=0.7,
+        # )
 
     }
 
@@ -178,7 +177,8 @@ def main():
             return
         models = {args.model: models[args.model]}
 
-    grading_sampler = ChatCompletionSampler(model="gpt-4o")
+    # grading_sampler = ChatCompletionSampler(model="gpt-4o")
+    grading_sampler = models["Llama-3.3-70B-Instruct"]
     equality_checker = ChatCompletionSampler(model="gpt-4-turbo-preview")
     # ^^^ used for fuzzy matching, just for math
 
@@ -220,8 +220,8 @@ def main():
     evals = {
         eval_name: get_evals(eval_name, args.debug)
         # for eval_name in ["simpleqa", "mmlu", "math", "gpqa", "mgsm", "drop", "humaneval"]
-        # for eval_name in ["simpleqa"]
-        for eval_name in ["mmlu"]
+        for eval_name in ["simpleqa"]
+        # for eval_name in ["mmlu"]
     }
     print(evals)
     debug_suffix = "_DEBUG" if args.debug else ""
@@ -232,15 +232,15 @@ def main():
             result = eval_obj(sampler)
             # ^^^ how to use a sampler
             file_stem = f"{eval_name}_{model_name}"
-            report_filename = f"simple-evals/results/{file_stem}{debug_suffix}.html"
-            if not os.path.exists("simple-evals/results"):
-                os.makedirs("simple-evals/results")
+            report_filename = f"Llm-Calibration-Study/results/{file_stem}{debug_suffix}.html"
+            if not os.path.exists("Llm-Calibration-Study/results"):
+                os.makedirs("Llm-Calibration-Study/results")
             print(f"Writing report to {report_filename}")
             with open(report_filename, "w") as fh:
                 fh.write(common.make_report(result))
             metrics = result.metrics | {"score": result.score}
             print(metrics)
-            result_filename = f"./results/{file_stem}{debug_suffix}.json"
+            result_filename = f"Llm-Calibration-Study/results/{file_stem}{debug_suffix}.json"
             with open(result_filename, "w") as f:
                 f.write(json.dumps(metrics, indent=2))
             print(f"Writing results to {result_filename}")
