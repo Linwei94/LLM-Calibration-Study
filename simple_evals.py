@@ -220,8 +220,8 @@ def main():
     evals = {
         eval_name: get_evals(eval_name, args.debug)
         # for eval_name in ["simpleqa", "mmlu", "math", "gpqa", "mgsm", "drop", "humaneval"]
-        for eval_name in ["simpleqa"]
-        # for eval_name in ["mmlu"]
+        # for eval_name in ["simpleqa"]
+        for eval_name in ["mmlu"]
     }
     print(evals)
     debug_suffix = "_DEBUG" if args.debug else ""
@@ -232,15 +232,15 @@ def main():
             result = eval_obj(sampler)
             # ^^^ how to use a sampler
             file_stem = f"{eval_name}_{model_name}"
-            report_filename = f"Llm-Calibration-Study/results/{file_stem}{debug_suffix}.html"
-            if not os.path.exists("Llm-Calibration-Study/results"):
-                os.makedirs("Llm-Calibration-Study/results")
+            report_filename = f"LLM-Calibration-Study/results/{file_stem}{debug_suffix}.html"
+            if not os.path.exists("LLM-Calibration-Study/results"):
+                os.makedirs("LLM-Calibration-Study/results")
             print(f"Writing report to {report_filename}")
             with open(report_filename, "w") as fh:
                 fh.write(common.make_report(result))
             metrics = result.metrics | {"score": result.score}
             print(metrics)
-            result_filename = f"Llm-Calibration-Study/results/{file_stem}{debug_suffix}.json"
+            result_filename = f"LLM-Calibration-Study/results/{file_stem}{debug_suffix}.json"
             with open(result_filename, "w") as f:
                 f.write(json.dumps(metrics, indent=2))
             print(f"Writing results to {result_filename}")
