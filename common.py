@@ -9,6 +9,10 @@ import numpy as np
 import requests
 from tqdm import tqdm
 
+import regex as re
+from google.auth import default
+from google.auth.transport.requests import Request
+
 from .types import EvalResult, Message, SamplerBase, SingleEvalResult
 
 from .sampler.chat_completion_sampler import (
@@ -51,6 +55,17 @@ A) {A}
 B) {B}
 C) {C}
 D) {D}
+""".strip()
+
+LLM_UNCERTAINTY_TEMPLATE_WITHOUT_OPTIONS = """
+Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don't give me the explanation.
+
+{Question}
 """.strip()
 
 
@@ -180,6 +195,36 @@ HTML_JINJA = """
 <p>Extracted Answer Confidence: {{ extracted_answer_confidence }}</p>
 <p>Score: {{ score }}</p>
 """
+
+def extract_confidence_from_response(response_text: str) -> str:
+    """
+    Extract the confidence from the response string.
+    """
+    def default_postprocess_match(match) -> tuple[str, str]:
+        assert match is not None
+        option_key, conf_scale = match.group(1), match.group(2)
+        return option_key, conf_scale
+
+    # Define different regular expression patterns
+    patterns = [
+        r"Answer:\s*(.+?),\s*Confidence:\s*(\d+)%?",
+    ]
+
+    patterns_and_postprocess = []
+    patterns_and_postprocess.extend([(pat, default_postprocess_match) for pat in patterns])
+
+    # pre-process
+    response_text = response_text.replace("(1-100)", "(0-100)")
+
+    
+    answer, conf = None, None
+    for pattern, match_processor in patterns_and_postprocess:
+        match = re.search(pattern, response_text)
+        if not match:
+            continue
+        answer, conf = match_processor(match)
+
+    return conf
 
 
 def format_multichoice_question(row):
@@ -556,7 +601,7 @@ def get_model_dict(model_name: str):
                 model="meta-llama/Llama-3.1-8B-Instruct",
                 API_TOKEN=os.environ.get("HF_TOKEN", None),
                 system_message=None,
-                max_tokens=2048,
+                max_tokens=400,
                 temperature=0.7,
             )
     elif model_name == "DeepSeek-R1":
@@ -567,5 +612,47 @@ def get_model_dict(model_name: str):
                 max_tokens=2048,
                 temperature=0.7,
             )
+        
+    # add google cloud apis
+    credentials, _ = default()
+    auth_request = Request()
+    credentials.refresh(auth_request)
+    base_url = "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi"
+    
+    models["google-llama-3.1-405b-instruct-maas"] = ChatCompletionSampler(
+        model="meta/llama-3.1-405b-instruct-maas",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=2048,
+        base_url=base_url,
+        api_key=credentials.token
+    )
+    models["google-llama-3.1-70b-instruct-maas"] = ChatCompletionSampler(
+            model="meta/llama-3.1-70b-instruct-maas",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=2048,
+            base_url=base_url,
+            api_key=credentials.token
+        )
+    models["google-llama-3.1-8b-instruct-maas"] = ChatCompletionSampler(
+            model="meta/llama-3.1-8b-instruct-maas",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=2048,
+            base_url=f"https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
+            api_key=credentials.token
+        )
+    models["google-llama-3.3-70b-instruct-maas"] = ChatCompletionSampler(
+            model="meta/llama-3.3-70b-instruct-maas",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=2048,
+            base_url=f"https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
+            api_key=credentials.token
+        )
+    models["google-llama-3.1-8b-instruct-maas"] = ChatCompletionSampler(
+            model="meta/llama-3.1-8b-instruct-maas",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=2048,
+            base_url=f"https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
+            api_key=credentials.token
+        )
         
     return models
