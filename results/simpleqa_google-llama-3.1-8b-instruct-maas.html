@@ -1,0 +1,3990 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            .message {
+                padding: 8px 16px;
+                margin-bottom: 8px;
+                border-radius: 4px;
+            }
+            .message.user {
+                background-color: #B2DFDB;
+                color: #00695C;
+            }
+            .message.assistant {
+                background-color: #B39DDB;
+                color: #4527A0;
+            }
+            .message.system {
+                background-color: #EEEEEE;
+                color: #212121;
+            }
+            .role {
+                font-weight: bold;
+                margin-bottom: 4px;
+            }
+            .variant {
+                color: #795548;
+            }
+            table, th, td {
+                border: 1px solid black;
+            }
+            pre {
+                white-space: pre-wrap;
+            }
+        </style>
+    </head>
+    <body>
+    
+    <h1>Metrics</h1>
+    <table>
+    <tr>
+        <th>Metric</th>
+        <th>Value</th>
+    </tr>
+    <tr>
+        <td><b>Score</b></td>
+        <td>0.09</td>
+    </tr>
+    
+    <tr>
+        <td>is_correct</td>
+        <td>0.09</td>
+    </tr>
+    
+    <tr>
+        <td>is_correct:std</td>
+        <td>0.2861817604250837</td>
+    </tr>
+    
+    <tr>
+        <td>is_incorrect</td>
+        <td>0.87</td>
+    </tr>
+    
+    <tr>
+        <td>is_incorrect:std</td>
+        <td>0.3363034344160047</td>
+    </tr>
+    
+    <tr>
+        <td>is_not_attempted</td>
+        <td>0.04</td>
+    </tr>
+    
+    <tr>
+        <td>is_not_attempted:std</td>
+        <td>0.19595917942265423</td>
+    </tr>
+    
+    <tr>
+        <td>score:std</td>
+        <td>0.2861817604250837</td>
+    </tr>
+    
+    </table>
+    
+    <h1>Examples</h1>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+In which city of Pakistan was Muhammad Rafiq Tarar, a Pakistani politician, born?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Sheikhupura, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Mandi Bahauddin, Punjab</p>
+<p>Extracted Answer: Answer: Sheikhupura, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+How old was Aniol Serrasolses when he kayaked for the first time down the largest glacial waterfall ever recorded in Norway?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 13, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 32</p>
+<p>Extracted Answer: Answer: 13, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Who was Japan&#39;s Prime Minister after Ichirō Hatoyama left office on December 23, 1956?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Tanzan Ishibashi, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Tanzan Ishibashi</p>
+<p>Extracted Answer: Answer: Tanzan Ishibashi, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: True</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+How many more votes did Freeman Freeman-Thomas win than George Sandys in the 1906 Bodmin by-election?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 3, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 1,093</p>
+<p>Extracted Answer: Answer: 3, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+While Henri d&#39;Angoulême served as the governor of Provence, who was his secretary?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: François Rabelais, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: François de Malherbe.</p>
+<p>Extracted Answer: Answer: François Rabelais, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What year did Yohji Yamamoto&#39;s mother sell her dressmaking shop?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 1967, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 1972.</p>
+<p>Extracted Answer: Answer: 1967, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+In which country was the 4th edition of the ASEAN-India Grassroots Innovation Forum (AIGIF) launched?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: India, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Malaysia</p>
+<p>Extracted Answer: Answer: India, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Three years after joining Comme des Garçons, Junya Watanabe started designing which CdG line?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: CdG Shirt, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Tricot line</p>
+<p>Extracted Answer: Answer: CdG Shirt, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What was the name of the cannibal in the Whistleblower DLC of the 2013 video game &#34;Outlast&#34;?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Richard Trager, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Frank Manera</p>
+<p>Extracted Answer: Answer: Richard Trager, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What was the Sky EPG number of Game Network when it launched in the United Kingdom in May 2001?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 655, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 223.</p>
+<p>Extracted Answer: Answer: 655, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What is the month, day, and year that the United States removed Eritrea from the &#34;Counterterror Non-Cooperation List&#34;?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: January 9, 2018, Confidence: 90%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: May, 28, and 2019</p>
+<p>Extracted Answer: Answer: January 9, 2018, Confidence: 90%</p>
+<p>Extracted Answer Confidence: 90</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What is the name of track 10 on disc 2 of the Sen no Kiseki IV - The End of Saga - original soundtrack?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: I couldn&#39;t find any information about the track list of Sen no Kiseki IV - The End of Saga - original soundtrack, Confidence: 0%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Break In</p>
+<p>Extracted Answer: Answer: I couldn&#39;t find any information about the track list of Sen no Kiseki IV - The End of Saga - original soundtrack, Confidence: 0%</p>
+<p>Extracted Answer Confidence: 0</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+In what year did Jon Kleinberg become a fellow of the Association for Computing Machinery?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 1999, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 2013</p>
+<p>Extracted Answer: Answer: 1999, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+In what month and year did Bakshi Ghulam Mohammad announce his retirement from politics?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: July 1977, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: June 1965</p>
+<p>Extracted Answer: Answer: July 1977, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What year was the municipality of Tarso, Antioquia, Colombia, founded?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 1907, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 1912</p>
+<p>Extracted Answer: Answer: 1907, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+For the original Groove Coaster game for iOS, all the original songs were by Hirokazu Koshio (COSIO) and whom?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Takayuki Aihara, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Shohei Tsuchiya</p>
+<p>Extracted Answer: Answer: Takayuki Aihara, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What&#39;s the full name of the first female Finance Minister in Zambia?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Vera Mainza, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Edith Zewelani Nawakwi</p>
+<p>Extracted Answer: Answer: Vera Mainza, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+How many times did Bil Keane win Best Syndicated Panel by the National Cartoonists Society&#39;s Award?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 18, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: four times</p>
+<p>Extracted Answer: Answer: 18, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+On June 24, 2021, which political party did Hong Joon-pyo rejoin?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: People Power Party, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: People Power Party.</p>
+<p>Extracted Answer: Answer: People Power Party, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: True</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+In which month and year did Apple add the ability for users to speak &#34;Hey Siri&#34; to enable the assistant without the requirement of physically handling the device?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: September 2014, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: September 2014.</p>
+<p>Extracted Answer: Answer: September 2014, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: True</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+For what career did Eddie Marsan leave school at 16?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Actor, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer:  apprentice printer</p>
+<p>Extracted Answer: Answer: Actor, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What was the original name of the town of Dolores, Abra, Philippines?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Poblacion, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Bucao</p>
+<p>Extracted Answer: Answer: Poblacion, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+How many people were involved in making the largest human DNA helix, achieved by the Medical University of Varna (Bulgaria) in Varna, Bulgaria, on April 23, 2016?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 1,500, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 4,000</p>
+<p>Extracted Answer: Answer: 1,500, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What was the name of Project Zero Dawn&#39;s Extinction Failsafe Protocol in the video game Horizon Zero Dawn (2017)?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Project Zero Dawn&#39;s Extinction Failsafe Protocol was called &#34;The Overreach&#34;, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: HADES</p>
+<p>Extracted Answer: Answer: Project Zero Dawn&#39;s Extinction Failsafe Protocol was called &#34;The Overreach&#34;, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+In what year was the Penny Crane Award for Distinguished Service established?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 1997, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 2000</p>
+<p>Extracted Answer: Answer: 1997, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+On what date, month, and year did Mussolini declare before 60,000 people at the Fascist Congress in Naples, &#34;Our program is simple: we want to rule Italy&#34;?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 7 September 1922, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: October 24, 1922</p>
+<p>Extracted Answer: Answer: 7 September 1922, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+In what year did the Computer History Museum have its first exhibit?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 1996, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 1975</p>
+<p>Extracted Answer: Answer: 1996, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Who kills Daryl Garrs in Happy Valley?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Richard Moore, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Alison Garrs</p>
+<p>Extracted Answer: Answer: Richard Moore, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Sir Isaac Julien&#39;s installation piece &#39;Lost Boundaries&#39; is from which year?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 2007, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 2003</p>
+<p>Extracted Answer: Answer: 2007, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What year was the Süleymaniye damaged in the great fire?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 1997, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 1660</p>
+<p>Extracted Answer: Answer: 1997, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+How much money did Benny Hinn Ministries donate to the tsunami relief effort in 2007?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: $100,000, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: $250,000</p>
+<p>Extracted Answer: Answer: $100,000, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Comedian Phyllis Diller was crowned with what title by &#34;Field and Stream&#34; magazine in 1973?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Woman Angler of the Year, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Miss Fun Fishing</p>
+<p>Extracted Answer: Answer: Woman Angler of the Year, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What was Yoido Full Gospel Church&#39;s membership in 1968?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 4,000, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 8000</p>
+<p>Extracted Answer: Answer: 4,000, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+The Jensen Interceptor (1950), produced from 1950 to 1957, had a wheelbase measurement of what in millimeters?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 2840, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 2,845 mm</p>
+<p>Extracted Answer: Answer: 2840, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Who was the recipient of the Leslie Fox Prize for Numerical Analysis in 2017?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: David Bindel, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Nicole Spillane</p>
+<p>Extracted Answer: Answer: David Bindel, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+In which year did the top religious body in Saudi Arabia give the green light for codification of Sharia law?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 1351, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 2010</p>
+<p>Extracted Answer: Answer: 1351, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+To whom did Mehbooba Mufti Sayed contest the 2019 Lok Sabha elections and lose?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Anantnag, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Hasnain Masoodi</p>
+<p>Extracted Answer: Answer: Anantnag, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Who directed the play &#34;Agamemnon&#34; at the 2022 Athens Epidaurus Festival?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Iannis Petsalis-Diassellas, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Ulrich Rasche</p>
+<p>Extracted Answer: Answer: Iannis Petsalis-Diassellas, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Who was the first fashion designer to stream a runway show online?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Tommy Hilfiger, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Helmut Lang</p>
+<p>Extracted Answer: Answer: Tommy Hilfiger, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What is the surname of the individual who won the Gibson-Fawcett Award in 2012?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Rivlin, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Fogg</p>
+<p>Extracted Answer: Answer: Rivlin, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What was the title of the episode of *River Monsters* in which Jeremy Wade caught a Japanese giant salamander by hand?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: The River of No Return, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: &#34;Cold Blooded Horror&#34;</p>
+<p>Extracted Answer: Answer: The River of No Return, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Who was the inaugural winner of the Riemann Prize in 2019?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Terence Tao, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Terence Tao</p>
+<p>Extracted Answer: Answer: Terence Tao, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: True</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What is the name of the man who discovered 37 of the 75 non-prismatic uniform polyhedra in 1878?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Arthur Cayley, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Albert Badoureau</p>
+<p>Extracted Answer: Answer: Arthur Cayley, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What is the month, day, and year Kaitlin Armstrong pleaded not guilty to the murder charge of Moriah Wilson and was arraigned?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: June 8, 2022, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: July 21, 2022</p>
+<p>Extracted Answer: Answer: June 8, 2022, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+How old was Fatima Sydow, the famous Cape Malay chef, when she passed away?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 85, Confidence: 0%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 50.</p>
+<p>Extracted Answer: Answer: 85, Confidence: 0%</p>
+<p>Extracted Answer Confidence: 0</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What type of display does the Toshiba BC-1411 use?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: CRT, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Nixie tube display</p>
+<p>Extracted Answer: Answer: CRT, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+In which city in India is the flyover bridge named after Sam Manekshaw?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Bangalore, Confidence: 90%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Ahmedabad</p>
+<p>Extracted Answer: Answer: Bangalore, Confidence: 90%</p>
+<p>Extracted Answer Confidence: 90</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What was the date, month, and year when &#34;Selective Availability&#34; was discontinued as a result of the 1996 executive order, allowing civilian users to receive a non-degraded signal globally?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: May 1, 2000, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 2 May 2000</p>
+<p>Extracted Answer: Answer: May 1, 2000, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Other than being a choreographer for the TV series In Living Color, what other job did Rosie Perez do on the show?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Actress, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: segment producer</p>
+<p>Extracted Answer: Answer: Actress, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+On what day, month, and year did Ignaz Alberti, an Austrian illustrator, engraver, and book printer, die?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 1835, Confidence: 90%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 31 August 1794</p>
+<p>Extracted Answer: Answer: 1835, Confidence: 90%</p>
+<p>Extracted Answer Confidence: 90</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+On what day, month, and year was Syed Bashir Ahmad (a Kashmiri politician) born?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 1938, Confidence: 0%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 2 January 1952</p>
+<p>Extracted Answer: Answer: 1938, Confidence: 0%</p>
+<p>Extracted Answer Confidence: 0</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Who is the municipality of Gómez Plata, Antioquia, Colombia, named after?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Jorge Gómez Plata, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Juan de la Cruz Gómez Plata</p>
+<p>Extracted Answer: Answer: Jorge Gómez Plata, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What is the surname of the individual who won the Robert Boyle Prize for Analytical Science, formerly called the Boyle Medal, in 2012?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Howie, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Dovichi</p>
+<p>Extracted Answer: Answer: Howie, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+In which year was the International Centre for Genetic Engineering and Biotechnology (ICGEB) established?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 1983, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 1983</p>
+<p>Extracted Answer: Answer: 1983, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: True</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+On which date, month, and year was the &#34;King Shaka International Airport&#34; name approved by the South African Geographical Names Council?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 16 April 2010, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 14 January 2010</p>
+<p>Extracted Answer: Answer: 16 April 2010, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Who designed the San Martín Palace?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Ricardo Mackenna Sánchez, Confidence: 90%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: The San Martín Palace was designed by the architect Alejandro Christophersen.</p>
+<p>Extracted Answer: Answer: Ricardo Mackenna Sánchez, Confidence: 90%</p>
+<p>Extracted Answer Confidence: 90</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What venue did Ciara perform at on May 27, 2015, for her Jackie tour?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: The Forum in Inglewood, California, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: House of Blues</p>
+<p>Extracted Answer: Answer: The Forum in Inglewood, California, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+In what year was the praying mantis species Eremiaphila braueri described by Krauss?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 1902, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 1902</p>
+<p>Extracted Answer: Answer: 1902, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: True</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Tell me the specific day, month, and year when the Samajwadi Janata Party was formed.</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 20, April, 1992, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 5 November 1990</p>
+<p>Extracted Answer: Answer: 20, April, 1992, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What is the name of the performance that influenced &#34;Rhythm 2&#34; by Marina Abramović to include an unconscious aspect?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: &#34;Pier Paolo Pasolini&#39;s film &#39;Pigsty&#39;&#34;, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Rhythm 5</p>
+<p>Extracted Answer: Answer: &#34;Pier Paolo Pasolini&#39;s film &#39;Pigsty&#39;&#34;, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What is the name of the man who purchased Belmont on St. Saviour&#39;s Hill, Jersey, UK, in 1822?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Sir George Paynter, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Sir Colin Halkett</p>
+<p>Extracted Answer: Answer: Sir George Paynter, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+How many livres did artist Jean-Antoine Watteau sell his painting &#34;Camp-fire&#34; to Sirois for?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 1,200, Confidence: 80</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 200</p>
+<p>Extracted Answer: Answer: 1,200, Confidence: 80</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What was the maximum takeoff weight of the Brewster F2A-3 Buffalo (1937) in kilograms?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 2,400 kg, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 3,247</p>
+<p>Extracted Answer: Answer: 2,400 kg, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Which patch for the original Dark Souls reduced the effectiveness of the Hornet Ring?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 1.04, Confidence: 90%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 1.06</p>
+<p>Extracted Answer: Answer: 1.04, Confidence: 90%</p>
+<p>Extracted Answer Confidence: 90</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+How many operator cells are within the Yamaha YM2203 from the 1980s?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 8, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 12 operator cells.</p>
+<p>Extracted Answer: Answer: 8, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What was the title of Episode 12, Season 3 of Airwolf?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: &#34;Hijack&#34;, Confidence: 95%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Half-Pint</p>
+<p>Extracted Answer: Answer: &#34;Hijack&#34;, Confidence: 95%</p>
+<p>Extracted Answer Confidence: 95</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+In which village was the victim of the 2019 Hyderabad gang rape and murder case working as a veterinary assistant surgeon at the state-run hospital?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Shadnagar, Confidence: 90%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Kollur</p>
+<p>Extracted Answer: Answer: Shadnagar, Confidence: 90%</p>
+<p>Extracted Answer Confidence: 90</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Which company launched India’s first commercial MCU chip?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Vedant Tech, Confidence: 80</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Mindgrove</p>
+<p>Extracted Answer: Answer: Vedant Tech, Confidence: 80</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+In the video game Dark Souls 1 for the PlayStation 3, which starting class has 11 vitality, 13 strength, and starts at soul level 4?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Knight, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Warrior</p>
+<p>Extracted Answer: Answer: Knight, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+During which year did Gerhard Richter have a solo exhibition named &#34;Gerhard Richter 4900 Colours: Version II&#34;?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 2007, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 2008</p>
+<p>Extracted Answer: Answer: 2007, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What are the name of the town and province in the Netherlands where Frans Gunningh Sloet died?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Amsterdam, North Holland, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer:  Edam, North Holland</p>
+<p>Extracted Answer: Answer: Amsterdam, North Holland, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+On which day, month, and year did Egypt play against Angola in Group A of the 1996 African Cup of Nations?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 2 January 1996, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 15 January 1996</p>
+<p>Extracted Answer: Answer: 2 January 1996, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What Terraria patch added biome-specific stalactites to the underground areas?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 1.4.3, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 1.2.3</p>
+<p>Extracted Answer: Answer: 1.4.3, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What is the surname of the individual who won the Chemical Industry Medal, an annual American award given to an industrial chemist by the Society of Chemical Industry, America, in 1960?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Whitmore, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Stauffer</p>
+<p>Extracted Answer: Answer: Whitmore, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Who originally recorded the scientific name of the white-headed duck as *Anas leucocephala* in 1769?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Mathurin Jacques Brisson, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Giovanni Antonio Scopoli</p>
+<p>Extracted Answer: Answer: Mathurin Jacques Brisson, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+The Dante-Alighieri monument, located on Allée des Poètes along Rue D&#39;Auteuil, was created by L&#39;atelier Attitude and inspired by the work of what Italian-born sculptor?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Dante Alighieri, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Carlo Balboni</p>
+<p>Extracted Answer: Answer: Dante Alighieri, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+In what year did Francesco &#34;Franco&#34; Giordano become a member of the Italian Communist Party?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 1953, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 1974</p>
+<p>Extracted Answer: Answer: 1953, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Richard Serra created his work &#39;Thirty-Five Feet of Lead Rolled Up&#39; while living in which city?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: New York, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: New York City</p>
+<p>Extracted Answer: Answer: New York, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: True</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What year was the municipality of Susacón, Boyacá, Colombia, founded?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 1775, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 1809</p>
+<p>Extracted Answer: Answer: 1775, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Which Denver team did Brodie Smith play for in 2014?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Denver Outlaws, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Johnny Bravo</p>
+<p>Extracted Answer: Answer: Denver Outlaws, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Ivan Lyakhov located the Lyakhovsky Islands by following the tracks of which animal?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Walrus, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Reindeer</p>
+<p>Extracted Answer: Answer: Walrus, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What is the number and name of the second asteroid discovered by astronomer Édouard Jean-Marie Stephan?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 16 Psyche, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 91 Aegina</p>
+<p>Extracted Answer: Answer: 16 Psyche, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Who was Savannah Churchill&#39;s second husband?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Cirencester&#39;s 11th Baron, John Spencer Churchill, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Jesse Johnson</p>
+<p>Extracted Answer: Answer: Cirencester&#39;s 11th Baron, John Spencer Churchill, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+In what year did the Ethiopian politician Billene Seyoum Woldeyes co-form a spoken-word poetry collective called Zemneged-Andinet?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 2013, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 2011</p>
+<p>Extracted Answer: Answer: 2013, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What was the first name of the man who, in 1925, married Mavis Tate, a former British Conservative politician?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Henry, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Henry</p>
+<p>Extracted Answer: Answer: Henry, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: True</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+In which month and year did Arch Linux installation images start including installation scripts by default?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: March 2019, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: April 2021</p>
+<p>Extracted Answer: Answer: March 2019, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Which school did Lucas Valeriu Ntuba Radebe, the former South African professional footballer, attend until he was 15 years old?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: St. Alban&#39;s College, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Bopasenatla Secondary School</p>
+<p>Extracted Answer: Answer: St. Alban&#39;s College, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+On which month and year did Sony announce the PlayStation 5?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: November 2019, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: April 2019</p>
+<p>Extracted Answer: Answer: November 2019, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Which female chemist was awarded the Garvan–Olin Medal in 1952?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Mary L. Caldwell, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Gladys A. Emerson</p>
+<p>Extracted Answer: Answer: Mary L. Caldwell, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+In which month of 1993 was the Jianbing-93 spacecraft launched?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: August, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: October</p>
+<p>Extracted Answer: Answer: August, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Who played Creon in Antigone at the Epidaurus Festival 2022?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Konstantinos Travlou, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Vasilis Bisbikis played Creon in Antigone at the Epidaurus Festival in 2022.</p>
+<p>Extracted Answer: Answer: Konstantinos Travlou, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Who did the choreography for the play &#34;Helen&#34; at the 2022 Athens Epidaurus Festival?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Vangelis Theodoropoulos, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Dimitris Sotiriou</p>
+<p>Extracted Answer: Answer: Vangelis Theodoropoulos, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+On what day, month, and year was William Hodgson &#34;Hod&#34; Stuart suspended from the league before the start of the 1905–06 season?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 28 September, 1905, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 11 December 1905</p>
+<p>Extracted Answer: Answer: 28 September, 1905, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What is the first and last name of the professor who received the Royal Society of Chemistry Bader Award in 2021?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer:  Martin, Atta Mooko, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Alison Hulme</p>
+<p>Extracted Answer: Answer:  Martin, Atta Mooko, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Under what section of CRPC was Omar Abdullah placed under preventive detention by the Indian government on the 4th and 5th of August 2019?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 107, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 107</p>
+<p>Extracted Answer: Answer: 107, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: True</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+In what month and year did Jacques Frédéric Français publish a work in which he gave a geometric representation of complex numbers with interesting applications?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 1813, Confidence: 80%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: September 1813</p>
+<p>Extracted Answer: Answer: 1813, Confidence: 80%</p>
+<p>Extracted Answer Confidence: 80</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What role did Darsheel Safary play in the series Yeh Hai Aashiqui in 2016?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Guest role, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Abhay</p>
+<p>Extracted Answer: Answer: Guest role, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What month, day, and year did the second session of the 4th Parliament of Singapore commence?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: September 21, 1959, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: December 26, 1978</p>
+<p>Extracted Answer: Answer: September 21, 1959, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Who was the first transgender person in Argentina to get her name and gender on her government-issued ID legally changed?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Alexis Nunez, Confidence: 90%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Florencia de la V</p>
+<p>Extracted Answer: Answer: Alexis Nunez, Confidence: 90%</p>
+<p>Extracted Answer Confidence: 90</p>
+<p>Score: False</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What patch number was the Space Creature set added to in Terraria?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: 1.4.4, Confidence: 100%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 1.2.1</p>
+<p>Extracted Answer: Answer: 1.4.4, Confidence: 100%</p>
+<p>Extracted Answer Confidence: 100</p>
+<p>Score: False</p>
+    <hr>
+    
+    </body>
+</html>

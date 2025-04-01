@@ -127,7 +127,8 @@ class SimpleQAEval(Eval):
     def __call__(self, sampler: SamplerBase) -> EvalResult:
             def fn(row: dict):
                 prompt_messages = [
-                    sampler._pack_message(content=row.get("problem", ""), role="user")
+                    sampler._pack_message(content=common.LLM_UNCERTAINTY_TEMPLATE_WITHOUT_OPTIONS.format(Question=row.get("problem", ""))
+                                          , role="user")
                 ]
                 response_text = sampler(prompt_messages)
                 grade_letter = self.grade_sample(row.get("problem", ""), row.get("answer", ""), response_text)
@@ -139,6 +140,9 @@ class SimpleQAEval(Eval):
                 
                 score = is_correct
 
+                extracted_answer_confidence = common.extract_confidence_from_response(response_text)
+                print(f"Extracted Answer Confidence: {extracted_answer_confidence}")
+
                 # Create HTML for each sample result
                 html = common.jinja_env.from_string(common.HTML_JINJA).render(
                     prompt_messages=prompt_messages,
@@ -146,12 +150,14 @@ class SimpleQAEval(Eval):
                     score=score,
                     correct_answer=row["answer"],
                     extracted_answer=response_text,
+                    extracted_answer_confidence=extracted_answer_confidence,
                 )
                 convo = prompt_messages + [dict(content=response_text, role="assistant")]
                 return SingleEvalResult(html=html, score=score, convo=convo, metrics={
                     "is_correct": is_correct,
                     "is_incorrect": is_incorrect,
-                    "is_not_attempted": is_not_attempted
+                    "is_not_attempted": is_not_attempted,
+                    "verbalized_confidence": extracted_answer_confidence,
                 })
 
             # Run evaluation and collect results
@@ -161,7 +167,7 @@ class SimpleQAEval(Eval):
             aggregate_metrics = {
                 "is_correct": sum(result.metrics["is_correct"] for result in results) / len(results),
                 "is_incorrect": sum(result.metrics["is_incorrect"] for result in results) / len(results),
-                "is_not_attempted": sum(result.metrics["is_not_attempted"] for result in results) / len(results),
+                "is_not_attempted": sum(result.metrics["is_not_attempted"] for result in results) / len(results)
             }
             aggregate_metrics["is_given_attempted"] = aggregate_metrics["is_correct"] + aggregate_metrics["is_incorrect"]
             # Calculate accuracy_given_attempted

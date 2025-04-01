@@ -132,3 +132,5 @@ dmypy.json
 *.DS_Store
 .vscode/
 run.sh
+test_vertexai.py
+test_vertexai.sh
