@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            .message {
+                padding: 8px 16px;
+                margin-bottom: 8px;
+                border-radius: 4px;
+            }
+            .message.user {
+                background-color: #B2DFDB;
+                color: #00695C;
+            }
+            .message.assistant {
+                background-color: #B39DDB;
+                color: #4527A0;
+            }
+            .message.system {
+                background-color: #EEEEEE;
+                color: #212121;
+            }
+            .role {
+                font-weight: bold;
+                margin-bottom: 4px;
+            }
+            .variant {
+                color: #795548;
+            }
+            table, th, td {
+                border: 1px solid black;
+            }
+            pre {
+                white-space: pre-wrap;
+            }
+        </style>
+    </head>
+    <body>
+    
+    <h1>Metrics</h1>
+    <table>
+    <tr>
+        <th>Metric</th>
+        <th>Value</th>
+    </tr>
+    <tr>
+        <td><b>Score</b></td>
+        <td>0.8</td>
+    </tr>
+    
+    <tr>
+        <td>other</td>
+        <td>0.7142857142857143</td>
+    </tr>
+    
+    <tr>
+        <td>other:std</td>
+        <td>0.4517539514526257</td>
+    </tr>
+    
+    <tr>
+        <td>score:std</td>
+        <td>0.4</td>
+    </tr>
+    
+    <tr>
+        <td>stem</td>
+        <td>0.75</td>
+    </tr>
+    
+    <tr>
+        <td>stem:std</td>
+        <td>0.4330127018922193</td>
+    </tr>
+    
+    <tr>
+        <td>humanities</td>
+        <td>0.75</td>
+    </tr>
+    
+    <tr>
+        <td>humanities:std</td>
+        <td>0.4330127018922193</td>
+    </tr>
+    
+    <tr>
+        <td>social_sciences</td>
+        <td>1.0</td>
+    </tr>
+    
+    <tr>
+        <td>social_sciences:std</td>
+        <td>0.0</td>
+    </tr>
+    
+    </table>
+    
+    <h1>Examples</h1>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+Use the following format to answer:
+```Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```
+Only the answer and confidence, don&#39;t give me the explanation.
+
+The successful anti-cancer HPV vaccine consists of:
+
+A) Live virus attenuated by specific mutagenesis
+B) Whole virus chemically inactivated vaccine
+C) Self-assemble of virus L1 protein into VLP
+D) Sub unit chemically inactivated vaccine</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer and Confidence (0-100): C, 90%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: A</p>
+<p>Extracted Answer: C</p>
+<p>Extracted Answer Confidence: 90</p>
+<p>Score: 0.0</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+Use the following format to answer:
+```Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```
+Only the answer and confidence, don&#39;t give me the explanation.
+
+The woman who conducted a longitudinal study on herself and found increased retrieval difficulty as she got older was named
+
+A) Clark
+B) Smith
+C) Whitebear
+D) Ebbinghaus</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer and Confidence (0-100): C, 85%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: B</p>
+<p>Extracted Answer: C</p>
+<p>Extracted Answer Confidence: 85</p>
+<p>Score: 0.0</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+Use the following format to answer:
+```Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```
+Only the answer and confidence, don&#39;t give me the explanation.
+
+A 75-year-old female presents to the office for a health maintenance examination. She says that she is more fatigued than she was at 65, but she still gardens and drives to the grocery store. Routine laboratory studies reveal a leukocyte count of 25.0 × 103/mcL (reference range 4.5-11.0 × 103/mcL) and 97% mature-appearing lymphocytes on a peripheral blood smear. Immunohistochemical stains demonstrate the lymphocytes to be of B-cell origin. The most likely diagnosis is
+
+A) acute lymphocytic leukemia
+B) acute myelogenous leukemia
+C) chronic lymphocytic leukemia
+D) chronic myelogenous leukemia</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>```Answer and Confidence (0-100): C, 90%```</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: C</p>
+<p>Extracted Answer: C</p>
+<p>Extracted Answer Confidence: 90</p>
+<p>Score: 1.0</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+Use the following format to answer:
+```Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Which of the following are the spatial clustering algorithms?
+
+A) Partitioning based clustering
+B) K-means clustering
+C) Grid based clustering
+D) All of the above</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer and Confidence (0-100): D, 90%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: D</p>
+<p>Extracted Answer: D</p>
+<p>Extracted Answer Confidence: 90</p>
+<p>Score: 1.0</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+Use the following format to answer:
+```Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```
+Only the answer and confidence, don&#39;t give me the explanation.
+
+What must you ensure before a speaking valve is used?
+
+A) That the patient is able to swallow properly.
+B) It is seven days after the tracheostomy tube was first inserted.
+C) The cuff is deflated.
+D) The cuff is inflated.</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer and Confidence (0-100): C, 90%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: C</p>
+<p>Extracted Answer: C</p>
+<p>Extracted Answer Confidence: 90</p>
+<p>Score: 1.0</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+Use the following format to answer:
+```Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Suppose the graph of f is both increasing and concave up on a &lt;= x &lt;= b. Then, using the same number of subdivisions, and with L, R, M, and T denoting, respectively, left, right, midpoint, and trapezoid sums, it follows that
+
+A) R &lt;= T &lt;= M &lt;= L
+B) L &lt;= T &lt;= M &lt;= R
+C) R &lt;= M &lt;= T &lt;= L
+D) L &lt;= M &lt;= T &lt;= R</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>```Answer and Confidence (0-100): D, 90%```</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: D</p>
+<p>Extracted Answer: D</p>
+<p>Extracted Answer Confidence: 90</p>
+<p>Score: 1.0</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+Use the following format to answer:
+```Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```
+Only the answer and confidence, don&#39;t give me the explanation.
+
+ In responding to terrorism, says Walzer, it is particularly important that
+
+A) we make an effort to convince the terrorists that they are acting wrongly.
+B) we avoid harming terrorists to the same extent that we would avoid harming innocent civilians.
+C) we attack the lower-ranking terrorists first.
+D) we do not repeat the wrongs of terrorism in the process.</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer and Confidence (0-100): D, 90%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: D</p>
+<p>Extracted Answer: D</p>
+<p>Extracted Answer Confidence: 90</p>
+<p>Score: 1.0</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+Use the following format to answer:
+```Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```
+Only the answer and confidence, don&#39;t give me the explanation.
+
+The ability to do which of the following is a characteristic of all living organisms?
+
+A) Move from place to place
+B) Detect and respond to changes in the environment
+C) Produce sugars by photosynthesis
+D) Produce heat to maintain a constant internal temperature</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer and Confidence (0-100): B, 90%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: B</p>
+<p>Extracted Answer: B</p>
+<p>Extracted Answer Confidence: 90</p>
+<p>Score: 1.0</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+Use the following format to answer:
+```Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```
+Only the answer and confidence, don&#39;t give me the explanation.
+
+The distinction between general and particular jurisprudence was recognized by
+
+A) Holland
+B) Salmond
+C) Austin
+D) Kelsen</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer and Confidence (0-100): A, 85%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: C</p>
+<p>Extracted Answer: A</p>
+<p>Extracted Answer Confidence: 85</p>
+<p>Score: 0.0</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+Use the following format to answer:
+```Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```
+Only the answer and confidence, don&#39;t give me the explanation.
+
+&#34;A friend of yours says, “Every time I plan a vacation, there&#39;s always a crisis at home or work so that I can&#39;t go.&#34;&#34; Assuming that this is not really true, your friend&#39;s statement best illustrates which of the following?&#34;
+
+A) psychological reactance
+B) base rate fallacy
+C) illusory correlation
+D) fundamental attribution bias</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer and Confidence (0-100): C, 85%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: C</p>
+<p>Extracted Answer: C</p>
+<p>Extracted Answer Confidence: 85</p>
+<p>Score: 1.0</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+Use the following format to answer:
+```Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Which of the following is not a consequence of global tourism?
+
+A) decreased rates of prostitution and sex tourism
+B) developing countries can depend on it as a crucial source of income
+C) the exploitation of cheap, unregulated labour in poor countries
+D) we have become more aware of &#39;other&#39; societies and ways of living</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer and Confidence (0-100): A, 90%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: A</p>
+<p>Extracted Answer: A</p>
+<p>Extracted Answer Confidence: 90</p>
+<p>Score: 1.0</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+Use the following format to answer:
+```Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Which of the following approaches emphasizes the importance of people&#39;s feelings and views human nature as naturally positive and growth seeking?
+
+A) biological
+B) behavioral
+C) cognitive
+D) humanistic</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer and Confidence (0-100): D, 95%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: D</p>
+<p>Extracted Answer: D</p>
+<p>Extracted Answer Confidence: 95</p>
+<p>Score: 1.0</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+Use the following format to answer:
+```Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```
+Only the answer and confidence, don&#39;t give me the explanation.
+
+In ice hockey which of the following is not a penalty?
+
+A) hooking
+B) charging
+C) carving
+D) butt-ending</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer and Confidence (0-100): C, 95%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: C</p>
+<p>Extracted Answer: C</p>
+<p>Extracted Answer Confidence: 95</p>
+<p>Score: 1.0</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+Use the following format to answer:
+```Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```
+Only the answer and confidence, don&#39;t give me the explanation.
+
+This question refers to the following information.
+&#34;The spontaneous forces of capitalism have been steadily growing in the countryside in recent years, with new rich peasants springing up everywhere and many well-to-do middle peasants striving to become rich peasants. On the other hand, many poor peasants are still living in poverty for lack of sufficient means of production, with some in debt and others selling or renting out their land. If this tendency goes unchecked, the polarization in the countryside will inevitably be aggravated day by day. Those peasants who lose their land and those who remain in poverty will complain that we are doing nothing to save them from ruin or to help them overcome their difficulties. Nor will the well-to-do middle peasants who are heading in the capitalist direction be pleased with us, for we shall never be able to satisfy their demands unless we intend to take the capitalist road. Can the worker-peasant alliance continue to stand in these circumstances? Obviously not! There is no solution to this problem except on a new basis. And that means to bring about, step by step, the socialist transformation of the whole of agriculture simultaneously with the gradual realization of socialist industrialization and the socialist transformation of handicrafts and capitalist industry and commerce; in other words, it means to carry out co-operation and eliminate the rich-peasant economy and the individual economy in the countryside so that all the rural people will become increasingly well off together. We maintain that this is the only way to consolidate the worker-peasant alliance.&#34;
+Mao Zedong, On the Question of Agricultural Co-operation, 1955
+Which of the following best explains Mao&#39;s concept of the &#34;socialist transformation of the whole of agriculture&#34; in China?
+
+A) Agriculture fueled industrialization in cities as excess labor flowed from the countryside to urban centers.
+B) Agricultural surpluses allowed the state to invest more heavily in modernizing agricultural production.
+C) Agricultural efficiency reduced prices of basic commodities, raising the standard of living across the whole of China.
+D) Agriculture was collectivized, with the result that entire communities shared fields instead of individuals owning the land as private property.</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>```Answer and Confidence (0-100): D, 90%```</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: D</p>
+<p>Extracted Answer: D</p>
+<p>Extracted Answer Confidence: 90</p>
+<p>Score: 1.0</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+Use the following format to answer:
+```Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Which of the following is not a function of vitamin A
+
+
+A) Synthesis of the blood clotting proteins
+B) Activation of vitamin D receptors
+C) Activation of thyroid hormone receptors
+D) Regulation of gene expression and cell differentiation</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer and Confidence (0-100): A, 90%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: A</p>
+<p>Extracted Answer: A</p>
+<p>Extracted Answer Confidence: 90</p>
+<p>Score: 1.0</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+Use the following format to answer:
+```Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Which one of the following statements is NOT true of the &#34;core&#34; countries?
+
+A) They are technologically advanced.
+B) They are wealthy.
+C) They are powerful.
+D) They are less developed.</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer and Confidence (0-100): D, 95%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: D</p>
+<p>Extracted Answer: D</p>
+<p>Extracted Answer Confidence: 95</p>
+<p>Score: 1.0</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+Use the following format to answer:
+```Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```
+Only the answer and confidence, don&#39;t give me the explanation.
+
+ Leopold claims that history has shown that &#34;the conqueror role is eventually self-defeating.&#34; It is self-defeating, in this view, because
+
+A) the conqueror doesn&#39;t understand what makes the conquered community tick.
+B) the conqueror doesn&#39;t know what and who within the community is valuable.
+C) the conqueror doesn&#39;t know what and who is worthless in community life.
+D) all of the above</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer and Confidence (0-100): D, 85%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: D</p>
+<p>Extracted Answer: D</p>
+<p>Extracted Answer Confidence: 85</p>
+<p>Score: 1.0</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+Use the following format to answer:
+```Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Maria spends $9 on lunch each day she is at work. To find how much money she spends on lunch during a 5-day work week she multiplies 5 × 9. How much money does Maria spend on lunch during a 5-day work week?
+
+A) $40 
+B) $45 
+C) $50 
+D) $59 </pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>```Answer and Confidence (0-100): B, 95%```</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: B</p>
+<p>Extracted Answer: B</p>
+<p>Extracted Answer Confidence: 95</p>
+<p>Score: 1.0</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+Use the following format to answer:
+```Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```
+Only the answer and confidence, don&#39;t give me the explanation.
+
+When the opportunity for price discrimination arises,
+
+A) market segments with relatively elastic demand pay higher prices
+B) market segments with relatively inelastic demand pay lower prices
+C) consumer surplus decreases
+D) demand is horizontal</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer and Confidence (0-100): C, 85%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: C</p>
+<p>Extracted Answer: C</p>
+<p>Extracted Answer Confidence: 85</p>
+<p>Score: 1.0</p>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+Use the following format to answer:
+```Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```
+Only the answer and confidence, don&#39;t give me the explanation.
+
+If a total of 762 students at a citywide competition are divided into 6 equal-sized teams, how many students are on each team?
+
+A) 110
+B) 120
+C) 127
+D) 137</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer and Confidence (0-100): B, 95%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: C</p>
+<p>Extracted Answer: B</p>
+<p>Extracted Answer Confidence: 95</p>
+<p>Score: 0.0</p>
+    <hr>
+    
+    </body>
+</html>

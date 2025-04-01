@@ -140,7 +140,9 @@ class MMLUEval(Eval):
 
         # Define five different regular expression patterns
         patterns_multi_choice = [
-            r"Answer and Confidence\s*(?:\(0-100\))?:\s*[\(\[]?([A-Z])[\)\]]?,\s*(\d+)%*",
+            r"^\s*([A-Z])\s*,\s*(\d+)%?",
+            r"(?:Answer and Confidence(?:\s*\([A-Z]\))?|Answer):\s*[\(\[]?([A-Z])[\)\]]?,?\s*(?:Confidence:\s*)?(\d+)",
+            r"Answer and Confidence(?:\s*\([A-Z]\))?:\s*[\(\[]?([A-Z])[\)\]]?,?\s*(\d+)%?"
             r"Answer and Confidence\s*(?:\(0-100\))?:\s*[\(\[]?([A-Z])[\)\]]?[,]?\s*(\d+)%?",
             r"Answer and Confidence\s*(?:\(0-100\))?:\s*[\(\[]?([A-Z])[\)\]]?[,]?\s*[\(\[]?(\d+)%?[\(\[]?",
             r"Answer and Confidence\s*(?:\(0-100\))?:\s*[\(\[]?([A-Z])[\)\]]?[,.]?\s*.*[\(\[]?(\d+)%?[\(\[]?",
@@ -190,6 +192,17 @@ class MMLUEval(Eval):
             answer = None
             conf = None
 
+        # extract answer using standard MMLU code
+        extracted_answer_MMLU = None
+        for answer_regex in MULTILINGUAL_ANSWER_REGEXES:
+            regex = MULTILINGUAL_ANSWER_PATTERN_TEMPLATE.format(answer_regex)
+            match = re.search(regex, response_text)
+            if match:
+                extracted_answer_MMLU = normalize_extracted_answer(match.group(1))
+                break
+
+        answer = answer if answer is not None else extracted_answer_MMLU
+
         return answer, conf
 
     def __call__(self, sampler: SamplerBase) -> EvalResult:
@@ -200,7 +213,6 @@ class MMLUEval(Eval):
                 )
             ]
             response_text = normalize_response(sampler(prompt_messages))
-
             # Extract the answer from the response text
             extracted_answer, confidence = self.extract_answer_and_confidence(response_text, options={k: row[k] for k in ['A', 'B', 'C', 'D']})
             print(f"extracted_answer: {extracted_answer}, confidence: {confidence}")
@@ -211,6 +223,7 @@ class MMLUEval(Eval):
                 score=score,
                 correct_answer=row["Answer"],
                 extracted_answer=extracted_answer,
+                extracted_answer_confidence=confidence,
             )
             convo = prompt_messages + [dict(content=response_text, role="assistant")]
             category = subject2category.get(row["Subject"], "other")
