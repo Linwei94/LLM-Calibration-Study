@@ -11,6 +11,15 @@ from tqdm import tqdm
 
 from .types import EvalResult, Message, SamplerBase, SingleEvalResult
 
+from .sampler.chat_completion_sampler import (
+    OPENAI_SYSTEM_MESSAGE_API,
+    OPENAI_SYSTEM_MESSAGE_CHATGPT,
+    ChatCompletionSampler,
+)
+from .sampler.o_chat_completion_sampler import OChatCompletionSampler
+from .sampler.claude_sampler import ClaudeCompletionSampler, CLAUDE_SYSTEM_MESSAGE_LMSYS
+from .sampler.hfmodel_sampler import HFChatCompletionSampler
+
 QUERY_TEMPLATE_MULTICHOICE = """
 Answer the following multiple choice question. The last line of your response should be of the following format: 'Answer: $LETTER' (without quotes) where LETTER is one of ABCD. Think step by step before answering.
 
@@ -372,3 +381,157 @@ def url_to_fileobj(url: str, binary=False) -> Any:
     response = requests.get(url)
     response.raise_for_status()
     return io.BytesIO(response.content) if binary else io.StringIO(response.text)
+
+
+def get_model_dict(model_name: str):
+    """
+    Get the model dict from the model name.
+    """
+    models = {}
+    if model_name == "gpt-4o-2024-11-20_assistant":
+        models["gpt-4o-2024-11-20_assistant"] = ChatCompletionSampler(
+            model="gpt-4o-2024-11-20",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=2048,
+        )
+    elif model_name == "gpt-4o-2024-11-20_chatgpt":
+        models["gpt-4o-2024-11-20_chatgpt"] = ChatCompletionSampler(
+            model="gpt-4o-2024-11-20",
+            system_message=OPENAI_SYSTEM_MESSAGE_CHATGPT,
+            max_tokens=2048,
+        )
+    elif model_name == "gpt-4o-mini":
+        models["gpt-4o-mini"] = ChatCompletionSampler(
+            model="gpt-4o-mini",
+            system_message=OPENAI_SYSTEM_MESSAGE_CHATGPT,
+            max_tokens=2048,
+        )
+    elif model_name == "o1":
+        models["o1"] = OChatCompletionSampler(
+            model="o1",
+        )
+    elif model_name == "o1-preview":
+        models["o1-preview"] = OChatCompletionSampler(
+            model="o1-preview",
+        )
+    elif model_name == "o1-mini":
+        models["o1-mini"] = OChatCompletionSampler(
+            model="o1-mini",
+        )
+    elif model_name == "o3-mini":
+        models["o3-mini"] = OChatCompletionSampler(
+            model="o3-mini",
+        )
+    elif model_name == "o3-mini_high":
+        models["o3-mini_high"] = OChatCompletionSampler(
+            model="o3-mini",
+            reasoning_effort="high",
+        )
+    elif model_name == "o3-mini_low":
+        models["o3-mini_low"] = OChatCompletionSampler(
+            model="o3-mini",
+            reasoning_effort="low",
+        )
+    elif model_name == "gpt-4-turbo-2024-04-09_assistant":
+        models["gpt-4-turbo-2024-04-09_assistant"] = ChatCompletionSampler(
+            model="gpt-4-turbo-2024-04-09",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+        )
+    elif model_name == "gpt-4-turbo-2024-04-09_chatgpt":
+        models["gpt-4-turbo-2024-04-09_chatgpt"] = ChatCompletionSampler(
+            model="gpt-4-turbo-2024-04-09",
+            system_message=OPENAI_SYSTEM_MESSAGE_CHATGPT,
+        )
+    elif model_name == "gpt-4o_assistant":
+        models["gpt-4o_assistant"] = ChatCompletionSampler(
+            model="gpt-4o",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=2048,
+        )
+    elif model_name == "gpt-4o_chatgpt":
+        models["gpt-4o_chatgpt"] = ChatCompletionSampler(
+            model="gpt-4o",
+            system_message=OPENAI_SYSTEM_MESSAGE_CHATGPT,
+            max_tokens=2048,
+        )
+    elif model_name == "gpt-4o-mini-2024-07-18":
+        models["gpt-4o-mini-2024-07-18"] = ChatCompletionSampler(
+            model="gpt-4o-mini-2024-07-18",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=2048,
+        )
+    elif model_name == "gpt-4.5-preview-2025-02-27":
+        models["gpt-4.5-preview-2025-02-27"] = ChatCompletionSampler(
+            model="gpt-4.5-preview-2025-02-27",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=2048,
+        )
+    elif model_name == "claude-3-opus-20240229_empty":
+        models["claude-3-opus-20240229_empty"] = ClaudeCompletionSampler(
+            model="claude-3-opus-20240229",
+            system_message=CLAUDE_SYSTEM_MESSAGE_LMSYS,
+        )
+    elif model_name == "Llama-3.2-3B-Instruct":
+        models["Llama-3.2-3B-Instruct"] = HFChatCompletionSampler(
+                model="meta-llama/Llama-3.2-3B-Instruct",
+                API_TOKEN=os.environ.get("HF_TOKEN", None),
+                system_message=None,
+                max_tokens=400,
+                temperature=0.7,
+            )
+    elif model_name == "Qwen2.5-3B-Instruct":
+        models["Qwen2.5-3B-Instruct"] = HFChatCompletionSampler(
+                model="Qwen/Qwen2.5-3B-Instruct",
+                API_TOKEN=os.environ.get("HF_TOKEN", None),
+                system_message=None,
+                max_tokens=2048,
+                temperature=0.7,
+            )
+    elif model_name == "Qwen2.5-7B-Instruct":
+        models["Qwen2.5-7B-Instruct"] = HFChatCompletionSampler(
+                model="Qwen/Qwen2.5-7B-Instruct",
+                API_TOKEN=os.environ.get("HF_TOKEN", None),
+                system_message=None,
+                max_tokens=2048,
+                temperature=0.7,
+            )
+    elif model_name == "Qwen2.5-13B-Instruct":
+        models["Qwen2.5-13B-Instruct"] = HFChatCompletionSampler(
+                model="Qwen/Qwen2.5-32B-Instruct",
+                API_TOKEN=os.environ.get("HF_TOKEN", None),
+                system_message=None,
+                max_tokens=2048,
+                temperature=0.7,
+            )
+    elif model_name == "Qwen2.5-32B-Instruct":
+        models["Qwen2.5-32B-Instruct"] = HFChatCompletionSampler(
+                model="Qwen/Qwen2.5-72B-Instruct",
+                API_TOKEN=os.environ.get("HF_TOKEN", None),
+                system_message=None,
+                max_tokens=2048,
+                temperature=0.7,
+            )
+    elif model_name == "Llama-3.1-405B-Instruct":
+        models["Llama-3.1-405B-Instruct"] = HFChatCompletionSampler(
+                model="meta-llama/Llama-3.1-405B-Instruct",
+                API_TOKEN=os.environ.get("HF_TOKEN", None),
+                system_message=None,
+                max_tokens=2048,
+                temperature=0.7,
+            )
+    elif model_name == "Llama-3.3-70B-Instruct": 
+        models["Llama-3.3-70B-Instruct"] = HFChatCompletionSampler(
+                model="meta-llama/Llama-3.3-70B-Instruct",
+                API_TOKEN=os.environ.get("HF_TOKEN", None),
+                system_message=None,
+                max_tokens=2048,
+                temperature=0.7,
+            )
+    elif model_name == "DeepSeek-R1":
+        models["DeepSeek-R1"] = HFChatCompletionSampler(
+                model="deepseek-ai/DeepSeek-R1",
+                API_TOKEN=os.environ.get("HF_TOKEN", None),
+                system_message=None,
+                max_tokens=2048,
+                temperature=0.7,
+            )
