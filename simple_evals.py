@@ -42,8 +42,8 @@ def main():
             return
         models = {args.model: models[args.model]}
 
-    # grading_sampler = ChatCompletionSampler(model="gpt-4o")
-    grading_sampler = models["Llama-3.3-70B-Instruct"]
+    grading_sampler = ChatCompletionSampler(model="gpt-4o")
+    # grading_sampler = models["Llama-3.2-3B-Instruct"]
     equality_checker = ChatCompletionSampler(model="gpt-4-turbo-preview")
     # ^^^ used for fuzzy matching, just for math
 

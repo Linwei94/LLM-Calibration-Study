@@ -31,6 +31,29 @@ C) {C}
 D) {D}
 """.strip()
 
+QUERY_TEMPLATE_MULTICHOICE_WITH_CONFIDENCE = """
+Read the following multiple choice question, analyze step by step, provide your answer and your confidence in this answer in the last line. Note: The confidence indicates how likely you think your answer is true.\nUse the following format to answer:\n```Explanation: [insert step-by-step analysis here]\nThe last line of your response should be of the following format: Answer: [ONLY the option LETTER where LETTER is one of ABCD; not a complete sentence], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%\n```\nOnly give me the reply according to this format, don't give me any other words."
+
+{Question}
+
+A) {A}
+B) {B}
+C) {C}
+D) {D}
+""".strip()
+
+LLM_UNCERTAINTY_TEMPLATE = """
+Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.\nUse the following format to answer:\n```Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```\nOnly the answer and confidence, don't give me the explanation.
+
+{Question}
+
+A) {A}
+B) {B}
+C) {C}
+D) {D}
+""".strip()
+
+
 ANSWER_PATTERN_MULTICHOICE = r"(?i)Answer[ \t]*:[ \t]*\$?([A-D])\$?"
 ANSWER_PATTERN = r"(?i)Answer\s*:\s*([^\n]+)"
 MULTILINGUAL_ANSWER_PATTERN_TEMPLATE = (
@@ -154,12 +177,13 @@ HTML_JINJA = """
 <h3>Results</h3>
 <p>Correct Answer: {{ correct_answer }}</p>
 <p>Extracted Answer: {{ extracted_answer }}</p>
+<p>Extracted Answer Confidence: {{ extracted_answer_confidence }}</p>
 <p>Score: {{ score }}</p>
 """
 
 
 def format_multichoice_question(row):
-    return QUERY_TEMPLATE_MULTICHOICE.format(**row)
+    return LLM_UNCERTAINTY_TEMPLATE.format(**row)
 
 
 def check_equality(sampler: SamplerBase, expr1: str, expr2: str):
@@ -527,6 +551,14 @@ def get_model_dict(model_name: str):
                 max_tokens=2048,
                 temperature=0.7,
             )
+    elif model_name == "Llama-3.1-8B-Instruct": 
+        models["Llama-3.1-8B-Instruct"] = HFChatCompletionSampler(
+                model="meta-llama/Llama-3.1-8B-Instruct",
+                API_TOKEN=os.environ.get("HF_TOKEN", None),
+                system_message=None,
+                max_tokens=2048,
+                temperature=0.7,
+            )
     elif model_name == "DeepSeek-R1":
         models["DeepSeek-R1"] = HFChatCompletionSampler(
                 model="deepseek-ai/DeepSeek-R1",
@@ -535,3 +567,5 @@ def get_model_dict(model_name: str):
                 max_tokens=2048,
                 temperature=0.7,
             )
+        
+    return models
