@@ -10,14 +10,7 @@ from .math_eval import MathEval
 from .mgsm_eval import MGSMEval
 from .mmlu_eval import MMLUEval
 from .simpleqa_eval import SimpleQAEval
-from .sampler.chat_completion_sampler import (
-    OPENAI_SYSTEM_MESSAGE_API,
-    OPENAI_SYSTEM_MESSAGE_CHATGPT,
-    ChatCompletionSampler,
-)
-from .sampler.o_chat_completion_sampler import OChatCompletionSampler
-from .sampler.claude_sampler import ClaudeCompletionSampler, CLAUDE_SYSTEM_MESSAGE_LMSYS
-from .sampler.hfmodel_sampler import HFChatCompletionSampler
+from .sampler.chat_completion_sampler import ChatCompletionSampler
 
 
 def main():
@@ -35,6 +28,9 @@ def main():
 
     args = parser.parse_args()
 
+<<<<<<< HEAD
+    models = common.get_model_dict(args.model)
+=======
     models = {
         # chatgpt models:
         "gpt-4o-2024-11-20_assistant": ChatCompletionSampler(
@@ -164,6 +160,7 @@ def main():
         # )
 
     }
+>>>>>>> parent of e948795... update the confidence extraction prompt
 
     if args.list_models:
         print("Available models:")
