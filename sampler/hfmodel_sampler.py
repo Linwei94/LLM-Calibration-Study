@@ -18,10 +18,10 @@ class HFChatCompletionSampler(SamplerBase):
     ):
         if model_dir:
             self.tokenizer = AutoTokenizer.from_pretrained(model_dir)
-            self.model = AutoModelForCausalLM.from_pretrained(model_dir, device_map="auto")
+            self.model = AutoModelForCausalLM.from_pretrained(model_dir, device_map="auto", torch_dtype=torch.bfloat16)
         else:
             self.tokenizer = AutoTokenizer.from_pretrained(model)
-            self.model = AutoModelForCausalLM.from_pretrained(model, device_map="auto")
+            self.model = AutoModelForCausalLM.from_pretrained(model, device_map="auto", torch_dtype=torch.bfloat16)
         self.system_message = system_message
         self.max_tokens = max_tokens
         self.temperature = temperature

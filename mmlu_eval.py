@@ -140,7 +140,10 @@ class MMLUEval(Eval):
 
         # Define five different regular expression patterns
         patterns_multi_choice = [
-            r"^\s*([A-Z])\s*,\s*(\d+)%?",
+            r"^\s*([A-Z])\s*,\s*(\d+)%?", # A, 100%
+            r"\s*([A-Z])\)\s*(\d+)", # C) 80
+            r"\s*([A-Z])\)\s*.+?,\s*(\d+)%?", # B) currents and wind patterns, 100%
+            r"\s*([A-Z])\)\s*.+?[\.，,]?\s*(\d+)%?", # B) currents and wind patterns. 100%
             r"(?:Answer and Confidence(?:\s*\([A-Z]\))?|Answer):\s*[\(\[]?([A-Z])[\)\]]?,?\s*(?:Confidence:\s*)?(\d+)",
             r"Answer and Confidence(?:\s*\([A-Z]\))?:\s*[\(\[]?([A-Z])[\)\]]?,?\s*(\d+)%?"
             r"Answer and Confidence\s*(?:\(0-100\))?:\s*[\(\[]?([A-Z])[\)\]]?[,]?\s*(\d+)%?",
@@ -228,7 +231,7 @@ class MMLUEval(Eval):
             convo = prompt_messages + [dict(content=response_text, role="assistant")]
             category = subject2category.get(row["Subject"], "other")
             return SingleEvalResult(
-                html=html, score=score, metrics={category: score}, convo=convo
+                html=html, score=score, metrics={category: score}, convo=convo, verbal_confidence=confidence
             )
 
         results = common.map_with_progress(fn, self.examples)

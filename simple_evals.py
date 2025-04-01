@@ -28,22 +28,23 @@ def main():
 
     args = parser.parse_args()
 
-    models = common.get_model_dict(args.model)
+    all_models = common.get_model_dict(args.model)
 
     if args.list_models:
         print("Available models:")
-        for model_name in models.keys():
+        for model_name in all_models.keys():
             print(f" - {model_name}")
         return
 
     if args.model:
-        if args.model not in models:
+        if args.model not in all_models:
             print(f"Error: Model '{args.model}' not found.")
             return
-        models = {args.model: models[args.model]}
+        models = {args.model: all_models[args.model]}
 
-    grading_sampler = ChatCompletionSampler(model="gpt-4o")
-    # grading_sampler = models["Llama-3.2-3B-Instruct"]
+    # grading_sampler = ChatCompletionSampler(model="gpt-4o")
+    # grading_sampler = ChatCompletionSampler(model="gpt-4o-mini")
+    grading_sampler = all_models["google-llama-3.1-70b-instruct-maas"]
     equality_checker = ChatCompletionSampler(model="gpt-4-turbo-preview")
     # ^^^ used for fuzzy matching, just for math
 
