@@ -69,6 +69,7 @@ class ChatCompletionSampler(SamplerBase):
                     temperature=self.temperature,
                     max_tokens=self.max_tokens,
                 )
+                print("Response received from OpenAI API.", response)
                 return response.choices[0].message.content
             # NOTE: BadRequestError is triggered once for MMMU, please uncomment if you are reruning MMMU
             except openai.BadRequestError as e:

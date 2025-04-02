@@ -82,7 +82,7 @@ subject2category = {
 
 
 class MMLUEval(Eval):
-    def __init__(self, num_examples: int | None = None, language: str = "EN-US"):
+    def __init__(self, num_examples: int | None = None, language: str = "EN-US", conf_mode: str = "verbal"):
         if language != "EN-US":
             url = f"https://openaipublic.blob.core.windows.net/simple-evals/mmlu_{language}.csv"
         else:
@@ -92,6 +92,7 @@ class MMLUEval(Eval):
         if num_examples:
             examples = random.Random(0).sample(examples, num_examples)
         self.examples = examples
+        self.conf_mode = conf_mode
 
     def extract_answer(self, response_text: str) -> str | None:
         """

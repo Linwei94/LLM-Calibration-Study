@@ -21,6 +21,7 @@ def main():
         "--list-models", action="store_true", help="List available models"
     )
     parser.add_argument("--model", type=str, help="Select a model by name")
+    parser.add_argument("--conf_mode", type=str, help="Select a mode to extract confidence from verbal, verbal_cot", default="verbal")
     parser.add_argument("--debug", action="store_true", help="Run in debug mode")
     parser.add_argument(
         "--examples", type=int, help="Number of examples to use (overrides default)"
@@ -48,14 +49,14 @@ def main():
     equality_checker = ChatCompletionSampler(model="gpt-4-turbo-preview")
     # ^^^ used for fuzzy matching, just for math
 
-    def get_evals(eval_name, debug_mode):
+    def get_evals(eval_name, debug_mode, conf_mode):
         num_examples = (
             args.examples if args.examples is not None else (5 if debug_mode else None)
         )
         # Set num_examples = None to reproduce full evals
         match eval_name:
             case "mmlu":
-                return MMLUEval(num_examples=1 if debug_mode else num_examples)
+                return MMLUEval(num_examples=1 if debug_mode else num_examples, conf_mode=conf_mode)
             case "math":
                 return MathEval(
                     equality_checker=equality_checker,
@@ -79,12 +80,13 @@ def main():
                 return SimpleQAEval(
                     grader_model=grading_sampler,
                     num_examples=10 if debug_mode else num_examples,
+                    conf_mode=conf_mode,
                 )
             case _:
                 raise Exception(f"Unrecognized eval type: {eval_name}")
 
     evals = {
-        eval_name: get_evals(eval_name, args.debug)
+        eval_name: get_evals(eval_name, args.debug, args.conf_mode)
         # for eval_name in ["simpleqa", "mmlu", "math", "gpqa", "mgsm", "drop", "humaneval"]
         for eval_name in ["simpleqa"]
         # for eval_name in ["mmlu"]

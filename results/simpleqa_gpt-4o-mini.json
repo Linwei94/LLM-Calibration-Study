@@ -1,0 +1,11 @@
+{
+  "is_correct": 0.12,
+  "is_correct:std": 0.3249615361854384,
+  "is_incorrect": 0.86,
+  "is_incorrect:std": 0.34698703145794946,
+  "is_not_attempted": 0.02,
+  "is_not_attempted:std": 0.13999999999999999,
+  "score:std": 0.3249615361854384,
+  "verbal_ece": 0.7734999656677246,
+  "score": 0.12
+}
