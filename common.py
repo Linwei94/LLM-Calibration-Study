@@ -83,6 +83,18 @@ Only the answer and confidence, don't give me the explanation.
 """.strip()
 
 
+LLM_UNCERTAINTY_COT_TEMPLATE_WITHOUT_OPTIONS = """
+Read the question, analyze step by step, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Explanation: [insert step-by-step analysis here]\nAnswer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only give me the reply according to this format, don't give me any other words.
+
+{Question}
+""".strip()
+
+
 
 
 ANSWER_PATTERN_MULTICHOICE = r"(?i)Answer[ \t]*:[ \t]*\$?([A-D])\$?"
@@ -212,39 +224,36 @@ HTML_JINJA = """
 <p>Score: {{ score }}</p>
 """
 
-def extract_confidence_from_response(response_text: str) -> str:
+def extract_confidence_from_response(response_text: str) -> str | None:
     """
-    Extract the confidence from the response string.
+    Extract the confidence score from the last line of the response string.
+    Returns the confidence as a string if found, otherwise None.
     """
-    def default_postprocess_match(match) -> tuple[str, str]:
-        assert match is not None
-        option_key, conf_scale = match.group(1), match.group(2)
-        return option_key, conf_scale
+    last_line = response_text.strip().splitlines()[-1]
 
-    # Define different regular expression patterns
+    # Try multiple patterns to handle various formats
     patterns = [
-        r"Answer:\s*(.+?),\s*Confidence:\s*(\d+)%?",
+        r"Confidence:\s*(\d+(?:\.\d+)?)%?",                # e.g., Confidence: 80%
+        r".*?,\s*Confidence:\s*(\d+(?:\.\d+)?)%?",          # e.g., Actor, Confidence: 80%
+        r"Conf(?:idence)?\s*[:\-]?\s*(\d+(?:\.\d+)?)%?"     # e.g., Conf: 85 or Confidence-90%
     ]
 
-    patterns_and_postprocess = []
-    patterns_and_postprocess.extend([(pat, default_postprocess_match) for pat in patterns])
+    for pattern in patterns:
+        match = re.search(pattern, last_line, re.IGNORECASE)
+        if match:
+            return match.group(1)
 
-    # pre-process
-    response_text = response_text.replace("(1-100)", "(0-100)")
-
-    
-    answer, conf = None, None
-    for pattern, match_processor in patterns_and_postprocess:
-        match = re.search(pattern, response_text)
-        if not match:
-            continue
-        answer, conf = match_processor(match)
-
-    return conf
+    return None
 
 
-def format_multichoice_question(row):
-    return LLM_UNCERTAINTY_COT_TEMPLATE.format(**row)
+
+def format_multichoice_question(row, conf_mode="verbal"):
+    if conf_mode == "verbal":
+        return LLM_UNCERTAINTY_TEMPLATE.format(**row)
+    elif conf_mode == "verbal_cot":
+        return LLM_UNCERTAINTY_COT_TEMPLATE.format(**row)
+    else:
+        raise ValueError(f"Unknown conf_mode: {conf_mode}")
 
 
 def check_equality(sampler: SamplerBase, expr1: str, expr2: str):
