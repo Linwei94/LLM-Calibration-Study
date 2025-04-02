@@ -8,6 +8,7 @@ import jinja2
 import numpy as np
 import requests
 from tqdm import tqdm
+import torch
 
 import regex as re
 from google.auth import default
@@ -262,6 +263,7 @@ def aggregate_results(
     name2values = defaultdict(list)
     htmls = []
     convos = []
+    verbal_confidence_list = []
     for single_eval_result in single_eval_results:
         for name, value in single_eval_result.metrics.items():
             name2values[name].append(value)
@@ -269,12 +271,16 @@ def aggregate_results(
             name2values["score"].append(single_eval_result.score)
         htmls.append(single_eval_result.html)
         convos.append(single_eval_result.convo)
+        verbal_confidence_list.append(single_eval_result.verbal_confidence)
     final_metrics = {}
     for name, values in name2values.items():
         stats = name2stats.get(name, default_stats)
         for stat in stats:
             key = name if stat == "mean" else f"{name}:{stat}"
             final_metrics[key] = _compute_stat(values, stat)
+
+    # Calculate the verbalized ECE
+    final_metrics['verbal_ece'] = calculate_ece(confidences=verbal_confidence_list, accuracies=name2values["score"])
     return EvalResult(
         score=final_metrics.pop("score", None), metrics=final_metrics, htmls=htmls, convos=convos
     )
@@ -444,6 +450,29 @@ def normalize_extracted_answer(extracted_answer: str) -> str:
         .replace("Ｄ", " D")
         .strip()
     )
+
+def calculate_ece(confidences, accuracies, n_bins=15) -> float:
+    """
+    Calculate the expected calibration error (ECE) given a list of confidence scores and accuracy scores.
+    """
+    confidences = torch.tensor([i/100 for i in confidences]) # turn confidences to 0~1
+    accuracies = torch.tensor(accuracies)
+    bin_boundaries = torch.linspace(0, 1, n_bins + 1)
+    bin_lowers = bin_boundaries[:-1]
+    bin_uppers = bin_boundaries[1:]
+
+    ece = torch.zeros(1)
+    for bin_lower, bin_upper in zip(bin_lowers, bin_uppers):
+        # Calculated |confidence - accuracy| in each bin
+        in_bin = confidences.gt(bin_lower.item()) * confidences.le(bin_upper.item())
+        prop_in_bin = in_bin.float().mean()
+        if prop_in_bin.item() > 0:
+            accuracy_in_bin = accuracies[in_bin].float().mean()
+            avg_confidence_in_bin = confidences[in_bin].mean()
+            ece += torch.abs(avg_confidence_in_bin - accuracy_in_bin) * prop_in_bin
+    
+    return ece.item()
+
 
 
 def url_to_fileobj(url: str, binary=False) -> Any:

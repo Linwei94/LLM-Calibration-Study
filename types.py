@@ -25,6 +25,7 @@ class EvalResult:
     metrics: dict[str, float] | None  # other metrics
     htmls: list[str]  # strings of valid HTML
     convos: list[MessageList]  # sampled conversations
+    verbal_ece: float | None = None  # verbal confidence ECE
 
 
 @dataclass
@@ -37,6 +38,7 @@ class SingleEvalResult:
     metrics: dict[str, float] = field(default_factory=dict)
     html: str | None = None
     convo: MessageList | None = None  # sampled conversation
+    verbal_confidence: float | None = None
 
 
 class Eval:
