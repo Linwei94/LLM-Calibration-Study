@@ -231,7 +231,7 @@ class MMLUEval(Eval):
             convo = prompt_messages + [dict(content=response_text, role="assistant")]
             category = subject2category.get(row["Subject"], "other")
             return SingleEvalResult(
-                html=html, score=score, metrics={category: score}, convo=convo, verbal_confidence=confidence
+                html=html, score=score, metrics={category: score}, convo=convo, verbal_confidence=float(confidence)
             )
 
         results = common.map_with_progress(fn, self.examples)
