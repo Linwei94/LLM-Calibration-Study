@@ -86,8 +86,8 @@ def main():
     evals = {
         eval_name: get_evals(eval_name, args.debug)
         # for eval_name in ["simpleqa", "mmlu", "math", "gpqa", "mgsm", "drop", "humaneval"]
-        # for eval_name in ["simpleqa"]
-        for eval_name in ["mmlu"]
+        for eval_name in ["simpleqa"]
+        # for eval_name in ["mmlu"]
     }
     print(evals)
     debug_suffix = "_DEBUG" if args.debug else ""

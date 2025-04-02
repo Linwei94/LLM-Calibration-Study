@@ -1,12 +1,13 @@
 {
   "other": 0.85,
   "other:std": 0.3570714214271425,
-  "score:std": 0.4142463035441596,
-  "stem": 0.6666666666666666,
-  "stem:std": 0.4714045207910317,
-  "humanities": 0.8,
-  "humanities:std": 0.4,
-  "social_sciences": 0.7916666666666666,
-  "social_sciences:std": 0.40611643103370687,
-  "score": 0.78
+  "score:std": 0.39230090491866065,
+  "stem": 0.8095238095238095,
+  "stem:std": 0.392676726249301,
+  "humanities": 0.7714285714285715,
+  "humanities:std": 0.4199125273342591,
+  "social_sciences": 0.8333333333333334,
+  "social_sciences:std": 0.37267799624996495,
+  "verbal_ece": 0.07850003987550735,
+  "score": 0.81
 }

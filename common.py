@@ -58,6 +58,19 @@ C) {C}
 D) {D}
 """.strip()
 
+LLM_UNCERTAINTY_COT_TEMPLATE = """
+Read the question, analyze step by step, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.\nUse the following format to answer:\n```Explanation: [insert step-by-step analysis here]\nAnswer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```\nOnly give me the reply according to this format, don't give me any other words.
+
+{Question}
+
+A) {A}
+B) {B}
+C) {C}
+D) {D}
+""".strip()
+
+
+
 LLM_UNCERTAINTY_TEMPLATE_WITHOUT_OPTIONS = """
 Read the question, provide your answer and your confidence in this answer. 
 
@@ -68,6 +81,8 @@ Only the answer and confidence, don't give me the explanation.
 
 {Question}
 """.strip()
+
+
 
 
 ANSWER_PATTERN_MULTICHOICE = r"(?i)Answer[ \t]*:[ \t]*\$?([A-D])\$?"
@@ -229,7 +244,7 @@ def extract_confidence_from_response(response_text: str) -> str:
 
 
 def format_multichoice_question(row):
-    return LLM_UNCERTAINTY_TEMPLATE.format(**row)
+    return LLM_UNCERTAINTY_COT_TEMPLATE.format(**row)
 
 
 def check_equality(sampler: SamplerBase, expr1: str, expr2: str):
@@ -574,7 +589,7 @@ def get_model_dict(model_name: str):
                 model="meta-llama/Llama-3.2-3B-Instruct",
                 API_TOKEN=os.environ.get("HF_TOKEN", None),
                 system_message=None,
-                max_tokens=400,
+                max_tokens=2048,
                 temperature=0.7,
             )
     elif model_name == "Qwen2.5-3B-Instruct":
@@ -630,7 +645,7 @@ def get_model_dict(model_name: str):
                 model="meta-llama/Llama-3.1-8B-Instruct",
                 API_TOKEN=os.environ.get("HF_TOKEN", None),
                 system_message=None,
-                max_tokens=400,
+                max_tokens=2048,
                 temperature=0.7,
             )
     elif model_name == "DeepSeek-R1":
@@ -683,5 +698,6 @@ def get_model_dict(model_name: str):
             base_url=f"https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
             api_key=credentials.token
         )
+        
         
     return models
