@@ -141,6 +141,8 @@ class SimpleQAEval(Eval):
                 score = is_correct
 
                 extracted_answer_confidence = common.extract_confidence_from_response(response_text)
+                if extracted_answer_confidence==None: 
+                    print(response_text)
                 print(f"Extracted Answer Confidence: {extracted_answer_confidence}")
 
                 # Create HTML for each sample result
