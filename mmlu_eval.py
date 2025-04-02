@@ -108,10 +108,6 @@ class MMLUEval(Eval):
         return extracted_answer
 
     def extract_answer_and_confidence(self, response_text: str, options) -> tuple[str | None, float | None]:
-        """
-        Extracts the answer and confidence from the response text.
-        The answer is extracted using a regex pattern, and the confidence is set to None.
-        """
         def default_postprocess_match(match) -> tuple[str, str]:
             assert match is not None
             option_key, conf_scale = match.group(1), match.group(2)
@@ -120,93 +116,58 @@ class MMLUEval(Eval):
         def postprocess_match_without_option(match) -> tuple[str, str]:
             assert match is not None
             answer_option_value = match.group(1).strip()
-            
             conf_scale = match.group(2)
             answer_option_key = None
             for option_key, option_value in options.items():
                 option_value = option_value.strip().strip(".").lower()
                 answer_option_value = answer_option_value.strip().strip(".").lower()
-                if answer_option_value in option_value or \
-                    option_value in answer_option_value:
+                if answer_option_value in option_value or option_value in answer_option_value:
                     answer_option_key = option_key
-            
-            # assert answer_option_key is not None, (match.group(0), answer_option_value, options)
+
             if answer_option_key is None:
                 print(match.group(0), answer_option_value, options)
-                # it returns an answer that does not belong to any of the option values
                 return "Z", conf_scale
-            
+
             return answer_option_key, conf_scale
 
-        # Define five different regular expression patterns
+        response_text = response_text.replace("(1-100)", "(0-100)")
+        lines = response_text.strip().splitlines()[::-1]  # reverse the lines
+
+        # Regular expressions
         patterns_multi_choice = [
-            r"^\s*([A-Z])\s*,\s*(\d+)%?", # A, 100%
-            r"\s*([A-Z])\)\s*(\d+)", # C) 80
-            r"\s*([A-Z])\)\s*.+?,\s*(\d+)%?", # B) currents and wind patterns, 100%
-            r"\s*([A-Z])\)\s*.+?[\.，,]?\s*(\d+)%?", # B) currents and wind patterns. 100%
-            r"(?:Answer and Confidence(?:\s*\([A-Z]\))?|Answer):\s*[\(\[]?([A-Z])[\)\]]?,?\s*(?:Confidence:\s*)?(\d+)",
-            r"Answer and Confidence(?:\s*\([A-Z]\))?:\s*[\(\[]?([A-Z])[\)\]]?,?\s*(\d+)%?"
-            r"Answer and Confidence\s*(?:\(0-100\))?:\s*[\(\[]?([A-Z])[\)\]]?[,]?\s*(\d+)%?",
-            r"Answer and Confidence\s*(?:\(0-100\))?:\s*[\(\[]?([A-Z])[\)\]]?[,]?\s*[\(\[]?(\d+)%?[\(\[]?",
-            r"Answer and Confidence\s*(?:\(0-100\))?:\s*[\(\[]?([A-Z])[\)\]]?[,.]?\s*.*[\(\[]?(\d+)%?[\(\[]?",
+            r"^\s*([A-Z])\s*,\s*(\d+)%?",
+            r"\s*([A-Z])\)\s*(\d+)",
+            r"\s*([A-Z])\)\s*.+?,\s*(\d+)%?",
+            r"\s*([A-Z])\)\s*.+?[\.\uFF0C,]?\s*(\d+)%?",
+            r"Answer and Confidence\s*\(0-100\):\s*[\(\[]?([A-Z0-9]+)[\)\]]?,\s*(\d+)%?",
+            r"(?:Answer and Confidence(?:\s*\([A-Z]\))?|Answer):\s*[\(\[]?([A-Z])\)?\]?[,]?\s*(?:Confidence:\s*)?(\d+)",
+            r"Answer: [\(\[]?([A-Z])\)?\]?[,.]?\s+Confidence(?: level)?:\s*(\d+)%?",
         ]
-        # sometimes the LLM will directly output the answer rather than the associated option key
+
         patterns_multi_choice_without_option = [
-            r"Answer and Confidence\s*(?:\(0-100\))?:\s*(.*?)\s*,\s*(\d+)%*"
+            r"Answer and Confidence\s*(?:\(0-100\))?:\s*(.+?),\s*(\d+)%?"
         ]
-        
-        # [\(\[]?([A-Z])[\)\]]?  -> [\(\[]? matches optional ([
-        # [\)\]]? matches optional )]
-        # most appears in vicuna
-        # Note: .* can match any character (except for a newline character) zero or more times
-        patterns_multi_choice_werid = [
-            r"Answer: [\(\[]?([A-Z])[\)\]]?[,.]?\s+Confidence level: (\d+%)",
-            r"Answer: [\(\[]?([A-Z])[\)\]]?[,.]?.*\s+Confidence(?: level)?: (\d+%)",
-            r"Answer:\s*[\(\[]?([A-Z])[\)\]]?[,.]?\s+Confidence level:\s*(\d+%)"
+
+        patterns_multi_choice_weird = [
+            r"Answer: [\(\[]?([A-Z])\)?\]?[,.]?\s+Confidence level: (\d+)%",
+            r"Answer: [\(\[]?([A-Z])\)?\]?[,.]?.*\s+Confidence(?: level)?: (\d+)%",
+            r"Answer:\s*[\(\[]?([A-Z])\)?\]?[,.]?\s+Confidence level:\s*(\d+)%"
         ]
 
         patterns_and_postprocess_multi_choice = []
         patterns_and_postprocess_multi_choice.extend([(pat, default_postprocess_match) for pat in patterns_multi_choice])
         patterns_and_postprocess_multi_choice.extend([(pat, postprocess_match_without_option) for pat in patterns_multi_choice_without_option])
-        patterns_and_postprocess_multi_choice.extend([(pat, postprocess_match_without_option) for pat in patterns_multi_choice_werid])
+        patterns_and_postprocess_multi_choice.extend([(pat, postprocess_match_without_option) for pat in patterns_multi_choice_weird])
 
-        # pre-process
-        response_text = response_text.replace("(1-100)", "(0-100)")
-        
-        # Try each regular expression pattern in turn, until a match is found or all patterns have been tried
-        is_match = False
-        
-        # task_type = "multi_choice"
-        patterns_and_postprocess = patterns_and_postprocess_multi_choice
-        
         answer, conf = None, None
-        for pattern, match_processor in patterns_and_postprocess:
-            match = re.search(pattern, response_text)
-            if not match:
-                continue
-            answer, conf = match_processor(match)
-            answer = None if (answer not in 'ABCD') and (answer != "place_holder") else answer # If a match is found, check whether the matched result meets the requirements
-            if answer is not None and conf is not None:
-                is_match = True
-                break     
-                    
-        if not is_match:
-            # If no match is found, print a message
-            answer = None
-            conf = None
-
-        # extract answer using standard MMLU code
-        extracted_answer_MMLU = None
-        for answer_regex in MULTILINGUAL_ANSWER_REGEXES:
-            regex = MULTILINGUAL_ANSWER_PATTERN_TEMPLATE.format(answer_regex)
-            match = re.search(regex, response_text)
-            if match:
-                extracted_answer_MMLU = normalize_extracted_answer(match.group(1))
-                break
-
-        answer = answer if answer is not None else extracted_answer_MMLU
-
-        return answer, conf
+        for line in lines:
+            for pattern, match_processor in patterns_and_postprocess_multi_choice:
+                match = re.search(pattern, line)
+                if match:
+                    answer, conf = match_processor(match)
+                    if answer in 'ABCD' or answer == 'place_holder':
+                        return answer, float(conf)
+        return None, None
 
     def __call__(self, sampler: SamplerBase) -> EvalResult:
         def fn(row: dict):
@@ -230,6 +191,10 @@ class MMLUEval(Eval):
             )
             convo = prompt_messages + [dict(content=response_text, role="assistant")]
             category = subject2category.get(row["Subject"], "other")
+            if extracted_answer == None or confidence == None:
+                # answer is one of A, B, C, D ramdomly
+                extracted_answer = random.choice(['A', 'B', 'C', 'D'])
+                confidence = 0
             return SingleEvalResult(
                 html=html, score=score, metrics={category: score}, convo=convo, verbal_confidence=float(confidence)
             )
