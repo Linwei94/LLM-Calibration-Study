@@ -97,7 +97,7 @@ CHOICE_STRINGS = ["CORRECT", "INCORRECT", "NOT_ATTEMPTED"]
 CHOICE_LETTER_TO_STRING = dict(zip(CHOICE_LETTERS, CHOICE_STRINGS))
 
 class SimpleQAEval(Eval):
-    def __init__(self, grader_model: SamplerBase, num_examples: int | None = None, n_repeats: int = 1):
+    def __init__(self, grader_model: SamplerBase, num_examples: int | None = None, n_repeats: int = 1, conf_mode: str = "verbal"):
         df = pandas.read_csv(
             f"https://openaipublic.blob.core.windows.net/simple-evals/simple_qa_test_set.csv"
         )
@@ -108,6 +108,7 @@ class SimpleQAEval(Eval):
             examples = rng.sample(examples, num_examples)
         self.examples = examples * n_repeats
         self.grader_model = grader_model
+        self.conf_mode = conf_mode
 
     def grade_sample(self, question: str, target: str, predicted_answer: str) -> str:
         grader_prompt = GRADER_TEMPLATE.format(
@@ -126,9 +127,12 @@ class SimpleQAEval(Eval):
 
     def __call__(self, sampler: SamplerBase) -> EvalResult:
             def fn(row: dict):
+                if self.conf_mode == "verbal":
+                    template = common.LLM_UNCERTAINTY_TEMPLATE_WITHOUT_OPTIONS
+                else:
+                    template = common.LLM_UNCERTAINTY_COT_TEMPLATE_WITHOUT_OPTIONS
                 prompt_messages = [
-                    sampler._pack_message(content=common.LLM_UNCERTAINTY_TEMPLATE_WITHOUT_OPTIONS.format(Question=row.get("problem", ""))
-                                          , role="user")
+                    sampler._pack_message(content=template.format(Question=row.get("problem", "")), role="user")
                 ]
                 response_text = sampler(prompt_messages)
                 grade_letter = self.grade_sample(row.get("problem", ""), row.get("answer", ""), response_text)
@@ -140,10 +144,9 @@ class SimpleQAEval(Eval):
                 
                 score = is_correct
 
-                extracted_answer_confidence = common.extract_confidence_from_response(response_text)
-                if extracted_answer_confidence==None: 
-                    print(response_text)
-                print(f"Extracted Answer Confidence: {extracted_answer_confidence}")
+                confidence = common.extract_confidence_from_response(response_text)
+                if confidence==None: 
+                    confidence = 0.0
 
                 # Create HTML for each sample result
                 html = common.jinja_env.from_string(common.HTML_JINJA).render(
@@ -152,15 +155,14 @@ class SimpleQAEval(Eval):
                     score=score,
                     correct_answer=row["answer"],
                     extracted_answer=response_text,
-                    extracted_answer_confidence=extracted_answer_confidence,
+                    extracted_answer_confidence=confidence,
                 )
                 convo = prompt_messages + [dict(content=response_text, role="assistant")]
                 return SingleEvalResult(html=html, score=score, convo=convo, metrics={
                     "is_correct": is_correct,
                     "is_incorrect": is_incorrect,
                     "is_not_attempted": is_not_attempted,
-                    "verbalized_confidence": extracted_answer_confidence,
-                })
+                }, verbal_confidence=float(confidence))
 
             # Run evaluation and collect results
             results = common.map_with_progress(fn, self.examples)
