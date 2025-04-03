@@ -1,10 +1,15 @@
+import argparse
+import os
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 import numpy as np
+import re
+from bs4 import BeautifulSoup
+from reliability_plots import reliability_plot, bin_strength_plot
 
-
-def plot_benchmarks_vertical(results_path="results/results.csv"):
+def plot_benchmarks_vertical(results_path="plots/results.csv"):
     results = pd.read_csv(results_path)
     # 只保留需要n_samples=100的行
     results = results[results["n_samples"] == 100]
@@ -105,8 +110,52 @@ def plot_benchmarks_vertical(results_path="results/results.csv"):
     plt.suptitle("Model Performance by Benchmark", fontsize=16, y=1.02)
     plt.tight_layout()
     plt.subplots_adjust(bottom=0.12, top=0.92, hspace=0.35)
-    plt.savefig("results/all_benchmark_results.pdf", bbox_inches="tight")
+    plt.savefig("plots/all_benchmark_results.pdf", bbox_inches="tight")
     plt.show()
 
+def read_html(result_html_path):
+    with open(result_html_path, 'r', encoding='utf-8') as f:
+        soup = BeautifulSoup(f.read(), "html.parser")
+
+    confs, preds, labels = [], [], []
+    results_sections = soup.find_all("h3", string="Results")
+    for result in results_sections:
+        correct_tag = result.find_next_sibling("p", string=re.compile("Correct Answer:"))
+        extracted_tag = result.find_next_sibling("p", string=re.compile("Extracted Answer:"))
+        conf_tag = result.find_next_sibling("p", string=re.compile("Extracted Answer Confidence:"))
+
+        if correct_tag and extracted_tag and conf_tag:
+            correct = re.search(r"Correct Answer:\s+([A-Z])", correct_tag.text)
+            extracted = re.search(r"Extracted Answer:\s+([A-Z])", extracted_tag.text)
+            conf = re.search(r"(\d+)", conf_tag.text)
+            if correct and extracted and conf:
+                labels.append(correct.group(1))
+                preds.append(extracted.group(1))
+                confs.append(int(conf.group(1)) / 100.0)
+
+    return confs, preds, labels
+
+
+
+
+
+def plot_reliability_diagram_from_html(result_html_path):
+    confs, preds, labels = read_html(result_html_path)
+    num_bins = 15
+
+    # Plotting the reliability plot
+    reliability_plot(confs, preds, labels, num_bins=num_bins)
+    bin_strength_plot(confs, preds, labels, num_bins=num_bins)
+
+
+
 if __name__ == "__main__":
-    plot_benchmarks_vertical()
+    argparse = argparse.ArgumentParser(description="Plotting functions")
+    argparse.add_argument(
+        "--file_path",
+        type=str,
+    )
+    args = argparse.parse_args()
+    # plot_benchmarks_vertical()
+    plot_reliability_diagram_from_html(args.file_path)
+    # Plotting the reliability plot
