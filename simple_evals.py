@@ -53,8 +53,9 @@ def main():
 
     def get_evals(eval_name, debug_mode, conf_mode):
         num_examples = (
-            args.examples if args.examples is not None else (5 if debug_mode else None)
+            args.examples if args.examples is not None or args.examples != 0 else (5 if debug_mode else None)
         )
+
         # Set num_examples = None to reproduce full evals
         match eval_name:
             case "mmlu":
@@ -98,7 +99,7 @@ def main():
         for eval_name, eval_obj in evals.items():
             result = eval_obj(sampler)
             # ^^^ how to use a sampler
-            file_stem = f"{eval_name}_{model_name}"
+            file_stem = f"{eval_name}_{model_name}_{args.conf_mode}_{args.examples}"
             report_filename = f"LLM-Calibration-Study/results/{file_stem}{debug_suffix}.html"
             if not os.path.exists("LLM-Calibration-Study/results"):
                 os.makedirs("LLM-Calibration-Study/results")

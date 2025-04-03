@@ -8,6 +8,8 @@ References:
 
 import math
 import matplotlib.pyplot as plt
+
+import torch
 plt.rcParams.update({'font.size': 20})
 
 # Some keys used for the following dictionaries
@@ -16,6 +18,28 @@ CONF = 'conf'
 ACC = 'acc'
 BIN_ACC = 'bin_acc'
 BIN_CONF = 'bin_conf'
+
+def calculate_ece(confidences, accuracies, n_bins=15) -> float:
+    """
+    Calculate the expected calibration error (ECE) given a list of confidence scores and accuracy scores.
+    """
+    confidences = torch.tensor([i/100 for i in confidences]) # turn confidences to 0~1
+    accuracies = torch.tensor(accuracies)
+    bin_boundaries = torch.linspace(0, 1, n_bins + 1)
+    bin_lowers = bin_boundaries[:-1]
+    bin_uppers = bin_boundaries[1:]
+
+    ece = torch.zeros(1)
+    for bin_lower, bin_upper in zip(bin_lowers, bin_uppers):
+        # Calculated |confidence - accuracy| in each bin
+        in_bin = confidences.gt(bin_lower.item()) * confidences.le(bin_upper.item())
+        prop_in_bin = in_bin.float().mean()
+        if prop_in_bin.item() > 0:
+            accuracy_in_bin = accuracies[in_bin].float().mean()
+            avg_confidence_in_bin = confidences[in_bin].mean()
+            ece += torch.abs(avg_confidence_in_bin - accuracy_in_bin) * prop_in_bin
+    
+    return ece.item()
 
 
 def _bin_initializer(bin_dict, num_bins=10):
@@ -56,7 +80,7 @@ def _populate_bins(confs, preds, labels, num_bins=10):
     return bin_dict
 
 
-def reliability_plot(confs, preds, labels, num_bins=15):
+def reliability_plot(confs, preds, labels, file_name, num_bins=15):
     '''
     Method to draw a reliability plot from a model's predictions and confidences.
     '''
@@ -71,12 +95,17 @@ def reliability_plot(confs, preds, labels, num_bins=15):
             color='blue', alpha=0.5, label='Actual')
     plt.ylabel('Accuracy')
     plt.xlabel('Confidence')
+    accuracies = preds==labels
+    ece = calculate_ece(confidences=confs, accuracies=accuracies)
+    print(f'Expected Calibration Error: {ece:.2f}')
+    plt.title(f'Expected Calibration Error: {ece:.2f}')
     plt.legend()
-    plt.savefig('plots/reliability_plot.pdf')
+    plt.savefig(f'plots/reliability_plot_{file_name}.pdf')
+    plt.savefig(f'plots/reliability_plot.pdf')
     plt.show()
 
 
-def bin_strength_plot(confs, preds, labels, num_bins=15):
+def bin_strength_plot(confs, preds, labels, file_name, num_bins=15):
     '''
     Method to draw a plot for the number of samples in each confidence bin.
     '''
@@ -92,5 +121,6 @@ def bin_strength_plot(confs, preds, labels, num_bins=15):
             color='blue', alpha=0.5, label='Percentage samples')
     plt.ylabel('Percentage of samples')
     plt.xlabel('Confidence')
-    plt.savefig('plots/bin_strength_plot.pdf')
+    plt.savefig(f'plots/bin_strength_plot_{file_name}.pdf')
+    plt.savefig(f'plots/bin_strength_plot.pdf')
     plt.show()

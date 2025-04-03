@@ -180,8 +180,17 @@ class MMLUEval(Eval):
             response_text = normalize_response(sampler(prompt_messages))
             # Extract the answer from the response text
             extracted_answer, confidence = self.extract_answer_and_confidence(response_text, options={k: row[k] for k in ['A', 'B', 'C', 'D']})
+            if extracted_answer == None or confidence == None:
+                # answer is one of A, B, C, D ramdomly
+                extracted_answer = random.choice(['A', 'B', 'C', 'D'])
+                confidence = 0
+            if confidence > 100:
+                confidence = 100
+            if confidence < 0:
+                confidence = 0
             print(f"extracted_answer: {extracted_answer}, confidence: {confidence}")
             score = 1.0 if extracted_answer == row["Answer"] else 0.0
+            category = subject2category.get(row["Subject"], "other")
             html = common.jinja_env.from_string(HTML_JINJA).render(
                 prompt_messages=prompt_messages,
                 next_message=dict(content=response_text, role="assistant"),
@@ -189,13 +198,9 @@ class MMLUEval(Eval):
                 correct_answer=row["Answer"],
                 extracted_answer=extracted_answer,
                 extracted_answer_confidence=confidence,
+                subject=category,
             )
             convo = prompt_messages + [dict(content=response_text, role="assistant")]
-            category = subject2category.get(row["Subject"], "other")
-            if extracted_answer == None or confidence == None:
-                # answer is one of A, B, C, D ramdomly
-                extracted_answer = random.choice(['A', 'B', 'C', 'D'])
-                confidence = 0
             return SingleEvalResult(
                 html=html, score=score, metrics={category: score}, convo=convo, verbal_confidence=float(confidence)
             )
