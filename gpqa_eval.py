@@ -20,6 +20,7 @@ class GPQAEval(Eval):
         n_repeats: int = 4,
         variant: str = "diamond",
         num_examples: int | None = None,  # restrict to a subset of the data for debugging
+        conf_mode: str = "verbal",
     ):
         df = pandas.read_csv(
             f"https://openaipublic.blob.core.windows.net/simple-evals/gpqa_{variant}.csv"
@@ -33,6 +34,7 @@ class GPQAEval(Eval):
         examples = [example | {"permutation": rng.sample(range(4), 4)} for example in examples]
         self.examples = examples
         self.n_repeats = n_repeats
+        self.conf_mode = conf_mode
 
     def __call__(self, sampler: SamplerBase) -> EvalResult:
         def fn(row: dict):
@@ -50,7 +52,7 @@ class GPQAEval(Eval):
             )
             prompt_messages = [
                 sampler._pack_message(
-                    content=format_multichoice_question(choices_dict), role="user"
+                    content=format_multichoice_question(choices_dict, conf_mode=self.conf_mode), role="user"
                 )
             ]
             response_text = sampler(prompt_messages)
@@ -63,10 +65,12 @@ class GPQAEval(Eval):
                 score=score,
                 correct_answer=correct_answer,
                 extracted_answer=extracted_answer,
+                extracted_answer_confidence=100,
+                subject=None,
             )
             convo = prompt_messages + [dict(content=response_text, role="assistant")]
             return SingleEvalResult(
-                html=html, score=score, convo=convo, metrics={"chars": len(response_text)}
+                html=html, score=score, convo=convo, metrics={"chars": len(response_text)}, verbal_confidence=100
             )
 
         results = common.map_with_progress(fn, self.examples)

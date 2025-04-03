@@ -10,14 +10,17 @@ from bs4 import BeautifulSoup
 from reliability_plots import reliability_plot, bin_strength_plot
 from pathlib import Path
 
-def plot_ece_acc_per_benchmark(results_path="plots/results.csv"):
+
+
+
+def plot_ece_acc_per_benchmark(results_path="plots/output.csv"):
     results = pd.read_csv(results_path)
     # 只保留需要n_samples=100的行
     results = results[results["n_samples"] == 1000]
     benchmarks = results["benchmark"].unique()
     num_bench = len(benchmarks)
 
-    fig, axes = plt.subplots(num_bench, 1, figsize=(8, 5 * num_bench), sharex=False, sharey=False)
+    fig, axes = plt.subplots(num_bench, 1, figsize=(10, 8 * num_bench), sharex=False, sharey=False)
 
     if num_bench == 1:
         axes = [axes]  # 保证 axes 可迭代
@@ -38,13 +41,14 @@ def plot_ece_acc_per_benchmark(results_path="plots/results.csv"):
             df["point_size"] = 200
 
         df["color"] = df["model_family"].map(palette)
-        df["is_cot"] = df["model"].str.lower().str.contains("cot")
+        df["is_cot"] = df["conf_mode"].str.lower().str.contains("cot")
         df["marker"] = df["is_cot"].apply(lambda x: "^" if x else "o")
+
 
         # 绘制每个点
         for _, row in df.iterrows():
             ax.scatter(
-                row["accuracy"],
+                row["score"],
                 row["verbal_ece"],
                 s=row["point_size"],
                 color=row["color"],
@@ -55,7 +59,7 @@ def plot_ece_acc_per_benchmark(results_path="plots/results.csv"):
                 zorder=3
             )
             ax.text(
-                row["accuracy"] + 0.002,
+                row["score"] + 0.002,
                 row["verbal_ece"] + 0.002,
                 row["model"],
                 fontsize=8,
@@ -63,18 +67,25 @@ def plot_ece_acc_per_benchmark(results_path="plots/results.csv"):
             )
 
         # 绘制箭头：non-COT -> COT
-        for _, row in df[~df["is_cot"]].iterrows():
-            base_name = row["model"]
-            cot_name = base_name + "-cot"
-            if cot_name in df["model"].values:
-                target = df[df["model"] == cot_name].iloc[0]
+        non_cot_df = df[df["conf_mode"] == "verbal"]
+        cot_df = df[df["conf_mode"] == "verbal_cot"]
+
+        for _, base_row in non_cot_df.iterrows():
+            # 匹配相同模型名称和 benchmark 的 COT 版本
+            cot_match = cot_df[
+                (cot_df["model"].str.replace("-maas", "") == base_row["model"].replace("-maas", "")) &
+                (cot_df["benchmark"] == base_row["benchmark"])
+            ]
+            if not cot_match.empty:
+                cot_row = cot_match.iloc[0]
+
                 ax.annotate(
                     "",
-                    xy=(target["accuracy"], target["verbal_ece"]),
-                    xytext=(row["accuracy"], row["verbal_ece"]),
+                    xy=(cot_row["score"], cot_row["verbal_ece"]),
+                    xytext=(base_row["score"], base_row["verbal_ece"]),
                     arrowprops=dict(
                         arrowstyle="->",
-                        color=row["color"],
+                        color=base_row["color"],
                         lw=1.5,
                         alpha=0.8,
                     ),
@@ -113,6 +124,17 @@ def plot_ece_acc_per_benchmark(results_path="plots/results.csv"):
     plt.subplots_adjust(bottom=0.12, top=0.92, hspace=0.35)
     plt.savefig("plots/all_benchmark_results.pdf", bbox_inches="tight")
     plt.show()
+
+    print("ECE vs Accuracy Plots done!")
+
+
+
+
+
+
+
+
+
 
 def read_html(result_html_path):
     from bs4 import BeautifulSoup
@@ -178,4 +200,6 @@ if __name__ == "__main__":
 
 
     # plot_reliability_diagram_from_html(args.file_path)
+
+    print("Plots done!")
 
