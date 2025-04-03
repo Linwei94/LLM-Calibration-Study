@@ -222,6 +222,7 @@ HTML_JINJA = """
 <p>Extracted Answer: {{ extracted_answer }}</p>
 <p>Extracted Answer Confidence: {{ extracted_answer_confidence }}</p>
 <p>Score: {{ score }}</p>
+<p>Subject: {{ subject }}</p>
 """
 
 def extract_confidence_from_response(response_text: str) -> str | None:

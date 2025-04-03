@@ -8,11 +8,12 @@ import numpy as np
 import re
 from bs4 import BeautifulSoup
 from reliability_plots import reliability_plot, bin_strength_plot
+from pathlib import Path
 
-def plot_benchmarks_vertical(results_path="plots/results.csv"):
+def plot_ece_acc_per_benchmark(results_path="plots/results.csv"):
     results = pd.read_csv(results_path)
     # 只保留需要n_samples=100的行
-    results = results[results["n_samples"] == 100]
+    results = results[results["n_samples"] == 1000]
     benchmarks = results["benchmark"].unique()
     num_bench = len(benchmarks)
 
@@ -114,38 +115,51 @@ def plot_benchmarks_vertical(results_path="plots/results.csv"):
     plt.show()
 
 def read_html(result_html_path):
+    from bs4 import BeautifulSoup
+    import re
+
     with open(result_html_path, 'r', encoding='utf-8') as f:
         soup = BeautifulSoup(f.read(), "html.parser")
 
     confs, preds, labels = [], [], []
     results_sections = soup.find_all("h3", string="Results")
-    for result in results_sections:
-        correct_tag = result.find_next_sibling("p", string=re.compile("Correct Answer:"))
-        extracted_tag = result.find_next_sibling("p", string=re.compile("Extracted Answer:"))
-        conf_tag = result.find_next_sibling("p", string=re.compile("Extracted Answer Confidence:"))
 
-        if correct_tag and extracted_tag and conf_tag:
-            correct = re.search(r"Correct Answer:\s+([A-Z])", correct_tag.text)
-            extracted = re.search(r"Extracted Answer:\s+([A-Z])", extracted_tag.text)
-            conf = re.search(r"(\d+)", conf_tag.text)
-            if correct and extracted and conf:
-                labels.append(correct.group(1))
-                preds.append(extracted.group(1))
-                confs.append(int(conf.group(1)) / 100.0)
+    for result in results_sections:
+        result_block = result.find_next_siblings("p", limit=4)
+        if len(result_block) < 3:
+            continue
+
+        correct = re.search(r"Correct Answer:\s*([A-Z])", result_block[0].text)
+        extracted = re.search(r"Extracted Answer:\s*([A-Z])", result_block[1].text)
+        confidence = re.search(r"Extracted Answer Confidence:\s*([\d.]+)", result_block[2].text)
+
+        if correct and extracted and confidence:
+            labels.append(correct.group(1))
+            preds.append(extracted.group(1))
+            conf_val = float(confidence.group(1)) / 100.0
+            if conf_val > 0:  # 可选：去除提取失败样本
+                confs.append(conf_val)
+
+
+    # mapping A->0, B->1, C->2, D->3
+    labels = np.array([ord(label) - ord('A') for label in labels])
+    preds = np.array([ord(pred) - ord('A') for pred in preds])
+    confs = np.array(confs)
 
     return confs, preds, labels
 
 
 
 
-
 def plot_reliability_diagram_from_html(result_html_path):
     confs, preds, labels = read_html(result_html_path)
+    file_name = Path(result_html_path).stem
+    print(f"File name: {file_name}")
     num_bins = 15
 
     # Plotting the reliability plot
-    reliability_plot(confs, preds, labels, num_bins=num_bins)
-    bin_strength_plot(confs, preds, labels, num_bins=num_bins)
+    reliability_plot(confs, preds, labels, file_name=file_name, num_bins=num_bins)
+    bin_strength_plot(confs, preds, labels, file_name=file_name, num_bins=num_bins)
 
 
 
@@ -154,8 +168,14 @@ if __name__ == "__main__":
     argparse.add_argument(
         "--file_path",
         type=str,
+        default="results/mmlu_google-llama-3.1-8b-instruct-maas_verbal_cot_1000.html"
     )
     args = argparse.parse_args()
-    # plot_benchmarks_vertical()
-    plot_reliability_diagram_from_html(args.file_path)
-    # Plotting the reliability plot
+    
+    
+    plot_ece_acc_per_benchmark()
+
+
+
+    # plot_reliability_diagram_from_html(args.file_path)
+
