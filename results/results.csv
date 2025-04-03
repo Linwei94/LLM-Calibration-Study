@@ -1,24 +1,26 @@
-benchmark,model,accuracy,verbal_ece,model_size,model_family
-mmlu,gpt-4o-mini,0.76,0.12350000441074371,8,GPT
-mmlu,gpt-4o-mini-cot,0.82,0.09100000560283661,8,GPT
-mmlu,gpt-4o,0.86,0.0958000048995018,200,GPT
-mmlu,gpt-4o-cot,0.87,0.0689999908208847,200,GPT
-mmlu,llama-3.1-405b-instruct,0.82,0.0729999840259552,405,LLaMA
-mmlu,llama-3.1-405b-instruct-cot,0.85,0.05640006810426712,405,LLaMA
-mmlu,llama-3.1-70b-instruct,0.77,0.13750006258487701,70,LLaMA
-mmlu,llama-3.1-70b-instruct-cot,0.81,0.07850003987550735,70,LLaMA
-mmlu,llama-3.1-8b-instruct,0.58,0.1929999738931656,8,LLaMA
-mmlu,llama-3.1-8b-instruct-cot,0.68,0.14329998195171356,8,LLaMA
-simpleqa,llama-3.1-8b-instruct,0.09,0.7935000061988831,8,LLaMA
-simpleqa,llama-3.1-8b-instruct-cot,0.11,0.4909999966621399,8,LLaMA
-simpleqa,llama-3.1-70b-instruct,0.18,0.49469998478889465,70,LLaMA
-simpleqa,llama-3.1-70b-instruct-cot,0.15,0.5189999341964722,70,LLaMA
-simpleqa,llama-3.1-405b-instruct,0.26,0.21794494717703367,405,LLaMA
-simpleqa,llama-3.1-405b-instruct-cot,0.29,0.23600001633167267,405,LLaMA
-simpleqa,gpt-4o-mini,0.07,0.8220000267028809,8,GPT
-simpleqa,gpt-4o-mini-cot,0.12,0.7734999656677246,8,GPT
-simpleqa,gpt-4o,0.31,0.6019999980926514,200,GPT
-simpleqa,gpt-4o-cot,0.38,0.5239998698234558,200,GPT
+benchmark,model,accuracy,verbal_ece,model_size,model_family,n_samples
+mmlu,gpt-4o-mini,0.76,0.12350000441074371,8,GPT,100
+mmlu,gpt-4o-mini,0.723,0.15345004200935364,8,GPT,1000
+mmlu,gpt-4o-mini,0.718,0.15845005214214325,8,GPT,1000
+mmlu,gpt-4o-mini-cot,0.82,0.09100000560283661,8,GPT,100
+mmlu,gpt-4o,0.86,0.0958000048995018,200,GPT,100
+mmlu,gpt-4o-cot,0.87,0.0689999908208847,200,GPT,100
+mmlu,llama-3.1-405b-instruct,0.82,0.0729999840259552,405,LLaMA,100
+mmlu,llama-3.1-405b-instruct-cot,0.85,0.05640006810426712,405,LLaMA,100
+mmlu,llama-3.1-70b-instruct,0.77,0.13750006258487701,70,LLaMA,100
+mmlu,llama-3.1-70b-instruct-cot,0.81,0.07850003987550735,70,LLaMA,100
+mmlu,llama-3.1-8b-instruct,0.58,0.1929999738931656,8,LLaMA,100
+mmlu,llama-3.1-8b-instruct-cot,0.68,0.14329998195171356,8,LLaMA,100
+simpleqa,llama-3.1-8b-instruct,0.09,0.7935000061988831,8,LLaMA,100
+simpleqa,llama-3.1-8b-instruct-cot,0.11,0.4909999966621399,8,LLaMA,100
+simpleqa,llama-3.1-70b-instruct,0.18,0.49469998478889465,70,LLaMA,100
+simpleqa,llama-3.1-70b-instruct-cot,0.15,0.5189999341964722,70,LLaMA,100
+simpleqa,llama-3.1-405b-instruct,0.26,0.21794494717703367,405,LLaMA,100
+simpleqa,llama-3.1-405b-instruct-cot,0.29,0.23600001633167267,405,LLaMA,100
+simpleqa,gpt-4o-mini,0.07,0.8220000267028809,8,GPT,100
+simpleqa,gpt-4o-mini-cot,0.12,0.7734999656677246,8,GPT,100
+simpleqa,gpt-4o,0.31,0.6019999980926514,200,GPT,100
+simpleqa,gpt-4o-cot,0.38,0.5239998698234558,200,GPT,100
 
 
 

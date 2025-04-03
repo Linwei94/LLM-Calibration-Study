@@ -3,9 +3,11 @@ import pandas as pd
 import seaborn as sns
 import numpy as np
 
-results = pd.read_csv("results/results.csv")
 
-def plot_benchmarks_vertical(results):
+def plot_benchmarks_vertical(results_path="results/results.csv"):
+    results = pd.read_csv(results_path)
+    # 只保留需要n_samples=100的行
+    results = results[results["n_samples"] == 100]
     benchmarks = results["benchmark"].unique()
     num_bench = len(benchmarks)
 
@@ -107,4 +109,4 @@ def plot_benchmarks_vertical(results):
     plt.show()
 
 if __name__ == "__main__":
-    plot_benchmarks_vertical(results)
+    plot_benchmarks_vertical()
