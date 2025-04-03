@@ -22,6 +22,8 @@ def main():
     )
     parser.add_argument("--model", type=str, help="Select a model by name")
     parser.add_argument("--conf_mode", type=str, help="Select a mode to extract confidence from verbal, verbal_cot", default="verbal")
+    parser.add_argument("--benchmark", type=str, help="if None, use all benchmarks, otherwise use the benchmark name",
+                        default="simpleqa,mmlu,math,gpqa,mgsm,drop,humaneval")
     parser.add_argument("--debug", action="store_true", help="Run in debug mode")
     parser.add_argument(
         "--examples", type=int, help="Number of examples to use (overrides default)"
@@ -86,10 +88,7 @@ def main():
                 raise Exception(f"Unrecognized eval type: {eval_name}")
 
     evals = {
-        eval_name: get_evals(eval_name, args.debug, args.conf_mode)
-        # for eval_name in ["simpleqa", "mmlu", "math", "gpqa", "mgsm", "drop", "humaneval"]
-        for eval_name in ["simpleqa"]
-        # for eval_name in ["mmlu"]
+        eval_name: get_evals(eval_name, args.debug, args.conf_mode) for eval_name in args.benchmark.split(",")
     }
     print(evals)
     debug_suffix = "_DEBUG" if args.debug else ""

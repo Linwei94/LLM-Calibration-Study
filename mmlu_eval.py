@@ -174,7 +174,7 @@ class MMLUEval(Eval):
         def fn(row: dict):
             prompt_messages = [
                 sampler._pack_message(
-                    content=format_multichoice_question(row), role="user"
+                    content=format_multichoice_question(row, conf_mode=self.conf_mode), role="user"
                 )
             ]
             response_text = normalize_response(sampler(prompt_messages))
