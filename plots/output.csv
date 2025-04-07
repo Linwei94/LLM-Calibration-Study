@@ -18,8 +18,10 @@ gpqa,gpt-4o-mini,verbal_cot,0,GPT,8,0.37,0.4974999725818634
 mmlu,gpt-4o-mini,verbal_cot,1000,GPT,8,0.8,0.11260991543531418
 mmlu,gpt-4o-2024-11-20,verbal_cot,1000,GPT,200,0.877,0.0781499445438385
 mmlu,google-llama-3.1-70b-instruct-maas,verbal,1000,LLaMA,70,0.804,0.11052000522613525
+mmlu,Llama-4-Scout-17B-16E-Instruct,verbal,1000,LLaMA,70,0.758,0.16141001880168915
 mmlu,google-llama-3.1-8b-instruct-maas,verbal,1000,LLaMA,8,0.583,0.18962007761001587
 gpqa,Llama-4-Scout-17B-16E-Instruct,verbal,0,LLaMA,8,0.46,0.3925999701023102
 gpqa,google-llama-3.1-8b-instruct-maas,verbal,0,LLaMA,8,0.36,0.33980000019073486
 gpqa,gpt-4o-2024-11-20,verbal,0,GPT,200,0.45,0.424000084400177
+mmlu,Llama-4-Scout-17B-16E-Instruct,verbal_cot,1000,GPT,200,0.821,0.10488999634981155
 mmlu,databricks-llama-4-maverick,verbal_cot,1000,LLaMA,400,0.883,0.06412994861602783
