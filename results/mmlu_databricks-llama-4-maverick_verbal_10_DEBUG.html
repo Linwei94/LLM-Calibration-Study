@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            .message {
+                padding: 8px 16px;
+                margin-bottom: 8px;
+                border-radius: 4px;
+            }
+            .message.user {
+                background-color: #B2DFDB;
+                color: #00695C;
+            }
+            .message.assistant {
+                background-color: #B39DDB;
+                color: #4527A0;
+            }
+            .message.system {
+                background-color: #EEEEEE;
+                color: #212121;
+            }
+            .role {
+                font-weight: bold;
+                margin-bottom: 4px;
+            }
+            .variant {
+                color: #795548;
+            }
+            table, th, td {
+                border: 1px solid black;
+            }
+            pre {
+                white-space: pre-wrap;
+            }
+        </style>
+    </head>
+    <body>
+    
+    <h1>Metrics</h1>
+    <table>
+    <tr>
+        <th>Metric</th>
+        <th>Value</th>
+    </tr>
+    <tr>
+        <td><b>Score</b></td>
+        <td>0.0</td>
+    </tr>
+    
+    <tr>
+        <td>other</td>
+        <td>0.0</td>
+    </tr>
+    
+    <tr>
+        <td>other:std</td>
+        <td>0.0</td>
+    </tr>
+    
+    <tr>
+        <td>score:std</td>
+        <td>0.0</td>
+    </tr>
+    
+    <tr>
+        <td>verbal_ece</td>
+        <td>0.949999988079071</td>
+    </tr>
+    
+    </table>
+    
+    <h1>Examples</h1>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+Use the following format to answer:
+```Answer and Confidence (0-100): [ONLY the option LETTER, where the LETTER is one of A,B,C,D; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```
+Only the answer and confidence, don&#39;t give me the explanation.
+
+The successful anti-cancer HPV vaccine consists of:
+
+A) Live virus attenuated by specific mutagenesis
+B) Whole virus chemically inactivated vaccine
+C) Self-assemble of virus L1 protein into VLP
+D) Sub unit chemically inactivated vaccine</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer and Confidence (0-100): C, 95%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: A</p>
+<p>Extracted Answer: C</p>
+<p>Extracted Answer Confidence: 95.0</p>
+<p>Score: 0.0</p>
+<p>Subject: other</p>
+    <hr>
+    
+    </body>
+</html>
