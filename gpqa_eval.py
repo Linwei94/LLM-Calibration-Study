@@ -10,8 +10,8 @@ import re
 import pandas
 
 from . import common
-from .common import ANSWER_PATTERN_MULTICHOICE, HTML_JINJA, format_multichoice_question
-from .types import Eval, EvalResult, MessageList, SamplerBase, SingleEvalResult
+from .common import extract_answer_and_confidence, HTML_JINJA, format_multichoice_question
+from .types import Eval, EvalResult, SamplerBase, SingleEvalResult
 
 
 class GPQAEval(Eval):
@@ -56,8 +56,9 @@ class GPQAEval(Eval):
                 )
             ]
             response_text = sampler(prompt_messages)
-            match = re.search(ANSWER_PATTERN_MULTICHOICE, response_text)
-            extracted_answer = match.group(1) if match else None
+            # Extract the answer from the response text
+            extracted_answer, confidence = extract_answer_and_confidence(response_text, options={k: choices_dict[k] for k in ['A', 'B', 'C', 'D']})
+            print(f"extracted_answer: {extracted_answer}, confidence: {confidence}")
             score = 1.0 if extracted_answer == correct_answer else 0.0
             html = common.jinja_env.from_string(HTML_JINJA).render(
                 prompt_messages=prompt_messages,
@@ -65,12 +66,16 @@ class GPQAEval(Eval):
                 score=score,
                 correct_answer=correct_answer,
                 extracted_answer=extracted_answer,
-                extracted_answer_confidence=100,
-                subject=None,
+                extracted_answer_confidence=confidence,
+                subject=row["Record ID"],
             )
             convo = prompt_messages + [dict(content=response_text, role="assistant")]
             return SingleEvalResult(
-                html=html, score=score, convo=convo, metrics={"chars": len(response_text)}, verbal_confidence=100
+                html=html, 
+                score=score, 
+                convo=convo, 
+                metrics={"chars": len(response_text)}, 
+                verbal_confidence=float(confidence)
             )
 
         results = common.map_with_progress(fn, self.examples)

@@ -47,7 +47,7 @@ def main():
 
     # grading_sampler = ChatCompletionSampler(model="gpt-4o")
     # grading_sampler = ChatCompletionSampler(model="gpt-4o-mini")
-    grading_sampler = all_models["google-llama-3.1-70b-instruct-maas"]
+    grading_sampler = all_models["google-llama-3.1-405b-instruct-maas"]
     equality_checker = ChatCompletionSampler(model="gpt-4-turbo-preview")
     # ^^^ used for fuzzy matching, just for math
 
@@ -68,7 +68,8 @@ def main():
                 )
             case "gpqa":
                 return GPQAEval(
-                    n_repeats=1 if debug_mode else 10, num_examples=num_examples
+                    n_repeats=1 if debug_mode else 10, num_examples=num_examples,
+                    conf_mode=conf_mode,
                 )
             case "mgsm":
                 return MGSMEval(num_examples_per_lang=10 if debug_mode else 250)
