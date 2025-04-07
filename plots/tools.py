@@ -14,7 +14,7 @@ def process_results_to_csv(results_folder='results', output_csv='output.csv'):
             conf_mode = "verbal_cot" if "verbal_cot" in filename else "verbal"
             num_samples = filename.split('_')[-1].replace('.json', '')
             num_samples = num_samples if num_samples.isdigit() else '0'
-            if "llama" in model_name:
+            if "llama" in model_name.lower():
                 model_family = "LLaMA"
                 if "8b" in model_name:
                     model_size = 8
@@ -24,6 +24,8 @@ def process_results_to_csv(results_folder='results', output_csv='output.csv'):
                     model_size = 405
                 elif "maverick" in model_name:
                     model_size = 400
+                elif "Scout" in model_name:
+                    model_size = 109
             elif "gpt" in model_name:
                 model_family = "GPT"
                 if "4o-mini" in model_name:
