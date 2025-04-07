@@ -29,7 +29,7 @@ class ChatCompletionSampler(SamplerBase):
         api_key=None,
     ):
         self.api_key_name = "OPENAI_API_KEY"
-        if "maas" in model:
+        if "maas" in model or "databricks" in model:
             self.client = OpenAI(base_url=base_url, api_key=api_key)
         else:
             self.client = OpenAI()

@@ -1,4 +1,4 @@
-
+import os
 from ..sampler.chat_completion_sampler import (
     OPENAI_SYSTEM_MESSAGE_API,
     OPENAI_SYSTEM_MESSAGE_CHATGPT,
@@ -172,7 +172,7 @@ def get_model_dict(model_name: str):
                 temperature=0.7,
             )
         
-    # add google cloud apis
+    # ----------- Google LLMs -----------
     credentials, _ = default()
     auth_request = Request()
     credentials.refresh(auth_request)
@@ -213,6 +213,20 @@ def get_model_dict(model_name: str):
             base_url=f"https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
             api_key=credentials.token
         )
-        
+    
+
+
+
+
+    # ----------- Databrick LLMs -----------
+    DATABRICKS_TOKEN = os.environ.get("DATABRICKS_TOKEN")
+
+    models["databricks-llama-4-maverick"] = ChatCompletionSampler(
+            api_key=DATABRICKS_TOKEN,
+            base_url="https://dbc-1b14d1ec-f076.cloud.databricks.com/serving-endpoints",
+            model="databricks-llama-4-maverick",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=2048,
+    )
         
     return models

@@ -52,8 +52,9 @@ def process_results_to_csv(results_folder='results', output_csv='output.csv'):
                 'n_samples': int(num_samples),
                 'model_family': model_family,
                 'model_size': model_size,
+                'score': data.get('score', None),
+                'verbal_ece': data.get('verbal_ece', None)
             }
-            row.update(data)
             rows.append(row)
 
     # Write all to CSV
