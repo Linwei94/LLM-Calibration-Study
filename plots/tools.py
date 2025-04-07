@@ -22,6 +22,8 @@ def process_results_to_csv(results_folder='results', output_csv='output.csv'):
                     model_size = 70
                 elif "405b" in model_name:
                     model_size = 405
+                elif "maverick" in model_name:
+                    model_size = 400
             elif "gpt" in model_name:
                 model_family = "GPT"
                 if "4o-mini" in model_name:

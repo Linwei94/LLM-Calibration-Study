@@ -228,5 +228,18 @@ def get_model_dict(model_name: str):
             system_message=OPENAI_SYSTEM_MESSAGE_API,
             max_tokens=2048,
     )
+
+
+    # ----------- Together LLMs -----------
+    from together import Together
+
+    models["Llama-4-Scout-17B-16E-Instruct"] = ChatCompletionSampler(
+            base_url = "https://api.together.xyz/v1",
+            api_key = os.environ['TOGETHER_API_KEY'],
+            model="meta-llama/Llama-4-Scout-17B-16E-Instruct",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=2048,
+    )
+    
         
     return models

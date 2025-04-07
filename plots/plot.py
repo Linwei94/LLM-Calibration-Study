@@ -16,7 +16,7 @@ from pathlib import Path
 def plot_ece_acc_per_benchmark(results_path="plots/output.csv"):
     results = pd.read_csv(results_path)
     # 只保留需要n_samples=100的行
-    # results = results[results["n_samples"] == 1000]
+    # results = results[results["conf_mode"] == "verbal"]
     benchmarks = results["benchmark"].unique()
     num_bench = len(benchmarks)
 
