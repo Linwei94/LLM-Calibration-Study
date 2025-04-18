@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            .message {
+                padding: 8px 16px;
+                margin-bottom: 8px;
+                border-radius: 4px;
+            }
+            .message.user {
+                background-color: #B2DFDB;
+                color: #00695C;
+            }
+            .message.assistant {
+                background-color: #B39DDB;
+                color: #4527A0;
+            }
+            .message.system {
+                background-color: #EEEEEE;
+                color: #212121;
+            }
+            .role {
+                font-weight: bold;
+                margin-bottom: 4px;
+            }
+            .variant {
+                color: #795548;
+            }
+            table, th, td {
+                border: 1px solid black;
+            }
+            pre {
+                white-space: pre-wrap;
+            }
+        </style>
+    </head>
+    <body>
+    
+    <h1>Metrics</h1>
+    <table>
+    <tr>
+        <th>Metric</th>
+        <th>Value</th>
+    </tr>
+    <tr>
+        <td><b>Score</b></td>
+        <td>0.333</td>
+    </tr>
+    
+    <tr>
+        <td>is_correct</td>
+        <td>0.3333333333333333</td>
+    </tr>
+    
+    <tr>
+        <td>is_correct:std</td>
+        <td>0.4714045207910317</td>
+    </tr>
+    
+    <tr>
+        <td>is_incorrect</td>
+        <td>0.6666666666666666</td>
+    </tr>
+    
+    <tr>
+        <td>is_incorrect:std</td>
+        <td>0.4714045207910317</td>
+    </tr>
+    
+    <tr>
+        <td>is_not_attempted</td>
+        <td>0.0</td>
+    </tr>
+    
+    <tr>
+        <td>is_not_attempted:std</td>
+        <td>0.0</td>
+    </tr>
+    
+    <tr>
+        <td>score:std</td>
+        <td>0.4714045207910317</td>
+    </tr>
+    
+    <tr>
+        <td>ECE</td>
+        <td>0.3246000111103058</td>
+    </tr>
+    
+    </table>
+    
+    <h1>Examples</h1>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+In which city of Pakistan was Muhammad Rafiq Tarar, a Pakistani politician, born?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Answer: Gujranwala, Confidence: 95%</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Mandi Bahauddin, Punjab</p>
+<p>Extracted Answer: Answer: Gujranwala, Confidence: 95%</p>
+<p>Extracted Answer Confidence: 0.95</p>
+<p>Confidence Extraction Mode: verbal_vanilla</p>
+<p>Score: False</p>
+<p>Subject: {&#39;topic&#39;: &#39;Politics&#39;, &#39;answer_type&#39;: &#39;Place&#39;, &#39;urls&#39;: [&#39;https://en.wikipedia.org/wiki/Mandi_Bahauddin&#39;, &#39;https://en.wikipedia.org/wiki/Muhammad_Rafiq_Tarar&#39;, &#39;https://www.dawn.com/news/1678830Punjab,&#39;, &#39;https://pantheon.world/profile/person/Muhammad_Rafiq_Tarar&#39;]}</p>
+<details>
+<summary>Log Probability:</summary>
+<p>[-0.018149960786104202, 0, -0.029777146875858307, -1.1920928244535389e-07, 0, 0, 0, 0, 0, -0.16730961203575134, -0.0003296785580459982, -0.03628738224506378]</p>
+</details>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+How old was Aniol Serrasolses when he kayaked for the first time down the largest glacial waterfall ever recorded in Norway?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>```Answer: 26, Confidence: 67%```</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: 32</p>
+<p>Extracted Answer: ```Answer: 26, Confidence: 67%```</p>
+<p>Extracted Answer Confidence: 0.67</p>
+<p>Confidence Extraction Mode: verbal_vanilla</p>
+<p>Score: False</p>
+<p>Subject: {&#39;topic&#39;: &#39;Sports&#39;, &#39;answer_type&#39;: &#39;Number&#39;, &#39;urls&#39;: [&#39;https://www.bbc.com/news/av/world-67578559&#39;, &#39;https://www.google.com/search?q=How+old+was+Aniol+Serrasolses+when+he+kayaked+for+the+first+time+down+the+largest+glacial+waterfall+ever+recorded+in+Norway%3F&amp;rlz=1C5CHFA_enAE918AE918&amp;oq=How+old+was+Aniol+Serrasolses+when+he+kayaked+for+the+first+time+down+the+largest+glacial+waterfall+ever+recorded+in+Norway%3F&amp;gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIGCAEQRRg80gEHMzUyajBqN6gCALACAA&amp;sourceid=chrome&amp;ie=UTF-8&#39;, &#39;https://www.ctvnews.ca/world/watch-this-kayaker-drops-20-metres-from-arctic-circle-waterfall-1.6667323&#39;, &#39;https://www.reuters.com/sports/kayaking-aventurer-completes-biggest-descent-glacial-waterfall-2023-11-29/&#39;]}</p>
+<details>
+<summary>Log Probability:</summary>
+<p>[-0.048596981912851334, 0, 0, -0.0016229089815169573, -2.52117919921875, 0, 0, 0, 0, -1.2257449626922607, -0.07888974994421005, -3.576278118089249e-07, -1.0728830375228426e-06]</p>
+</details>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, provide your answer and your confidence in this answer. 
+
+Use the following format to answer:
+```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
+
+Only the answer and confidence, don&#39;t give me the explanation.
+
+Who was Japan&#39;s Prime Minister after Ichirō Hatoyama left office on December 23, 1956?</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>```Answer: Tanzan Ishibashi, Confidence: 100%```</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: Tanzan Ishibashi</p>
+<p>Extracted Answer: ```Answer: Tanzan Ishibashi, Confidence: 100%```</p>
+<p>Extracted Answer Confidence: 1.0</p>
+<p>Confidence Extraction Mode: verbal_vanilla</p>
+<p>Score: True</p>
+<p>Subject: {&#39;topic&#39;: &#39;Politics&#39;, &#39;answer_type&#39;: &#39;Person&#39;, &#39;urls&#39;: [&#39;https://en.wikipedia.org/wiki/List_of_prime_ministers_of_Japan&#39;, &#39;https://en.wikipedia.org/wiki/Tanzan_Ishibashi#Life&#39;, &#39;https://japan.kantei.go.jp/past_cabinet/index.html&#39;, &#39;https://www.jagranjosh.com/general-knowledge/list-of-japan-prime-ministers-1632984150-1&#39;]}</p>
+<details>
+<summary>Log Probability:</summary>
+<p>[-0.12692856788635254, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.0003985564399044961, -7.486063259420916e-05, 0, -2.3841855067985307e-07]</p>
+</details>
+    <hr>
+    
+    </body>
+</html>

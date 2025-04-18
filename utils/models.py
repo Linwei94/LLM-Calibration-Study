@@ -172,47 +172,47 @@ def get_model_dict(model_name: str):
                 temperature=0.7,
             )
         
-    # ----------- Google LLMs -----------
-    credentials, _ = default()
-    auth_request = Request()
-    credentials.refresh(auth_request)
-    base_url = "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi"
+    # # ----------- Google LLMs -----------
+    # credentials, _ = default()
+    # auth_request = Request()
+    # credentials.refresh(auth_request)
+    # base_url = "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi"
     
-    models["google-llama-3.1-405b-instruct-maas"] = ChatCompletionSampler(
-        model="meta/llama-3.1-405b-instruct-maas",
-        system_message=OPENAI_SYSTEM_MESSAGE_API,
-        max_tokens=2048,
-        base_url=base_url,
-        api_key=credentials.token
-    )
-    models["google-llama-3.1-70b-instruct-maas"] = ChatCompletionSampler(
-            model="meta/llama-3.1-70b-instruct-maas",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-            base_url=base_url,
-            api_key=credentials.token
-        )
-    models["google-llama-3.1-8b-instruct-maas"] = ChatCompletionSampler(
-            model="meta/llama-3.1-8b-instruct-maas",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-            base_url=f"https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
-            api_key=credentials.token
-        )
-    models["google-llama-3.3-70b-instruct-maas"] = ChatCompletionSampler(
-            model="meta/llama-3.3-70b-instruct-maas",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-            base_url=f"https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
-            api_key=credentials.token
-        )
-    models["google-llama-3.1-8b-instruct-maas"] = ChatCompletionSampler(
-            model="meta/llama-3.1-8b-instruct-maas",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-            base_url=f"https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
-            api_key=credentials.token
-        )
+    # models["google-llama-3.1-405b-instruct-maas"] = ChatCompletionSampler(
+    #     model="meta/llama-3.1-405b-instruct-maas",
+    #     system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #     max_tokens=2048,
+    #     base_url=base_url,
+    #     api_key=credentials.token
+    # )
+    # models["google-llama-3.1-70b-instruct-maas"] = ChatCompletionSampler(
+    #         model="meta/llama-3.1-70b-instruct-maas",
+    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #         max_tokens=2048,
+    #         base_url=base_url,
+    #         api_key=credentials.token
+    #     )
+    # models["google-llama-3.1-8b-instruct-maas"] = ChatCompletionSampler(
+    #         model="meta/llama-3.1-8b-instruct-maas",
+    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #         max_tokens=2048,
+    #         base_url=f"https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
+    #         api_key=credentials.token
+    #     )
+    # models["google-llama-3.3-70b-instruct-maas"] = ChatCompletionSampler(
+    #         model="meta/llama-3.3-70b-instruct-maas",
+    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #         max_tokens=2048,
+    #         base_url=f"https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
+    #         api_key=credentials.token
+    #     )
+    # models["google-llama-3.1-8b-instruct-maas"] = ChatCompletionSampler(
+    #         model="meta/llama-3.1-8b-instruct-maas",
+    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #         max_tokens=2048,
+    #         base_url=f"https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
+    #         api_key=credentials.token
+    #     )
     
 
 
@@ -237,6 +237,14 @@ def get_model_dict(model_name: str):
             base_url = "https://api.together.xyz/v1",
             api_key = os.environ['TOGETHER_API_KEY'],
             model="meta-llama/Llama-4-Scout-17B-16E-Instruct",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=2048,
+    )
+
+    models["meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"] = ChatCompletionSampler(
+            base_url = "https://api.together.xyz/v1",
+            api_key = os.environ['TOGETHER_API_KEY'],
+            model="meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
             system_message=OPENAI_SYSTEM_MESSAGE_API,
             max_tokens=2048,
     )
