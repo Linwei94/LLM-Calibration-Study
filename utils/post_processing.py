@@ -5,9 +5,10 @@ import numpy as np
 import random
 import regex as re
 from ..types import EvalResult, Message, SamplerBase, SingleEvalResult
-
+from collections import Counter
 from ..utils.metrics import calculate_ece
-
+from sentence_transformers import SentenceTransformer
+from sklearn.cluster import AgglomerativeClustering
 
 
 ANSWER_PATTERN_MULTICHOICE = r"(?i)Answer[ \t]*:[ \t]*\$?([A-D])\$?"
@@ -134,8 +135,13 @@ HTML_JINJA = """
 <p>Correct Answer: {{ correct_answer }}</p>
 <p>Extracted Answer: {{ extracted_answer }}</p>
 <p>Extracted Answer Confidence: {{ extracted_answer_confidence }}</p>
+<p>Confidence Extraction Mode: {{ conf_mode }}</p>
 <p>Score: {{ score }}</p>
 <p>Subject: {{ subject }}</p>
+<details>
+<summary>Log Probability:</summary>
+<p>{{ logprobs }}</p>
+</details>
 """
 
 def extract_confidence_from_response(response_text: str) -> str | None:
@@ -212,7 +218,7 @@ def aggregate_results(
             final_metrics[key] = _compute_stat(values, stat)
 
     # Calculate the verbalized ECE
-    final_metrics['verbal_ece'] = calculate_ece(confidences=verbal_confidence_list, accuracies=name2values["score"])
+    final_metrics['ECE'] = calculate_ece(confidences=verbal_confidence_list, accuracies=name2values["score"])
     return EvalResult(
         score=final_metrics.pop("score", None), metrics=final_metrics, htmls=htmls, convos=convos
     )
@@ -468,3 +474,128 @@ def extract_answer_and_confidence(response_text: str, options) -> tuple[str | No
     if float(conf) < 0:
         conf = 0
     return answer, float(conf)
+
+
+# ------------------------------------------------------------------------------------------------------
+def mmlu_regex_extract_response(response_text):
+    response_text = normalize_response(response_text)
+    extracted_answer = None
+    for answer_regex in MULTILINGUAL_ANSWER_REGEXES:
+        regex = MULTILINGUAL_ANSWER_PATTERN_TEMPLATE.format(answer_regex)
+        match = re.search(regex, response_text)
+        if match:
+            extracted_answer = normalize_extracted_answer(match.group(1))
+            break
+    return extracted_answer
+
+def gpqa_regex_extract_response(response_text):
+    match = re.search(ANSWER_PATTERN_MULTICHOICE, response_text)
+    extracted_answer = match.group(1) if match else None
+    return extracted_answer
+
+mcq_regex_extractors = {"mmlu": mmlu_regex_extract_response, "gpqa": gpqa_regex_extract_response}
+
+# Semantic-based Confidence
+# ------------------------------------------------------------------------------------------------------
+def get_semantic_clusters(multi_response):
+    lnll_lst = [(x)[1] for x in multi_response]
+    response_list = [x[0] for x in multi_response]
+    distance_threshold = 0.3
+    model_name="all-MiniLM-L6-v2"
+    embeddings = SentenceTransformer(model_name).encode(response_list)
+    clustering = AgglomerativeClustering(n_clusters=None, distance_threshold=distance_threshold, metric="cosine", linkage="average")
+    labels = clustering.fit_predict(embeddings)
+    return response_list, lnll_lst, labels
+
+
+def get_mcq_clusters(multi_response, test = "mmlu"):
+    lnll_lst = [(x)[1] for x in multi_response]
+    response_list = [x[0] for x in multi_response]
+    choice_map = dict()
+    choice_map = {'A': 1, 'B': 2, 'C': 3, 'D': 4, 'a': 1, 'b': 2, 'c': 3, 'd': 4}
+    labels = [choice_map.get(mcq_regex_extractors[test](c), 0) for c in response_list]
+    return response_list, lnll_lst, labels
+
+
+def empirical_semantic_confidence(lnll_lst, response_list, labels):
+    counts = Counter(labels)
+    opt_cluster, opt_conf = max([(int(cluster_id), count/sum(counts.values())) for cluster_id, count in counts.items()], key=lambda x: x[1])
+    optimal_response, index = max([(response_list[i], i) for i, label in enumerate(labels) if label == opt_cluster], key=lambda x: x[1])
+    return optimal_response, opt_conf, index
+
+
+def likelihood_based_semantic_confidence(lnll_lst, response_list, labels):
+    clustered = []
+    # for each cluster calculat the following:
+    for c in np.unique(labels):
+        sum_ci = sum([lnll_lst[i] for i in range(len(lnll_lst)) if labels[i] == c]) # s(Ci | x) = sum(LN-LL)
+        clustered.append((int(c), sum_ci))
+    total_lsc = sum([x[1] for x in clustered])
+    lsc = [(c[0], c[1] / total_lsc) for c in clustered]
+    
+    opt_cluster, opt_conf = max(lsc, key=lambda x: x[1])
+    optimal_response, index = max([(response_list[i], i) for i, label in enumerate(labels) if label == opt_cluster], key=lambda x: x[1])
+    return optimal_response, opt_conf, index
+
+
+def mean_likelihood_based_semantic_confidence(lnll_lst, response_list, labels):
+    clustered = []
+    # for each cluster calculate s_bar(Ci | x):
+    for c in np.unique(labels):
+        sum_ci = sum([lnll_lst[i] for i in range(len(lnll_lst)) if labels[i] == c]) # s_bar(Ci | x) = sum(LN-LL) in cluster Ci
+        clustered.append((int(c), sum_ci / Counter(labels)[c])) # s_bar(Ci | x) = sum(LN-LL) / count(Ci)
+    total_mlsc = sum([x[1] for x in clustered])
+    mlsc = [(c[0], c[1] / total_mlsc) for c in clustered]
+    
+    opt_cluster, opt_conf = max(mlsc, key=lambda x: x[1])
+    optimal_response, index = max([(response_list[i], i) for i, label in enumerate(labels) if label == opt_cluster], key=lambda x: x[1])
+    return optimal_response, opt_conf, index
+
+
+def bayesian_semantic_confidence(lnll_lst, response_list, labels):
+    clustered = []
+    for c in np.unique(labels):
+        pi = Counter(labels)[c] / len(labels) # pi = count(Ci) / count
+        joint_lnll = np.prod([lnll_lst[i] for i in range(len(lnll_lst)) if labels[i] == c]) # joint lnll = ∏(LN-LL) in cluster Ci
+        clustered.append((int(c), joint_lnll * pi)) # joint_lnll * pi
+    
+    total_bsc = sum([x[1] for x in clustered])
+    bsc = [(c[0], float(c[1] / total_bsc)) for c in clustered]
+
+    opt_cluster, opt_conf = max(bsc, key=lambda x: x[1])
+    optimal_response, index = max([(response_list[i], i) for i, label in enumerate(labels) if label == opt_cluster], key=lambda x: x[1])
+    return optimal_response, opt_conf, index
+# ------------------------------------------------------------------------------------------------------
+
+
+# faithful response uncertainty
+# ------------------------------------------------------------------------------------------------------
+def confidence_by_contradiction(sampler, original_response, candidate_sample):
+    contradiction_prompt = """I will give you a question and two candidate answers. Extract their assertions and determine whether the two answers are contradicting. If one of the Candidate Answers is a canned response (as in, avoids answering the question), then the verdict should be "no contradiction".\n"""
+    vanilla_prompt = """Answer the following question using a succinct (at most one sentence) and full answer\n"""
+    def is_contradicting(sampler, original_response: str, candidate_response: str) -> bool:
+        msg = [{"role":"user","content":vanilla_prompt + " " + contradiction_prompt + f" Candidate Answer 1: {original_response} \nCandidate Answer 2: {candidate_response}" + """ Return 'true' for contradiction or 'false' for No Contradiction'"""}]
+        verdict = sampler(msg)[0].lower()
+        if 'true' in verdict:
+            return True
+        else:
+            return False
+    contradictions = [is_contradicting(sampler, original_response, c) for c in candidate_sample]
+    return float(1 - np.mean(contradictions))
+
+def decisiveness_score(sampler, question, response) -> tuple[str, float]:
+    dec_prompt = """You will be given a question and a proposed answer. Your task is to extract any assertions made by the proposed answer; for each assertion, you should output a decisiveness score: a number in [0,1] representing how likely you think this assertion is to be true, judged solely based on the provided answer. You should pay special attention to the usage of any hedging modifiers in the original answer, used to convey uncertainty in the truthfulness of the assertion. If the proposed answer punts the question, the extracted assertion should be the empty string and the decisiveness score should be 1.0.\n"""
+    vanilla_prompt = """Answer the following question using a succinct (at most one sentence) and full answer\n"""
+    msg = [{"role":"user","content":vanilla_prompt + " " + dec_prompt  + f" Question: {question} \nProposed answer: {response}.\n Only outputs each assertion after 'Assertion:',  and decisiveness score, after 'Decisiveness score: ' in two lines."}]
+    score_pattern = r"[Dd]ecisiveness [Ss]core:\s*([0-9]*\.?[0-9]+)"
+    assertion_pattern = r"(?i)assertion:\s*(.*)"
+    verdict = sampler(msg)[0]
+    print(verdict)
+    scores = re.findall(score_pattern, verdict)
+    assertions = re.findall(assertion_pattern, verdict)
+    verdict = verdict.split("\n")
+    decisiveness_scores = [float(score) for score in scores]
+    if len(decisiveness_scores) > 0:
+        return decisiveness_scores[0]
+    return 1
+# ------------------------------------------------------------------------------------------------------

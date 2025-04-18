@@ -10,6 +10,12 @@ import pandas
 from . import common
 from .types import Eval, EvalResult, SamplerBase, SingleEvalResult
 
+from .utils.post_processing import *
+from .utils.pre_processing import *
+
+import pickle
+import os
+
 GRADER_TEMPLATE = """
 Your job is to look at a question, a gold target, and a predicted answer, and then assign a grade of either ["CORRECT", "INCORRECT", "NOT_ATTEMPTED"].
 First, I will give examples of each grade, and then you will grade a new example.
@@ -97,7 +103,7 @@ CHOICE_STRINGS = ["CORRECT", "INCORRECT", "NOT_ATTEMPTED"]
 CHOICE_LETTER_TO_STRING = dict(zip(CHOICE_LETTERS, CHOICE_STRINGS))
 
 class SimpleQAEval(Eval):
-    def __init__(self, grader_model: SamplerBase, num_examples: int | None = None, n_repeats: int = 1, conf_mode: str = "verbal"):
+    def __init__(self, grader_model: SamplerBase, num_examples: int | None = None, n_repeats: int = 1, conf_mode: str = "verbal_vanilla", regenerate=True):
         df = pandas.read_csv(
             f"https://openaipublic.blob.core.windows.net/simple-evals/simple_qa_test_set.csv"
         )
@@ -109,6 +115,10 @@ class SimpleQAEval(Eval):
         self.examples = examples * n_repeats
         self.grader_model = grader_model
         self.conf_mode = conf_mode
+        self.regenerate = regenerate
+        self.n_repeats = n_repeats
+        self.num_examples = num_examples
+        self.cache_found = False
 
     def grade_sample(self, question: str, target: str, predicted_answer: str) -> str:
         grader_prompt = GRADER_TEMPLATE.format(
@@ -120,21 +130,117 @@ class SimpleQAEval(Eval):
         prompt_messages = [
             self.grader_model._pack_message(content=grader_prompt, role="user")
         ]
-        grading_response = self.grader_model(prompt_messages)
+        grading_response = self.grader_model(prompt_messages)[0]
         
         match = re.search(r"(A|B|C)", grading_response)
         return match.group(0) if match else "C"  # Default to "NOT_ATTEMPTED" if no match
 
     def __call__(self, sampler: SamplerBase) -> EvalResult:
             def fn(row: dict):
-                if self.conf_mode == "verbal":
-                    template = common.LLM_UNCERTAINTY_TEMPLATE_WITHOUT_OPTIONS
-                else:
-                    template = common.LLM_UNCERTAINTY_COT_TEMPLATE_WITHOUT_OPTIONS
-                prompt_messages = [
-                    sampler._pack_message(content=template.format(Question=row.get("problem", "")), role="user")
-                ]
-                response_text = sampler(prompt_messages)
+
+                sampling = 5
+                extracted_answer = ""
+                confidence = 0
+
+                match self.conf_mode:
+                    
+                    case "verbal_vanilla":
+                        if self.cache_found:
+                            response_tuple = row["sampler_responses"]
+                            prompt_messages = row["prompt_messages"]
+                        else:
+                            template = LLM_UNCERTAINTY_TEMPLATE_WITHOUT_OPTIONS
+                            prompt_messages = [
+                                sampler._pack_message(content=template.format(Question=row.get("problem", "")), role="user")
+                            ]
+                            response_tuple = sampler(prompt_messages)
+                            row["sampler_responses"] = response_tuple
+                            row["prompt_messages"] = prompt_messages
+                        response_text = response_tuple[0]
+                        logprobs = response_tuple[2]
+                        confidence = extract_confidence_from_response(response_text)
+                        if confidence==None: 
+                            confidence = 0.0
+                        else:
+                            confidence = float(confidence) / 100
+
+                    case "verbal_cot":
+                        if self.cache_found:
+                            response_tuple = row["sampler_responses"]
+                            prompt_messages = row["prompt_messages"]
+                        else:
+                            template = LLM_UNCERTAINTY_COT_TEMPLATE_WITHOUT_OPTIONS
+                            prompt_messages = [
+                                sampler._pack_message(content=template.format(Question=row.get("problem", "")), role="user")
+                            ]
+                            response_tuple = sampler(prompt_messages)
+                            row["sampler_responses"] = response_tuple
+                            row["prompt_messages"] = prompt_messages
+                            
+                        response_text = response_tuple[0]
+                        logprobs = response_tuple[2]
+                        confidence = extract_confidence_from_response(response_text)
+                        if confidence==None: 
+                            confidence = 0.0
+                        else:
+                            confidence = float(confidence) / 100
+
+                    case "single_generation":
+                        if self.cache_found:
+                            response_tuple = row["sampler_responses"]
+                            prompt_messages = row["prompt_messages"]
+                        else:
+                            template = LLM_UNCERTAINTY_COT_TEMPLATE_WITHOUT_OPTIONS_NON_VERBAL
+                            prompt_messages = [
+                                sampler._pack_message(content=template.format(Question=row.get("problem", "")), role="user")
+                            ]
+                            response_tuple = sampler(prompt_messages)
+                            row["sampler_responses"] = response_tuple
+                            row["prompt_messages"] = prompt_messages
+
+                        response_text, confidence, logprobs = response_tuple
+
+                    case "empirical_semantic":
+                        if self.cache_found:
+                            response_with_conf = row["sampler_responses"]
+                            prompt_messages = row["prompt_messages"]
+                        else:
+                            template = LLM_UNCERTAINTY_COT_TEMPLATE_WITHOUT_OPTIONS_NON_VERBAL
+                            prompt_messages = [
+                                sampler._pack_message(content=template.format(Question=row.get("problem", "")), role="user")
+                            ]
+                            response_with_conf = [sampler(prompt_messages) for _ in range(sampling)]
+                            row["sampler_responses"] = response_with_conf
+                            row["prompt_messages"] = prompt_messages
+                        response_texts, lnll_lst, labels = get_semantic_clusters(response_with_conf)
+                        response_text, confidence, index = empirical_semantic_confidence(lnll_lst, response_texts, labels)
+                        logprobs = response_with_conf[index][2] 
+
+                    case "faithfulness":
+                        if self.cache_found:
+                            response_with_conf = row["sampler_responses"]
+                            prompt_messages = row["prompt_messages"]
+                            candidate_sample = row["candidate_sample"]
+                        else:
+                            template = LLM_UNCERTAINTY_COT_TEMPLATE_WITHOUT_OPTIONS_NON_VERBAL
+                            vanilla_prompt = """Answer the following question using a succinct (at most one sentence) and full answer. \n"""
+                            prompt_messages = [
+                                sampler._pack_message(content=vanilla_prompt + template.format(Question=row.get("problem", "")), role="user")
+                            ]
+                            response_with_conf = sampler(prompt_messages)
+                            row["sampler_responses"] = response_with_conf
+                            row["prompt_messages"] = prompt_messages
+                            candidate_sample = [sampler(prompt_messages)[0] for _ in range(sampling)]
+                            row["candidate_sample"] = candidate_sample
+                        response_text, _, logprobs = response_with_conf
+                        # score = 1 if (grade_letter == "A") else 0
+                        confM = confidence_by_contradiction(sampler, response_text, candidate_sample)
+                        dec = decisiveness_score(sampler, row.get("problem", ""), response_text)
+                        confidence = float(1 - np.abs(dec - confM))
+
+                    case _:
+                        raise Exception(f"Unrecognized confidence type: {self.conf_mode}")
+
                 grade_letter = self.grade_sample(row.get("problem", ""), row.get("answer", ""), response_text)
                 
                 # Metrics based on grading response
@@ -144,10 +250,6 @@ class SimpleQAEval(Eval):
                 
                 score = is_correct
 
-                confidence = common.extract_confidence_from_response(response_text)
-                if confidence==None: 
-                    confidence = 0.0
-
                 # Create HTML for each sample result
                 html = common.jinja_env.from_string(common.HTML_JINJA).render(
                     prompt_messages=prompt_messages,
@@ -156,6 +258,9 @@ class SimpleQAEval(Eval):
                     correct_answer=row["answer"],
                     extracted_answer=response_text,
                     extracted_answer_confidence=confidence,
+                    subject = row["metadata"],
+                    logprobs = logprobs,
+                    conf_mode = self.conf_mode
                 )
                 convo = prompt_messages + [dict(content=response_text, role="assistant")]
                 return SingleEvalResult(html=html, score=score, convo=convo, metrics={
@@ -165,7 +270,22 @@ class SimpleQAEval(Eval):
                 }, verbal_confidence=float(confidence))
 
             # Run evaluation and collect results
-            results = common.map_with_progress(fn, self.examples)
+            regen_stored_path = f"LLM-Calibration-Study/cache/simpleqa_{sampler.model.split("/")[-1]}_{self.conf_mode}_{self.num_examples}_{self.n_repeats}"
+
+            if self.regenerate:
+                if os.path.exists(regen_stored_path):
+                    print("Fetching from cache")
+                    with open(regen_stored_path, 'rb') as f:
+                        self.examples = pickle.load(f)
+                    self.cache_found = True
+                    results = common.map_with_progress(fn, self.examples)
+                else:
+                    print("No cache")
+                    results = common.map_with_progress(fn, self.examples)
+                    with open(regen_stored_path, 'wb') as f:
+                        pickle.dump(self.examples, f)
+            else:
+                results = common.map_with_progress(fn, self.examples)
 
             # Aggregate metrics
             aggregate_metrics = {

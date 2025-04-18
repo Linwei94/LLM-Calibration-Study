@@ -1,3 +1,28 @@
+
+VERBAL_COT_SYS_PROMPT = """Read the question, analyze step by step, provide your answer.
+Use the following format to answer:
+“‘Explanation: [insert step-by-step analysis here]
+Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%”’
+Only give me the reply according to this format, don’t give me any other words.
+Question:[Specific Question Here]
+Now, please answer this question and provide your confidence level. Let’s think it step by step.
+"""
+
+VERBAL_VANILLA_PROMPT = """Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.\
+    \nUse the following format to answer:\n```Answer and Confidence (0-100): [ONLY the option LETTER, where the LETTER is one of A,B,C,D; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```\
+    \nOnly the answer and confidence, don’t give me any other words."""
+
+NON_VERBAL_COT_SYS_PROMPT = """Read the question, analyze step by step, provide your answer.
+Use the following format to answer:
+“‘Explanation: [insert step-by-step analysis here]
+Answer: [ONLY the option letter; not a complete sentence]”’
+Only give me the reply according to this format, don’t give me any other words.
+Question:[Specific Question Here]
+Now, please answer this question. Let’s think it step by step.
+"""
+
+
+
 QUERY_TEMPLATE_MULTICHOICE = """
 Answer the following multiple choice question. The last line of your response should be of the following format: 'Answer: $LETTER' (without quotes) where LETTER is one of ABCD. Think step by step before answering.
 
@@ -67,11 +92,36 @@ Only give me the reply according to this format, don't give me any other words.
 {Question}
 """.strip()
 
+LLM_UNCERTAINTY_COT_TEMPLATE_WITHOUT_OPTIONS_NON_VERBAL = """
+Read the question, analyze step by step, provide your answer. 
 
-def format_multichoice_question(row, conf_mode="verbal"):
-    if conf_mode == "verbal":
+Use the following format to answer:
+```Explanation: [insert step-by-step analysis here]\nAnswer: [Your answer]```
+
+Only give me the reply according to this format, don't give me any other words.
+
+{Question}
+""".strip()
+
+
+
+
+NON_VERBAL_QUERY_TEMPLATE_MULTICHOICE =  NON_VERBAL_COT_SYS_PROMPT + """ Answer the following multiple choice question. The last line of your response should be of the following format: 'Answer: $LETTER' (without quotes) where LETTER is one of ABCD. Think step by step before answering.
+
+{Question}
+
+A) {A}
+B) {B}
+C) {C}
+D) {D}
+""".strip()
+
+
+def format_multichoice_question(row, conf_mode="verbal_vanilla"):
+    if conf_mode == "verbal_vanilla":
         return LLM_UNCERTAINTY_TEMPLATE.format(**row)
     elif conf_mode == "verbal_cot":
         return LLM_UNCERTAINTY_COT_TEMPLATE.format(**row)
     else:
-        raise ValueError(f"Unknown conf_mode: {conf_mode}")
+        return NON_VERBAL_QUERY_TEMPLATE_MULTICHOICE.format(**row)
+        # raise ValueError(f"Unknown conf_mode: {conf_mode}")

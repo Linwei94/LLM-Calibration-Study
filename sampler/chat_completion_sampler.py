@@ -4,6 +4,7 @@ from typing import Any
 
 import openai
 from openai import OpenAI
+import numpy as np
 
 from ..types import MessageList, SamplerBase
 
@@ -68,8 +69,12 @@ class ChatCompletionSampler(SamplerBase):
                     messages=message_list,
                     temperature=self.temperature,
                     max_tokens=self.max_tokens,
+                    logprobs=True
                 )
-                return response.choices[0].message.content
+                try:
+                    return response.choices[0].message.content, float(np.exp(np.array([t.logprob for t in response.choices[0].logprobs.content])).mean()), [t.logprob for t in response.choices[0].logprobs.content]
+                except:
+                    return response.choices[0].message.content, float(np.exp(response.choices[0].logprobs.token_logprobs).mean()), response.choices[0].logprobs.token_logprobs
             # NOTE: BadRequestError is triggered once for MMMU, please uncomment if you are reruning MMMU
             except openai.BadRequestError as e:
                 print("Bad Request Error", e)
