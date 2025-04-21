@@ -214,9 +214,9 @@ class MMLUEval(Eval):
 
         # Run evaluation and collect results
         if not self.num_examples:
-            regen_stored_path = f"LLM-Calibration-Study/cache/mmlu_{sampler.model.split("/")[-1]}_{self.conf_mode}_full_{self.n_repeats}"
+            regen_stored_path = f"LLM-Calibration-Study/cache/mmlu_{sampler.model.split("/")[-1]}_{self.conf_mode}_full"
         else:
-            regen_stored_path = f"LLM-Calibration-Study/cache/mmlu_{sampler.model.split("/")[-1]}_{self.conf_mode}_{self.num_examples}_{self.n_repeats}"
+            regen_stored_path = f"LLM-Calibration-Study/cache/mmlu_{sampler.model.split("/")[-1]}_{self.conf_mode}_{self.num_examples}"
 
         if self.regenerate:
             if os.path.exists(regen_stored_path):
