@@ -240,6 +240,14 @@ def get_model_dict(model_name: str):
             system_message=OPENAI_SYSTEM_MESSAGE_API,
             max_tokens=2048,
     )
+
+    models["DeepSeek-R1-Distill-Llama-70B-free"] = ChatCompletionSampler(
+            base_url = "https://api.together.xyz/v1",
+            api_key = os.environ['TOGETHER_API_KEY'],
+            model="deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=2048,
+    )
     
         
     return models
