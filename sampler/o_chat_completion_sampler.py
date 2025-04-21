@@ -5,7 +5,7 @@ import openai
 from openai import OpenAI
 
 from ..types import MessageList, SamplerBase
-
+import os
 
 class OChatCompletionSampler(SamplerBase):
     """
@@ -18,8 +18,8 @@ class OChatCompletionSampler(SamplerBase):
         reasoning_effort: str | None = None,
         model: str = "o1-mini",
     ):
-        self.api_key_name = "OPENAI_API_KEY"
-        self.client = OpenAI()
+        self.api_key_name = os.environ.get("OPENAI_API_KEY") 
+        self.client = OpenAI(api_key=self.api_key_name)
         # using api_key=os.environ.get("OPENAI_API_KEY")  # please set your API_KEY
         self.model = model
         self.image_format = "url"

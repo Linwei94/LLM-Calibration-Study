@@ -14,13 +14,15 @@ from . import common
 from .common import extract_answer_and_confidence, HTML_JINJA, format_multichoice_question
 from .types import Eval, EvalResult, SamplerBase, SingleEvalResult
 
-from .utils.post_processing import *
+from .utils.report_post_processing import *
+from .utils.confidence_post_processing import *
 from .utils.pre_processing import *
 
 
 class GPQAEval(Eval):
     def __init__(
-        self,
+        self, 
+        decisiveness_grader: SamplerBase,
         n_repeats: int = 4,
         variant: str = "diamond",
         num_examples: int | None = None,  # restrict to a subset of the data for debugging
@@ -43,6 +45,7 @@ class GPQAEval(Eval):
         self.regenerate = regenerate
         self.cache_found = False
         self.num_examples = num_examples
+        self.decisiveness_grader = decisiveness_grader
 
     def __call__(self, sampler: SamplerBase) -> EvalResult:
         def fn(row: dict):
@@ -65,7 +68,7 @@ class GPQAEval(Eval):
 
             match self.conf_mode:
 
-                case "verbal_cot":
+                case "verbal_numerical":
                     if self.cache_found:
                         response_tuple = row["sampler_responses"]
                         prompt_messages = row["prompt_messages"]
@@ -84,28 +87,10 @@ class GPQAEval(Eval):
                     # Extract the answer from the response text
                     extracted_answer, confidence = extract_answer_and_confidence(response_text, options={k: choices_dict[k] for k in ['A', 'B', 'C', 'D']})
                     confidence /= 100
-                
-                case "verbal_vanilla":
-                    if self.cache_found:
-                        response_tuple = row["sampler_responses"]
-                        prompt_messages = row["prompt_messages"]
-                    else:
-                        prompt_messages = [
-                            sampler._pack_message(
-                                content=format_multichoice_question(choices_dict, conf_mode=self.conf_mode), role="user"
-                            )
-                        ]
-                        response_tuple = sampler(prompt_messages)
-                        row["sampler_responses"] = response_tuple
-                        row["prompt_messages"] = prompt_messages
 
-                    response_text = normalize_response(response_tuple[0])
-                    logprobs = response_tuple[2]
-                    # Extract the answer from the response text
-                    extracted_answer, confidence = extract_answer_and_confidence(response_text, options={k: choices_dict[k] for k in ['A', 'B', 'C', 'D']})
-                    confidence /= 100
                 
-                case "single_generation":
+                case "logit_perplexity":
+                    sampler.logprobs = True
                     if self.cache_found:
                         response_with_conf = row["sampler_responses"]
                         prompt_messages = row["prompt_messages"]
@@ -123,7 +108,7 @@ class GPQAEval(Eval):
                     extracted_answer = gpqa_regex_extract_response(response_text)
 
 
-                case "empirical_semantic":
+                case "semantic_entropy":
                     if self.cache_found:
                         response_with_conf = row["sampler_responses"]
                         prompt_messages = row["prompt_messages"]
@@ -144,7 +129,7 @@ class GPQAEval(Eval):
                     extracted_answer = gpqa_regex_extract_response(response_text)
                     logprobs = response_with_conf[index][2] 
 
-                case "faithfulness":
+                case "verbal_linguistic":
                     if self.cache_found:
                         response_with_conf = row["sampler_responses"]
                         prompt_messages = row["prompt_messages"]
@@ -162,10 +147,9 @@ class GPQAEval(Eval):
                     response_text, _, logprobs = response_with_conf
                     extracted_answer = gpqa_regex_extract_response(response_text)
                     score = 1.0 if extracted_answer == correct_answer else 0.0
-                    confM = confidence_by_contradiction(sampler, response_text, candidate_sample)
-                    dec = decisiveness_score(sampler, format_multichoice_question(choices_dict), response_text)
+                    confM = confidence_by_contradiction(self.decisiveness_grader, response_text, candidate_sample)
+                    dec = decisiveness_score(self.decisiveness_grader, format_multichoice_question(choices_dict), response_text)
                     confidence = float(1 - np.abs(dec - confM))
-
 
                 case _:
                     raise Exception(f"Unrecognized confidence type: {self.conf_mode}")
@@ -193,7 +177,13 @@ class GPQAEval(Eval):
                 verbal_confidence=float(confidence)
             )
 
-        regen_stored_path = f"LLM-Calibration-Study/cache/gpqa_{sampler.model.split("/")[-1]}_{self.conf_mode}_{self.num_examples}_{self.n_repeats}"
+
+        # Run evaluation and collect results
+        if not self.num_examples:
+            regen_stored_path = f"LLM-Calibration-Study/cache/gpqa_{sampler.model.split("/")[-1]}_{self.conf_mode}_full_{self.n_repeats}"
+        else:
+            regen_stored_path = f"LLM-Calibration-Study/cache/gpqa_{sampler.model.split("/")[-1]}_{self.conf_mode}_{self.num_examples}_{self.n_repeats}"
+
 
         if self.regenerate:
             if os.path.exists(regen_stored_path):
