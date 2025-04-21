@@ -28,6 +28,7 @@ class ChatCompletionSampler(SamplerBase):
         max_tokens: int = 1024,
         base_url=None,
         api_key=None,
+        logprobs = False
     ):
         self.api_key_name = "OPENAI_API_KEY"
         if base_url and any(provider in base_url for provider in ["google", "databricks", "together"]):
@@ -40,6 +41,7 @@ class ChatCompletionSampler(SamplerBase):
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.image_format = "url"
+        self.logprobs = logprobs
 
     def _handle_image(
         self, image: str, encoding: str = "base64", format: str = "png", fovea: int = 768
@@ -64,17 +66,37 @@ class ChatCompletionSampler(SamplerBase):
         trial = 0
         while True:
             try:
-                response = self.client.chat.completions.create(
-                    model=self.model,
-                    messages=message_list,
-                    temperature=self.temperature,
-                    max_tokens=self.max_tokens,
-                    logprobs=True
-                )
-                try:
-                    return response.choices[0].message.content, float(np.exp(np.array([t.logprob for t in response.choices[0].logprobs.content])).mean()), [t.logprob for t in response.choices[0].logprobs.content]
-                except:
-                    return response.choices[0].message.content, float(np.exp(response.choices[0].logprobs.token_logprobs).mean()), response.choices[0].logprobs.token_logprobs
+                if self.logprobs:
+                    try:
+                        response = self.client.chat.completions.create(
+                            model=self.model,
+                            messages=message_list,
+                            temperature=self.temperature,
+                            max_tokens=self.max_tokens,
+                            logprobs=self.logprobs
+                        )
+                    except:
+                        response = self.client.chat.completions.create(
+                            model=self.model,
+                            messages=message_list,
+                            temperature=self.temperature,
+                            max_tokens=self.max_tokens,
+                            logprobs=1
+                        )
+                    
+                    try:
+                        return response.choices[0].message.content, float(np.exp(np.array([t.logprob for t in response.choices[0].logprobs.content])).mean()), [t.logprob for t in response.choices[0].logprobs.content]
+                    except:
+                        return response.choices[0].message.content, float(np.exp(response.choices[0].logprobs.token_logprobs).mean()), response.choices[0].logprobs.token_logprobs
+                else:
+                    response = self.client.chat.completions.create(
+                        model=self.model,
+                        messages=message_list,
+                        temperature=self.temperature,
+                        max_tokens=self.max_tokens
+                    )
+                    return response.choices[0].message.content, None, None
+                
             # NOTE: BadRequestError is triggered once for MMMU, please uncomment if you are reruning MMMU
             except openai.BadRequestError as e:
                 print("Bad Request Error", e)

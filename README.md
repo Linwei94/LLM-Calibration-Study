@@ -137,8 +137,8 @@ To initiate benchmarking, run:
 
 Example usage:
 
-The following uses meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8 to run 3 examples against SimpleQA with the empirical semantic confidence extraction method. When the same command runs the second time or more, the program won't resample its responses. 
-`python -m LLM-Calibration-Study.simple_evals --model meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8 --examples 3 --benchmark simpleqa --conf_mode empirical_semantic --regenerate`
+The following uses meta-llama/Llama-3.3-70B-Instruct-Turbo-Free to run 3 examples against SimpleQA with the empirical semantic confidence extraction method. When the same command runs the second time or more, the program won't resample its responses. 
+`python -m LLM-Calibration-Study.simple_evals --model meta-llama/Llama-3.3-70B-Instruct-Turbo-Free --examples 3 --benchmark simpleqa --conf_mode logit_perplexity --regenerate`
 
 
 Evaluation results are saved in an HTML file (now also includes confidence extraction mode and log probs) along with a JSON as before. 

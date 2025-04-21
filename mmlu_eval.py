@@ -18,7 +18,8 @@ from .common import (
 )
 from .types import Eval, EvalResult, SamplerBase, SingleEvalResult
 
-from .utils.post_processing import *
+from .utils.report_post_processing import *
+from .utils.confidence_post_processing import *
 from .utils.pre_processing import *
 
 subject2category = {
@@ -83,7 +84,7 @@ subject2category = {
 
 
 class MMLUEval(Eval):
-    def __init__(self, num_examples: int | None = None, language: str = "EN-US", conf_mode: str = "verbal_vanilla", regenerate=True):
+    def __init__(self, decisiveness_grader: SamplerBase, num_examples: int | None = None, language: str = "EN-US", conf_mode: str = "verbal_vanilla", regenerate=True):
         if language != "EN-US":
             url = f"https://openaipublic.blob.core.windows.net/simple-evals/mmlu_{language}.csv"
         else:
@@ -97,6 +98,7 @@ class MMLUEval(Eval):
         self.regenerate = regenerate
         self.num_examples = num_examples
         self.cache_found = False
+        self.decisiveness_grader = decisiveness_grader
 
     def __call__(self, sampler: SamplerBase) -> EvalResult:
         def fn(row: dict):
@@ -107,7 +109,7 @@ class MMLUEval(Eval):
 
             match self.conf_mode:
                 
-                case "verbal_cot":
+                case "verbal_numerical":
                     if self.cache_found:
                         response_tuple = row["sampler_responses"]
                         prompt_messages = row["prompt_messages"]
@@ -126,26 +128,8 @@ class MMLUEval(Eval):
                     extracted_answer, confidence = extract_answer_and_confidence(response_text, options={k: row[k] for k in ['A', 'B', 'C', 'D']})
                     confidence /= 100
 
-                case "verbal_vanilla":
-                    if self.cache_found:
-                        response_tuple = row["sampler_responses"]
-                        prompt_messages = row["prompt_messages"]
-                    else:
-                        prompt_messages = [
-                            sampler._pack_message(
-                                content=format_multichoice_question(row, conf_mode=self.conf_mode), role="user"
-                            )
-                        ]
-                        response_tuple = sampler(prompt_messages)
-                        row["sampler_responses"] = response_tuple
-                        row["prompt_messages"] = prompt_messages
-                    response_text = normalize_response(response_tuple[0])
-                    logprobs = response_tuple[2]
-                    # Extract the answer from the response text
-                    extracted_answer, confidence = extract_answer_and_confidence(response_text, options={k: row[k] for k in ['A', 'B', 'C', 'D']})
-                    confidence /= 100
-
-                case "single_generation":
+                case "logit_perplexity":
+                    sampler.logprobs = True
                     if self.cache_found:
                         response_with_conf = row["sampler_responses"]
                         prompt_messages = row["prompt_messages"]
@@ -162,7 +146,7 @@ class MMLUEval(Eval):
                     response_text, confidence, logprobs = response_with_conf 
                     extracted_answer = mmlu_regex_extract_response(response_text)
 
-                case "empirical_semantic":
+                case "semantic_entropy":
                     if self.cache_found:
                         response_with_conf = row["sampler_responses"]
                         prompt_messages = row["prompt_messages"]
@@ -182,7 +166,7 @@ class MMLUEval(Eval):
                     extracted_answer = mmlu_regex_extract_response(response_text)
                     logprobs = response_with_conf[index][2]
 
-                case "faithfulness":
+                case "verbal_linguistic":
                     if self.cache_found:
                         response_with_conf = row["sampler_responses"]
                         prompt_messages = row["prompt_messages"]
@@ -202,8 +186,8 @@ class MMLUEval(Eval):
                     response_text, _, logprobs = response_with_conf
                     extracted_answer = mmlu_regex_extract_response(response_text)
                     score = 1.0 if extracted_answer == row["Answer"] else 0.0
-                    confM = confidence_by_contradiction(sampler, response_text, candidate_sample)
-                    dec = decisiveness_score(sampler, format_multichoice_question(row), response_text)
+                    confM = confidence_by_contradiction(self.decisiveness_grader, response_text, candidate_sample)
+                    dec = decisiveness_score(self.decisiveness_grader, format_multichoice_question(row), response_text)
                     confidence = float(1 - np.abs(dec - confM))
 
                 case _:
@@ -228,7 +212,11 @@ class MMLUEval(Eval):
                 html=html, score=score, metrics={category: score}, convo=convo, verbal_confidence=float(confidence)
             )
 
-        regen_stored_path = f"LLM-Calibration-Study/cache/mmlu_{sampler.model.split("/")[-1]}_{self.conf_mode}_{self.num_examples}"
+        # Run evaluation and collect results
+        if not self.num_examples:
+            regen_stored_path = f"LLM-Calibration-Study/cache/mmlu_{sampler.model.split("/")[-1]}_{self.conf_mode}_full_{self.n_repeats}"
+        else:
+            regen_stored_path = f"LLM-Calibration-Study/cache/mmlu_{sampler.model.split("/")[-1]}_{self.conf_mode}_{self.num_examples}_{self.n_repeats}"
 
         if self.regenerate:
             if os.path.exists(regen_stored_path):

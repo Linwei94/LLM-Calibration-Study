@@ -52,12 +52,13 @@ def main():
     # grading_sampler = all_models["google-llama-3.1-405b-instruct-maas"]
     # equality_checker = ChatCompletionSampler(model="gpt-4-turbo-preview")
 
-    grading_sampler = all_models["meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"]
-    equality_checker = all_models["meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"]
+    simpleqa_grader = all_models["meta/llama-4-maverick-17b-128e-instruct-maas"]
+    equality_checker = all_models["meta/llama-4-maverick-17b-128e-instruct-maas"]
+    decisiveness_grader = all_models["meta/llama-4-maverick-17b-128e-instruct-maas"]
 
 
     # ^^^ used for fuzzy matching, just for math
-
+    
     def get_evals(eval_name, debug_mode, conf_mode, regenerate):
         num_examples = (
             args.examples if args.examples is not None or args.examples != 0 else (5 if debug_mode else None)
@@ -66,7 +67,7 @@ def main():
         # Set num_examples = None to reproduce full evals
         match eval_name:
             case "mmlu":
-                return MMLUEval(num_examples=1 if debug_mode else num_examples, conf_mode=conf_mode, regenerate=regenerate)
+                return MMLUEval(num_examples=1 if debug_mode else num_examples, decisiveness_grader=decisiveness_grader, conf_mode=conf_mode, regenerate=regenerate)
             case "math":
                 return MathEval(
                     equality_checker=equality_checker,
@@ -75,6 +76,7 @@ def main():
                 )
             case "gpqa":
                 return GPQAEval(
+                    decisiveness_grader=decisiveness_grader,
                     n_repeats=1 if debug_mode else 1, num_examples=num_examples,
                     conf_mode=conf_mode,
                     regenerate=regenerate
@@ -90,7 +92,8 @@ def main():
                 return HumanEval(num_examples=10 if debug_mode else num_examples)
             case "simpleqa":
                 return SimpleQAEval(
-                    grader_model=grading_sampler,
+                    grader_model=simpleqa_grader, 
+                    decisiveness_grader=decisiveness_grader,
                     num_examples=10 if debug_mode else num_examples,
                     conf_mode=conf_mode,
                     regenerate=regenerate
