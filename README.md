@@ -142,3 +142,6 @@ The following uses meta-llama/Llama-3.3-70B-Instruct-Turbo-Free to run 3 example
 
 
 Evaluation results are saved in an HTML file (now also includes confidence extraction mode and log probs) along with a JSON as before. 
+
+
+https://cloud.google.com/sdk/docs/install-sdk#before-you-begin
