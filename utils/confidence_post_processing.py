@@ -252,7 +252,25 @@ def normalize_extracted_answer(extracted_answer: str) -> str:
         .strip()
     )
 
-def extract_answer(response_text: str) -> str | None:
+def mmlu_regex_extract_response(response_text):
+    response_text = normalize_response(response_text)
+    extracted_answer = None
+    for answer_regex in MULTILINGUAL_ANSWER_REGEXES:
+        regex = MULTILINGUAL_ANSWER_PATTERN_TEMPLATE.format(answer_regex)
+        match = re.search(regex, response_text)
+        if match:
+            extracted_answer = normalize_extracted_answer(match.group(1))
+            break
+    return extracted_answer
+
+def gpqa_regex_extract_response(response_text):
+    match = re.search(ANSWER_PATTERN_MULTICHOICE, response_text)
+    extracted_answer = match.group(1) if match else None
+    return extracted_answer
+
+mcq_regex_extractors = {"mmlu": mmlu_regex_extract_response, "gpqa": gpqa_regex_extract_response}
+
+def extract_mcq_answer(response_text: str, benchmark = "gpqa") -> str | None:
     """
     Extracts the answer from the response text.
     The answer is extracted using a regex pattern.
@@ -264,6 +282,16 @@ def extract_answer(response_text: str) -> str | None:
         if match:
             extracted_answer = normalize_extracted_answer(match.group(1))
             break
+    if extracted_answer == None or extracted_answer.upper() not in ["A", "B", "C", "D"]:
+        response_text = response_text.strip().splitlines()[-1]
+    for answer_regex in MULTILINGUAL_ANSWER_REGEXES:
+        regex = MULTILINGUAL_ANSWER_PATTERN_TEMPLATE.format(answer_regex)
+        match = re.search(regex, response_text)
+        if match:
+            extracted_answer = normalize_extracted_answer(match.group(1))
+            break
+    if extracted_answer == None or extracted_answer.upper() not in ["A", "B", "C", "D"]:
+        extracted_answer = mcq_regex_extractors[benchmark](response_text)
     return extracted_answer
 
 def extract_answer_and_confidence(response_text: str, options) -> tuple[str | None, float | None]:
@@ -348,23 +376,7 @@ def extract_answer_and_confidence(response_text: str, options) -> tuple[str | No
 
 
 # ------------------------------------------------------------------------------------------------------
-def mmlu_regex_extract_response(response_text):
-    response_text = normalize_response(response_text)
-    extracted_answer = None
-    for answer_regex in MULTILINGUAL_ANSWER_REGEXES:
-        regex = MULTILINGUAL_ANSWER_PATTERN_TEMPLATE.format(answer_regex)
-        match = re.search(regex, response_text)
-        if match:
-            extracted_answer = normalize_extracted_answer(match.group(1))
-            break
-    return extracted_answer
 
-def gpqa_regex_extract_response(response_text):
-    match = re.search(ANSWER_PATTERN_MULTICHOICE, response_text)
-    extracted_answer = match.group(1) if match else None
-    return extracted_answer
-
-mcq_regex_extractors = {"mmlu": mmlu_regex_extract_response, "gpqa": gpqa_regex_extract_response}
 
 # Semantic-based Confidence
 # ------------------------------------------------------------------------------------------------------

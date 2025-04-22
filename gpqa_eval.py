@@ -77,7 +77,7 @@ class GPQAEval(Eval):
                     else:
                         prompt_messages = [
                             sampler._pack_message(
-                                content=format_multichoice_question(choices_dict, conf_mode=self.conf_mode), role="user"
+                                content=format_multichoice_question(choices_dict, conf_mode="verbal_numerical"), role="user"
                             )
                         ]
                         response_tuple = sampler(prompt_messages)
@@ -100,7 +100,7 @@ class GPQAEval(Eval):
                     else:
                         prompt_messages = [
                             sampler._pack_message(
-                                content=format_multichoice_question(choices_dict, conf_mode=self.conf_mode), role="user"
+                                content=format_multichoice_question(choices_dict, conf_mode="logit_perplexity"), role="user"
                             )
                         ]
                         response_with_conf = sampler(prompt_messages)
@@ -108,7 +108,8 @@ class GPQAEval(Eval):
                         row["prompt_messages"] = prompt_messages
 
                     response_text, confidence, logprobs = response_with_conf 
-                    extracted_answer,_ = extract_answer_and_confidence(response_text, options={k: choices_dict[k] for k in ['A', 'B', 'C', 'D']})
+                    # extracted_answer,_ = extract_answer_and_confidence(response_text, options={k: choices_dict[k] for k in ['A', 'B', 'C', 'D']})
+                    extracted_answer = extract_mcq_answer(response_text, "gpqa")
                     print(f"extracted_answer: {extracted_answer}, confidence: {confidence}")
                     score = 1.0 if extracted_answer == correct_answer else 0.0
 
@@ -119,7 +120,7 @@ class GPQAEval(Eval):
                     else:
                         prompt_messages = [
                             sampler._pack_message(
-                                content=format_multichoice_question(choices_dict, conf_mode=self.conf_mode), role="user"
+                                content=format_multichoice_question(choices_dict, conf_mode="semantic_entropy"), role="user"
                             )
                         ]
                         response_with_conf = [sampler(prompt_messages) for _ in range(sampling)]
@@ -130,7 +131,8 @@ class GPQAEval(Eval):
                     # extracted_answers = [gpqa_regex_extract_response(text[0]) for text in response_with_conf]
                     response_texts, lnll_lst, labels = get_mcq_clusters(response_with_conf, "gpqa")
                     response_text, confidence, index = empirical_semantic_confidence(lnll_lst, response_texts, labels)
-                    extracted_answer, _ = extract_answer_and_confidence(response_text, options={k: choices_dict[k] for k in ['A', 'B', 'C', 'D']})
+                    # extracted_answer, _ = extract_answer_and_confidence(response_text, options={k: choices_dict[k] for k in ['A', 'B', 'C', 'D']})
+                    extracted_answer = extract_mcq_answer(response_text, "gpqa")
                     logprobs = response_with_conf[index][2] 
                     print(f"extracted_answer: {extracted_answer}, confidence: {confidence}")
                     score = 1.0 if extracted_answer == correct_answer else 0.0
@@ -143,7 +145,7 @@ class GPQAEval(Eval):
                     else:
                         prompt_messages = [
                             sampler._pack_message(
-                                content=format_multichoice_question(choices_dict, conf_mode=self.conf_mode), role="user"
+                                content=format_multichoice_question(choices_dict, conf_mode="verbal_linguistic"), role="user"
                             )
                         ]
                         row["sampler_responses"] = (response_with_conf := sampler(prompt_messages))
@@ -151,7 +153,10 @@ class GPQAEval(Eval):
                         # row["candidate_sample"] = (candidate_sample := [sampler(prompt_messages)[0] for _ in range(sampling)])
 
                     response_text, _, logprobs = response_with_conf
-                    extracted_answer, _ = extract_answer_and_confidence(response_text, options={k: choices_dict[k] for k in ['A', 'B', 'C', 'D']})
+                    # extracted_answer, _ = extract_answer_and_confidence(response_text.strip(), options={k: choices_dict[k] for k in ['A', 'B', 'C', 'D']})
+                    extracted_answer = extract_mcq_answer(response_text, "gpqa")
+        
+                    # extracted_answer = extract_answer(response_text, "gpqa")
                     score = 1.0 if extracted_answer == correct_answer else 0.0
                     # confM = confidence_by_contradiction(self.decisiveness_grader, response_text, candidate_sample)
                     confidence = decisiveness_score(self.decisiveness_grader, format_multichoice_question(choices_dict), response_text)

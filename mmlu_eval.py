@@ -117,7 +117,7 @@ class MMLUEval(Eval):
                     else:
                         prompt_messages = [
                             sampler._pack_message(
-                                content=format_multichoice_question(row, conf_mode=self.conf_mode), role="user"
+                                content=format_multichoice_question(row, conf_mode="verbal_numerical"), role="user"
                             )
                         ]
                         response_tuple = sampler(prompt_messages)
@@ -137,7 +137,7 @@ class MMLUEval(Eval):
                     else:
                         prompt_messages = [
                             sampler._pack_message(
-                                content=format_multichoice_question(row, conf_mode=self.conf_mode), role="user"
+                                content=format_multichoice_question(row, conf_mode="logit_perplexity"), role="user"
                             )
                         ]
                         response_with_conf = sampler(prompt_messages)
@@ -154,7 +154,7 @@ class MMLUEval(Eval):
                     else:
                         prompt_messages = [
                             sampler._pack_message(
-                                content=format_multichoice_question(row, conf_mode=self.conf_mode), role="user"
+                                content=format_multichoice_question(row, conf_mode="semantic_entropy"), role="user"
                             )
                         ]
                         response_with_conf = [sampler(prompt_messages) for _ in range(sampling)]
@@ -175,7 +175,7 @@ class MMLUEval(Eval):
                     else:
                         prompt_messages = [
                             sampler._pack_message(
-                                content=format_multichoice_question(row, conf_mode=self.conf_mode), role="user"
+                                content=format_multichoice_question(row, conf_mode="verbal_linguistic"), role="user"
                             )
                         ]
                         response_with_conf = sampler(prompt_messages)
