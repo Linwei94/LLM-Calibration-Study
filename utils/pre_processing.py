@@ -1,28 +1,6 @@
 import os
 import sys
 
-VERBAL_COT_SYS_PROMPT = """Read the question, analyze step by step, provide your answer.
-Use the following format to answer:
-“‘Explanation: [insert step-by-step analysis here]
-Answer and Confidence (0-100): [ONLY the option letter; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%”’
-Only give me the reply according to this format, don’t give me any other words.
-Question:[Specific Question Here]
-Now, please answer this question and provide your confidence level. Let’s think it step by step.
-"""
-
-VERBAL_VANILLA_PROMPT = """Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.\
-    \nUse the following format to answer:\n```Answer and Confidence (0-100): [ONLY the option LETTER, where the LETTER is one of A,B,C,D; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```\
-    \nOnly the answer and confidence, don’t give me any other words."""
-
-NON_VERBAL_COT_SYS_PROMPT = """Read the question, analyze step by step, provide your answer.
-Use the following format to answer:
-“‘Explanation: [insert step-by-step analysis here]
-Answer: [ONLY the option letter; not a complete sentence]”’
-Only give me the reply according to this format, don’t give me any other words.
-Question:[Specific Question Here]
-Now, please answer this question. Let’s think it step by step.
-"""
-
 
 
 QUERY_TEMPLATE_MULTICHOICE = """
@@ -75,11 +53,11 @@ D) {D}
 
 
 LLM_UNCERTAINTY_COT_TEMPLATE_NON_VERBAL = """
-Read the question, analyze step by step, provide your answer\n
+Read the question, analyze step by step, provide your answer.\n
 Use the following format to answer:\n
 ```Explanation: [insert step-by-step analysis here]\n
 Answer: [ONLY the option LETTER, where the LETTER is one of A,B,C,D]```\n
-Only give me the reply according to this format, don't give me any other words.
+The answer should be in the last line alone. Only give me the reply according to this format, don't give me any other words.
 
 {Question}
 
@@ -169,25 +147,13 @@ Only give me the reply according to this format, don't give me any other words.
 
 
 
-
-NON_VERBAL_QUERY_TEMPLATE_MULTICHOICE =  NON_VERBAL_COT_SYS_PROMPT + """ Answer the following multiple choice question. The last line of your response should be of the following format: 'Answer: $LETTER' (without quotes) where LETTER is one of ABCD. Think step by step before answering.
-
-{Question}
-
-A) {A}
-B) {B}
-C) {C}
-D) {D}
-""".strip()
-
-
 def format_multichoice_question(row, conf_mode="verbal_numerical"):
     if conf_mode == "sampling":
         return SHARED_SAMPLING_TEMPLATE.format(**row)
     elif conf_mode == "verbal_numerical":
         return LLM_UNCERTAINTY_COT_TEMPLATE.format(**row)
     elif conf_mode == "verbal_linguistic":
-        return LLM_UNCERTAINTY_COT_HEDGING_TEMPLATE.format(**row)
+        return LLM_UNCERTAINTY_COT_TEMPLATE_NON_VERBAL.format(**row)
     elif conf_mode == "semantic_entropy":
         return LLM_UNCERTAINTY_COT_TEMPLATE_NON_VERBAL.format(**row)
     elif conf_mode == "logit_perplexity":
