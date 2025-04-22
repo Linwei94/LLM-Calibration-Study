@@ -8,6 +8,7 @@ import random
 import pickle
 import os
 import pandas
+import sys
 
 from . import common
 from .common import (
@@ -16,7 +17,7 @@ from .common import (
     normalize_response,
     extract_answer_and_confidence,
 )
-from .types import Eval, EvalResult, SamplerBase, SingleEvalResult
+from .custom_types import Eval, EvalResult, SamplerBase, SingleEvalResult
 
 from .utils.report_post_processing import *
 from .utils.confidence_post_processing import *
@@ -109,7 +110,7 @@ class MMLUEval(Eval):
 
             match self.conf_mode:
                 
-                case "verbal_numerical":
+                case "verbal_numerical" | "verbal_numerical_shared_sampling":
                     if self.cache_found:
                         response_tuple = row["sampler_responses"]
                         prompt_messages = row["prompt_messages"]
@@ -128,7 +129,7 @@ class MMLUEval(Eval):
                     extracted_answer, confidence = extract_answer_and_confidence(response_text, options={k: row[k] for k in ['A', 'B', 'C', 'D']})
                     confidence /= 100
 
-                case "logit_perplexity":
+                case "logit_perplexity" | "logit_perplexity_shared_sampling":
                     sampler.logprobs = True
                     if self.cache_found:
                         response_with_conf = row["sampler_responses"]
@@ -144,7 +145,7 @@ class MMLUEval(Eval):
                         row["prompt_messages"] = prompt_messages
 
                     response_text, confidence, logprobs = response_with_conf 
-                    extracted_answer = mmlu_regex_extract_response(response_text)
+                    extracted_answer, _ = extract_answer_and_confidence(response_text, options={k: row[k] for k in ['A', 'B', 'C', 'D']})
 
                 case "semantic_entropy":
                     if self.cache_found:
@@ -163,10 +164,10 @@ class MMLUEval(Eval):
                     # extracted_answers = [mmlu_regex_extract_response(text[0]) for text in response_with_conf]
                     response_texts, lnll_lst, labels = get_mcq_clusters(response_with_conf, "mmlu")
                     response_text, confidence, index = empirical_semantic_confidence(lnll_lst, response_texts, labels)
-                    extracted_answer = mmlu_regex_extract_response(response_text)
+                    extracted_answer, _ = extract_answer_and_confidence(response_text, options={k: row[k] for k in ['A', 'B', 'C', 'D']})
                     logprobs = response_with_conf[index][2]
 
-                case "verbal_linguistic":
+                case "verbal_linguistic" | "verbal_linguistic_shared_sampling":
                     if self.cache_found:
                         response_with_conf = row["sampler_responses"]
                         prompt_messages = row["prompt_messages"]
@@ -184,11 +185,22 @@ class MMLUEval(Eval):
                         row["candidate_sample"] = candidate_sample
 
                     response_text, _, logprobs = response_with_conf
-                    extracted_answer = mmlu_regex_extract_response(response_text)
+                    extracted_answer, _ = extract_answer_and_confidence(response_text, options={k: row[k] for k in ['A', 'B', 'C', 'D']})
                     score = 1.0 if extracted_answer == row["Answer"] else 0.0
-                    confM = confidence_by_contradiction(self.decisiveness_grader, response_text, candidate_sample)
-                    dec = decisiveness_score(self.decisiveness_grader, format_multichoice_question(row), response_text)
-                    confidence = float(1 - np.abs(dec - confM))
+                    # confM = confidence_by_contradiction(self.decisiveness_grader, response_text, candidate_sample)
+                    confidence = decisiveness_score(self.decisiveness_grader, format_multichoice_question(row), response_text)
+
+                case "sampling":
+                    sampler.logprobs = True
+                    prompt_messages = [
+                            sampler._pack_message(
+                                content=format_multichoice_question(row, conf_mode=self.conf_mode), role="user"
+                            )
+                        ]
+                    response_with_conf = sampler(prompt_messages)
+                    row["sampler_responses"] = response_with_conf
+                    row["prompt_messages"] = prompt_messages
+                    row["top_logprobs"] = sampler.top_logprobs
 
                 case _:
                     raise Exception(f"Unrecognized confidence type: {self.conf_mode}")
@@ -212,11 +224,14 @@ class MMLUEval(Eval):
                 html=html, score=score, metrics={category: score}, convo=convo, verbal_confidence=float(confidence)
             )
 
+
         # Run evaluation and collect results
-        if not self.num_examples:
-            regen_stored_path = f"LLM-Calibration-Study/cache/mmlu_{sampler.model.split("/")[-1]}_{self.conf_mode}_full"
+        if self.conf_mode in ["sampling", "eval_all"] or "_shared_sampling" in self.conf_mode:
+            self.regenerate = True
+            regen_stored_path = shared_sampling_path("mmlu", sampler.model, self.conf_mode, self.num_examples, None)
         else:
-            regen_stored_path = f"LLM-Calibration-Study/cache/mmlu_{sampler.model.split("/")[-1]}_{self.conf_mode}_{self.num_examples}"
+            regen_stored_path = ind_sampling_path("mmlu", sampler.model, self.conf_mode, self.num_examples, None)
+
 
         if self.regenerate:
             if os.path.exists(regen_stored_path):
