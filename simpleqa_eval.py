@@ -8,7 +8,7 @@ import random
 import re
 import pandas
 from . import common
-from .types import Eval, EvalResult, SamplerBase, SingleEvalResult
+from .custom_types import Eval, EvalResult, SamplerBase, SingleEvalResult
 
 from .utils.report_post_processing import *
 from .utils.confidence_post_processing import *
@@ -146,7 +146,7 @@ class SimpleQAEval(Eval):
 
                 match self.conf_mode:
 
-                    case "verbal_numerical":
+                    case "verbal_numerical" | "verbal_numerical_shared_sampling":
                         if self.cache_found:
                             response_tuple = row["sampler_responses"]
                             prompt_messages = row["prompt_messages"]
@@ -167,7 +167,7 @@ class SimpleQAEval(Eval):
                         else:
                             confidence = float(confidence) / 100
 
-                    case "logit_perplexity":
+                    case "logit_perplexity" | "logit_perplexity_shared_sampling":
                         sampler.logprobs = True
                         if self.cache_found:
                             response_tuple = row["sampler_responses"]
@@ -199,13 +199,13 @@ class SimpleQAEval(Eval):
                         response_text, confidence, index = empirical_semantic_confidence(lnll_lst, response_texts, labels)
                         logprobs = response_with_conf[index][2] 
 
-                    case "verbal_linguistic":
+                    case "verbal_linguistic" | "verbal_linguistic_shared_sampling":
                         if self.cache_found:
                             response_with_conf = row["sampler_responses"]
                             prompt_messages = row["prompt_messages"]
                             candidate_sample = row["candidate_sample"]
                         else:
-                            template = LLM_UNCERTAINTY_COT_TEMPLATE_WITHOUT_OPTIONS_NON_VERBAL
+                            template = LLM_UNCERTAINTY_COT_HEDGING_TEMPLATE
                             vanilla_prompt = """Answer the following question using a succinct (at most one sentence) and full answer. \n"""
                             prompt_messages = [
                                 sampler._pack_message(content=vanilla_prompt + template.format(Question=row.get("problem", "")), role="user")
@@ -216,10 +216,18 @@ class SimpleQAEval(Eval):
                             candidate_sample = [sampler(prompt_messages)[0] for _ in range(sampling)]
                             row["candidate_sample"] = candidate_sample
                         response_text, _, logprobs = response_with_conf
-                        # score = 1 if (grade_letter == "A") else 0
-                        confM = confidence_by_contradiction(self.decisiveness_grader, response_text, candidate_sample)
-                        dec = decisiveness_score(self.decisiveness_grader, row.get("problem", ""), response_text)
-                        confidence = float(1 - np.abs(dec - confM))
+                        confidence = decisiveness_score(self.decisiveness_grader, row.get("problem", ""), response_text)
+
+                    case "sampling":
+                        sampler.logprobs = True
+                        template = LLM_UNCERTAINTY_COT_TEMPLATE_SHARED
+                        prompt_messages = [
+                            sampler._pack_message(content=template.format(Question=row.get("problem", "")), role="user")
+                        ]
+                        response_with_conf = sampler(prompt_messages)
+                        row["sampler_responses"] = response_with_conf
+                        row["prompt_messages"] = prompt_messages
+                        row["top_logprobs"] = sampler.top_logprobs
 
                     case _:
                         raise Exception(f"Unrecognized confidence type: {self.conf_mode}")

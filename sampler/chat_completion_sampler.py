@@ -6,7 +6,7 @@ import openai
 from openai import OpenAI
 import numpy as np
 
-from ..types import MessageList, SamplerBase
+from ..custom_types import MessageList, SamplerBase
 
 OPENAI_SYSTEM_MESSAGE_API = "You are a helpful assistant."
 OPENAI_SYSTEM_MESSAGE_CHATGPT = (
@@ -42,6 +42,7 @@ class ChatCompletionSampler(SamplerBase):
         self.max_tokens = max_tokens
         self.image_format = "url"
         self.logprobs = logprobs
+        self.top_logprobs = None
 
     def _handle_image(
         self, image: str, encoding: str = "base64", format: str = "png", fovea: int = 768
@@ -73,7 +74,8 @@ class ChatCompletionSampler(SamplerBase):
                             messages=message_list,
                             temperature=self.temperature,
                             max_tokens=self.max_tokens,
-                            logprobs=self.logprobs
+                            logprobs=self.logprobs,
+                            top_logprobs=5
                         )
                     except:
                         response = self.client.chat.completions.create(
@@ -81,10 +83,10 @@ class ChatCompletionSampler(SamplerBase):
                             messages=message_list,
                             temperature=self.temperature,
                             max_tokens=self.max_tokens,
-                            logprobs=1
+                            logprobs=5
                         )
-                    
                     try:
+                        self.top_logprobs = [t.top_logprobs for t in response.choices[0].logprobs.content]
                         return response.choices[0].message.content, float(np.exp(np.array([t.logprob for t in response.choices[0].logprobs.content])).mean()), [t.logprob for t in response.choices[0].logprobs.content]
                     except:
                         return response.choices[0].message.content, float(np.exp(response.choices[0].logprobs.token_logprobs).mean()), response.choices[0].logprobs.token_logprobs
@@ -102,7 +104,7 @@ class ChatCompletionSampler(SamplerBase):
                 print("Bad Request Error", e)
                 return ""
             except Exception as e:
-                exception_backoff = 2**trial  # expontial back off
+                exception_backoff = min(2**trial, 60)  # expontial back off
                 print(
                     f"Rate limit exception so wait and retry {trial} after {exception_backoff} sec",
                     e,

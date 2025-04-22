@@ -6,7 +6,7 @@ from collections import Counter
 from sentence_transformers import SentenceTransformer
 from sklearn.cluster import AgglomerativeClustering
 
-from ..types import SamplerBase
+from ..custom_types import SamplerBase
 
 
 ANSWER_PATTERN_MULTICHOICE = r"(?i)Answer[ \t]*:[ \t]*\$?([A-D])\$?"
