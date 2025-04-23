@@ -105,7 +105,7 @@ def get_model_dict(model_name: str):
                 API_TOKEN=os.environ.get("HF_TOKEN", None),
                 system_message=None,
                 max_tokens=2048,
-                temperature=0.7,
+                temperature=0,
             )
     elif model_name == "Qwen2.5-3B-Instruct":
         models["Qwen2.5-3B-Instruct"] = HFChatCompletionSampler(
@@ -113,7 +113,7 @@ def get_model_dict(model_name: str):
                 API_TOKEN=os.environ.get("HF_TOKEN", None),
                 system_message=None,
                 max_tokens=2048,
-                temperature=0.7,
+                temperature=0,
             )
     elif model_name == "Qwen2.5-7B-Instruct":
         models["Qwen2.5-7B-Instruct"] = HFChatCompletionSampler(
@@ -121,7 +121,7 @@ def get_model_dict(model_name: str):
                 API_TOKEN=os.environ.get("HF_TOKEN", None),
                 system_message=None,
                 max_tokens=2048,
-                temperature=0.7,
+                temperature=0,
             )
     elif model_name == "Qwen2.5-13B-Instruct":
         models["Qwen2.5-13B-Instruct"] = HFChatCompletionSampler(
@@ -129,7 +129,7 @@ def get_model_dict(model_name: str):
                 API_TOKEN=os.environ.get("HF_TOKEN", None),
                 system_message=None,
                 max_tokens=2048,
-                temperature=0.7,
+                temperature=0,
             )
     elif model_name == "Qwen2.5-32B-Instruct":
         models["Qwen2.5-32B-Instruct"] = HFChatCompletionSampler(
@@ -137,7 +137,7 @@ def get_model_dict(model_name: str):
                 API_TOKEN=os.environ.get("HF_TOKEN", None),
                 system_message=None,
                 max_tokens=2048,
-                temperature=0.7,
+                temperature=0,
             )
     elif model_name == "Llama-3.1-405B-Instruct":
         models["Llama-3.1-405B-Instruct"] = HFChatCompletionSampler(
@@ -145,7 +145,7 @@ def get_model_dict(model_name: str):
                 API_TOKEN=os.environ.get("HF_TOKEN", None),
                 system_message=None,
                 max_tokens=2048,
-                temperature=0.7,
+                temperature=0,
             )
     elif model_name == "Llama-3.3-70B-Instruct": 
         models["Llama-3.3-70B-Instruct"] = HFChatCompletionSampler(
@@ -153,7 +153,7 @@ def get_model_dict(model_name: str):
                 API_TOKEN=os.environ.get("HF_TOKEN", None),
                 system_message=None,
                 max_tokens=2048,
-                temperature=0.7,
+                temperature=0,
             )
     elif model_name == "Llama-3.1-8B-Instruct": 
         models["Llama-3.1-8B-Instruct"] = HFChatCompletionSampler(
@@ -161,7 +161,7 @@ def get_model_dict(model_name: str):
                 API_TOKEN=os.environ.get("HF_TOKEN", None),
                 system_message=None,
                 max_tokens=2048,
-                temperature=0.7,
+                temperature=0,
             )
     elif model_name == "DeepSeek-R1":
         models["DeepSeek-R1"] = HFChatCompletionSampler(
@@ -169,7 +169,7 @@ def get_model_dict(model_name: str):
                 API_TOKEN=os.environ.get("HF_TOKEN", None),
                 system_message=None,
                 max_tokens=2048,
-                temperature=0.7,
+                temperature=0,
             )
         
     # ----------- Google LLMs -----------

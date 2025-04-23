@@ -75,7 +75,8 @@ class ChatCompletionSampler(SamplerBase):
                             temperature=self.temperature,
                             max_tokens=self.max_tokens,
                             logprobs=self.logprobs,
-                            top_logprobs=5
+                            top_logprobs=5,
+                            seed=42
                         )
                     except:
                         response = self.client.chat.completions.create(
@@ -83,7 +84,8 @@ class ChatCompletionSampler(SamplerBase):
                             messages=message_list,
                             temperature=self.temperature,
                             max_tokens=self.max_tokens,
-                            logprobs=5
+                            logprobs=5,
+                            seed=42
                         )
                     try:
                         self.top_logprobs = [t.top_logprobs for t in response.choices[0].logprobs.content]
