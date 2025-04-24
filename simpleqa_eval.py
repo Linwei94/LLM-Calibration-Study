@@ -7,6 +7,8 @@ https://cdn.openai.com/papers/simpleqa.pdf
 import random 
 import re
 import pandas
+
+from .sampler.chat_completion_sampler import ChatCompletionSampler
 from . import common
 from .custom_types import Eval, EvalResult, SamplerBase, SingleEvalResult
 
@@ -137,100 +139,100 @@ class SimpleQAEval(Eval):
         match = re.search(r"(A|B|C)", grading_response)
         return match.group(0) if match else "C"  # Default to "NOT_ATTEMPTED" if no match
 
-    def __call__(self, sampler: SamplerBase) -> EvalResult:
+    def __call__(self, sampler: ChatCompletionSampler) -> EvalResult:
             def fn(row: dict):
 
-                sampling = 5
-                extracted_answer = ""
                 confidence = 0
 
                 match self.conf_mode:
 
                     case "verbal_numerical" | "verbal_numerical_shared_sampling":
                         if self.cache_found:
-                            response_tuple = row["sampler_responses"]
-                            prompt_messages = row["prompt_messages"]
+                            response_text = row["response_text"] 
+                            top_logprobs = row["top_logprobs"] 
+                            prompt_messages = row["prompt_messages"] 
                         else:
                             template = LLM_UNCERTAINTY_COT_TEMPLATE_WITHOUT_OPTIONS
                             prompt_messages = [
                                 sampler._pack_message(content=template.format(Question=row.get("problem", "")), role="user")
                             ]
-                            response_tuple = sampler(prompt_messages)
-                            row["sampler_responses"] = response_tuple
+                            response_text = sampler(prompt_messages)
                             row["prompt_messages"] = prompt_messages
-                            
-                        response_text = response_tuple[0]
-                        logprobs = response_tuple[2]
+                            row["response_text"] = response_text
+                            row["logprobs"] = sampler.logprobs
+                            row["top_logprobs"] = sampler.top_logprobs
+                            row["logit_perplexity"] = sampler.logit_perplexity
+                        response_text = row["response_text"]
+                        logprobs = row["logprobs"]
                         confidence = extract_confidence_from_response(response_text)
-                        if confidence==None: 
+                        if confidence == None: 
                             confidence = 0.0
                         else:
                             confidence = float(confidence) / 100
 
+
                     case "logit_perplexity" | "logit_perplexity_shared_sampling":
                         sampler.logprobs = True
                         if self.cache_found:
-                            response_tuple = row["sampler_responses"]
-                            prompt_messages = row["prompt_messages"]
+                            response_text = row["response_text"] 
+                            top_logprobs = row["top_logprobs"] 
+                            prompt_messages = row["prompt_messages"] 
                         else:
                             template = LLM_UNCERTAINTY_COT_TEMPLATE_WITHOUT_OPTIONS_NON_VERBAL
                             prompt_messages = [
                                 sampler._pack_message(content=template.format(Question=row.get("problem", "")), role="user")
                             ]
-                            response_tuple = sampler(prompt_messages)
-                            row["sampler_responses"] = response_tuple
+                            response_text = sampler(prompt_messages)
                             row["prompt_messages"] = prompt_messages
+                            row["response_text"] = response_text
+                            row["logprobs"] = sampler.logprobs
+                            row["top_logprobs"] = sampler.top_logprobs
+                            row["logit_perplexity"] = sampler.logit_perplexity
+                        confidence = row["logit_perplexity"]
+                        logprobs = row["logprobs"]
 
-                        response_text, confidence, logprobs = response_tuple
-
-                    case "semantic_entropy":
-                        if self.cache_found:
-                            response_with_conf = row["sampler_responses"]
-                            prompt_messages = row["prompt_messages"]
-                        else:
-                            template = LLM_UNCERTAINTY_COT_TEMPLATE_WITHOUT_OPTIONS_NON_VERBAL
-                            prompt_messages = [
-                                sampler._pack_message(content=template.format(Question=row.get("problem", "")), role="user")
-                            ]
-                            response_with_conf = [sampler(prompt_messages) for _ in range(sampling)]
-                            row["sampler_responses"] = response_with_conf
-                            row["prompt_messages"] = prompt_messages
-                        response_texts, lnll_lst, labels = get_semantic_clusters(response_with_conf)
-                        response_text, confidence, index = empirical_semantic_confidence(lnll_lst, response_texts, labels)
-                        logprobs = response_with_conf[index][2] 
 
                     case "verbal_linguistic" | "verbal_linguistic_shared_sampling":
                         if self.cache_found:
-                            response_with_conf = row["sampler_responses"]
-                            prompt_messages = row["prompt_messages"]
-                            candidate_sample = row["candidate_sample"]
+                            response_text = row["response_text"] 
+                            top_logprobs = row["top_logprobs"] 
+                            prompt_messages = row["prompt_messages"] 
                         else:
                             template = LLM_UNCERTAINTY_COT_HEDGING_TEMPLATE
                             vanilla_prompt = """Answer the following question using a succinct (at most one sentence) and full answer. \n"""
                             prompt_messages = [
                                 sampler._pack_message(content=vanilla_prompt + template.format(Question=row.get("problem", "")), role="user")
                             ]
-                            response_with_conf = sampler(prompt_messages)
-                            row["sampler_responses"] = response_with_conf
+                            response_text = sampler(prompt_messages)
                             row["prompt_messages"] = prompt_messages
-                            candidate_sample = [sampler(prompt_messages)[0] for _ in range(sampling)]
-                            row["candidate_sample"] = candidate_sample
-                        response_text, _, logprobs = response_with_conf
+                            row["response_text"] = response_text
+                            row["logprobs"] = sampler.logprobs
+                            row["top_logprobs"] = sampler.top_logprobs
+                            row["logit_perplexity"] = sampler.logit_perplexity
+
+                        confidence = row["logit_perplexity"]
+                        logprobs = row["logprobs"]
                         confidence = decisiveness_score(self.decisiveness_grader, row.get("problem", ""), response_text)
 
+                        
                     case "sampling":
-                        sampler.logprobs = True
                         template = LLM_UNCERTAINTY_COT_TEMPLATE_SHARED
                         prompt_messages = [
                             sampler._pack_message(content=template.format(Question=row.get("problem", "")), role="user")
                         ]
-                        response_with_conf = sampler(prompt_messages)
-                        row["sampler_responses"] = response_with_conf
+                        sampler.logprobs = True
+                        response = sampler(prompt_messages)
                         row["prompt_messages"] = prompt_messages
+                        row["response_text"] = response
+                        row["logprobs"] = sampler.logprobs
                         row["top_logprobs"] = sampler.top_logprobs
+                        row["logit_perplexity"] = sampler.logit_perplexity
+                        return
+                    
 
                     case _:
                         raise Exception(f"Unrecognized confidence type: {self.conf_mode}")
+
 
                 grade_letter = self.grade_sample(row.get("problem", ""), row.get("answer", ""), response_text)
                 
@@ -260,11 +262,13 @@ class SimpleQAEval(Eval):
                     "is_not_attempted": is_not_attempted,
                 }, verbal_confidence=float(confidence))
 
+
             # Run evaluation and collect results
-            if not self.num_examples:
-                regen_stored_path = f"LLM-Calibration-Study/cache/simpleqa_{sampler.model.split("/")[-1]}_{self.conf_mode}_full_{self.n_repeats}"
+            if self.conf_mode in ["sampling", "eval_all"] or "_shared_sampling" in self.conf_mode:
+                self.regenerate = True
+                regen_stored_path = shared_sampling_path("simpleqa", sampler.model, self.conf_mode, self.num_examples, self.n_repeats)
             else:
-                regen_stored_path = f"LLM-Calibration-Study/cache/simpleqa_{sampler.model.split("/")[-1]}_{self.conf_mode}_{self.num_examples}_{self.n_repeats}"
+                regen_stored_path = ind_sampling_path("simpleqa", sampler.model, self.conf_mode, self.num_examples, self.n_repeats)
 
             if self.regenerate:
                 if os.path.exists(regen_stored_path):
@@ -280,6 +284,12 @@ class SimpleQAEval(Eval):
                         pickle.dump(self.examples, f)
             else:
                 results = common.map_with_progress(fn, self.examples)
+
+            if self.conf_mode == "sampling":
+                with open(regen_stored_path, 'wb') as f:
+                    pickle.dump(self.examples, f)
+                print(f"Shared sampling complete and saved to: {regen_stored_path}")
+                sys.exit()
 
             # Aggregate metrics
             aggregate_metrics = {

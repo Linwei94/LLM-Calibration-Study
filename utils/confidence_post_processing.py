@@ -322,6 +322,8 @@ def extract_answer_and_confidence(response_text: str, options) -> tuple[str | No
 
     # Regular expressions
     patterns_multi_choice = [
+        r"The best answer is (\w): [\d.]+, (\d+)%?\.",
+        r"([A-D]):\s*[^,]+,\s*(\d+)%?",
         r"^\s*([A-Z])\)\s*.*\n\s*(\d{1,3})\s*$"
         r"^\s*([A-Z])\)\s*.*\n\s*(\d+)%?"
         r"^\s*([A-Z])\)\s+.*?(\d{1,3})\s*$",
@@ -329,19 +331,27 @@ def extract_answer_and_confidence(response_text: str, options) -> tuple[str | No
         r"\s*([A-Z])\)\s*(\d+)",
         r"\s*([A-Z])\)\s*.+?,\s*(\d+)%?",
         r"\s*([A-Z])\)\s*.+?[\.\uFF0C,]?\s*(\d+)%?",
-        r"Answer and Confidence\s*\(0-100\):\s*[\(\[]?([A-Z0-9]+)[\)\]]?,\s*(\d+)%?",
+        r"Answer and Confidence\s*\(0-100\):\s*[\(\[]?([A-D]+)[\)\]]?,\s*(\d+)%?",
+        r"Answer and Confidence \(0-100\): \s*[\(\[]?([A-D]+)[\)\]]?,\s*(\d+)%?",
         r"(?:Answer and Confidence(?:\s*\([A-Z]\))?|Answer):\s*[\(\[]?([A-Z])\)?\]?[,]?\s*(?:Confidence:\s*)?(\d+)",
+        r"The best answer is ([A-D]):\s*[\d.]+,\s*(\d+)%?",
         r"Answer: [\(\[]?([A-Z])\)?\]?[,.]?\s+Confidence(?: level)?:\s*(\d+)%?",
+        r"The best answer is ([A-D]),\s*(\d+)%?",
+        r"The best answer is ([A-D]):\s*(\d+)%?",
+        r"The best answer is ([A-D]):\.?\s,*(\d+)%?",
+        r"The best answer is ([A-D]):\s*(\d+)%?",
+        r"The best answer is ([A-D]).\s*(\d+)%?",
     ]
 
     patterns_multi_choice_without_option = [
         r"Answer and Confidence\s*(?:\(0-100\))?:\s*(.+?),\s*(\d+)%?"
+        r"Answer and Confidence (100):\s*(.+?),\s*(\d+)%?"
     ]
 
     patterns_multi_choice_weird = [
         r"Answer: [\(\[]?([A-Z])\)?\]?[,.]?\s+Confidence level: (\d+)%",
         r"Answer: [\(\[]?([A-Z])\)?\]?[,.]?.*\s+Confidence(?: level)?: (\d+)%",
-        r"Answer:\s*[\(\[]?([A-Z])\)?\]?[,.]?\s+Confidence level:\s*(\d+)%"
+        r"Answer:\s*[\(\[]?([A-Z])\)?\]?[,.]?\s+Confidence level:\s*(\d+)%",
     ]
 
     patterns_and_postprocess_multi_choice = []
@@ -360,20 +370,40 @@ def extract_answer_and_confidence(response_text: str, options) -> tuple[str | No
                         conf = 100
                     if float(conf) < 0 or conf==None:
                         conf = 0
-                    return answer, float(conf)
-
+                    if answer != None and conf != None: 
+                        return answer, float(conf)
+                
+    lines = lines[:2]
+    for line in lines:
+        if "%" not in line: line += " 25%"
+        for pattern, match_processor in patterns_and_postprocess_multi_choice:
+            match = re.search(pattern, line)
+            if match:
+                answer, conf = match_processor(match)
+                if answer in 'ABCD' or answer == 'place_holder':
+                    if float(conf) > 100:
+                        conf = 100
+                    if float(conf) < 0 or conf==None:
+                        conf = 0
+                    if answer != None and conf != None: 
+                        return answer, float(conf)
+    
     
     # if the extraction answer is None or confidence is None, we try to extract the answer using the default method   
-    if answer == None or conf == None:
-        # answer is one of A, B, C, D ramdomly
-        answer = random.choice(['A', 'B', 'C', 'D'])
-        conf = 0
+    if conf == None:
+        conf = 25
     if float(conf) > 100:
         conf = 100
     if float(conf) < 0:
         conf = 0
-    return answer, float(conf)
 
+    print("Extraction Failed")
+    if answer == None:
+        # answer is one of A, B, C, D ramdomly
+        # answer = random.choice(['A', 'B', 'C', 'D'])
+        answer = "F"
+        conf = 0
+    return answer, float(conf)
 
 # ------------------------------------------------------------------------------------------------------
 
@@ -426,16 +456,15 @@ def confidence_by_contradiction(sampler, original_response, candidate_sample):
 def decisiveness_score(sampler, question, response) -> tuple[str, float]:
     dec_prompt = """You will be given a question and a proposed answer. Your task is to extract any assertions made by the proposed answer; for each assertion, you should output a decisiveness score: a number in [0,1] representing how likely you think this assertion is to be true, judged solely based on the provided answer. You should pay special attention to the usage of any hedging modifiers in the original answer, used to convey uncertainty in the truthfulness of the assertion. If the proposed answer punts the question, the extracted assertion should be the empty string and the decisiveness score should be 1.0.\n"""
     vanilla_prompt = """Answer the following question using a succinct (at most one sentence) and full answer\n"""
-    msg = [{"role":"user","content":vanilla_prompt + " " + dec_prompt  + f" Question: {question} \nProposed answer: {response}.\n Only outputs each assertion after 'Assertion:',  and decisiveness score, after 'Decisiveness score: ' in two lines."}]
+    msg = [{"role":"user","content":vanilla_prompt + " " + dec_prompt  + f" Question: {question} \nProposed answer: {response}.\n Only outputs a assertion of the entire answer after 'Assertion:',  and its decisiveness score, after 'Decisiveness score: ' in two lines."}]
     score_pattern = r"[Dd]ecisiveness [Ss]core:\s*([0-9]*\.?[0-9]+)"
     assertion_pattern = r"(?i)assertion:\s*(.*)"
-    verdict = sampler(msg)[0]
-    print(verdict)
+    verdict = sampler(msg)
     scores = re.findall(score_pattern, verdict)
-    assertions = re.findall(assertion_pattern, verdict)
+    # assertions = re.findall(assertion_pattern, verdict)
     verdict = verdict.split("\n")
     decisiveness_scores = [float(score) for score in scores]
     if len(decisiveness_scores) > 0:
-        return decisiveness_scores[0]
+        return np.mean(decisiveness_scores)
     return 1
 # ------------------------------------------------------------------------------------------------------
