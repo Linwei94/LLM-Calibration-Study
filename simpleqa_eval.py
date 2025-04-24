@@ -15,6 +15,7 @@ from .custom_types import Eval, EvalResult, SamplerBase, SingleEvalResult
 from .utils.report_post_processing import *
 from .utils.confidence_post_processing import *
 from .utils.pre_processing import *
+from .utils.query_templates import *
 
 import pickle
 import os
@@ -152,9 +153,8 @@ class SimpleQAEval(Eval):
                             top_logprobs = row["top_logprobs"] 
                             prompt_messages = row["prompt_messages"] 
                         else:
-                            template = LLM_UNCERTAINTY_COT_TEMPLATE_WITHOUT_OPTIONS
                             prompt_messages = [
-                                sampler._pack_message(content=template.format(Question=row.get("problem", "")), role="user")
+                                sampler._pack_message(content=format_open_ended_question(row=row, conf_mode="verbal_numerical"), role="user")
                             ]
                             response_text = sampler(prompt_messages)
                             row["prompt_messages"] = prompt_messages
@@ -178,9 +178,8 @@ class SimpleQAEval(Eval):
                             top_logprobs = row["top_logprobs"] 
                             prompt_messages = row["prompt_messages"] 
                         else:
-                            template = LLM_UNCERTAINTY_COT_TEMPLATE_WITHOUT_OPTIONS_NON_VERBAL
                             prompt_messages = [
-                                sampler._pack_message(content=template.format(Question=row.get("problem", "")), role="user")
+                                sampler._pack_message(content=format_open_ended_question(row=row, conf_mode="logit_perplexity"), role="user")
                             ]
                             response_text = sampler(prompt_messages)
                             row["prompt_messages"] = prompt_messages
@@ -198,10 +197,8 @@ class SimpleQAEval(Eval):
                             top_logprobs = row["top_logprobs"] 
                             prompt_messages = row["prompt_messages"] 
                         else:
-                            template = LLM_UNCERTAINTY_COT_HEDGING_TEMPLATE
-                            vanilla_prompt = """Answer the following question using a succinct (at most one sentence) and full answer. \n"""
                             prompt_messages = [
-                                sampler._pack_message(content=vanilla_prompt + template.format(Question=row.get("problem", "")), role="user")
+                                sampler._pack_message(content=format_open_ended_question(row=row, conf_mode="verbal_linguistic"), role="user")
                             ]
                             response_text = sampler(prompt_messages)
                             row["prompt_messages"] = prompt_messages
@@ -212,13 +209,12 @@ class SimpleQAEval(Eval):
 
                         confidence = row["logit_perplexity"]
                         logprobs = row["logprobs"]
-                        confidence = decisiveness_score(self.decisiveness_grader, row.get("problem", ""), response_text)
+                        confidence = decisiveness_score(self.decisiveness_grader, format_open_ended_question(row=row, conf_mode="verbal_linguistic"), response_text)
 
                         
                     case "sampling":
-                        template = LLM_UNCERTAINTY_COT_TEMPLATE_SHARED
                         prompt_messages = [
-                            sampler._pack_message(content=template.format(Question=row.get("problem", "")), role="user")
+                            sampler._pack_message(content=format_open_ended_question(row=row, conf_mode="sampling"), role="user")
                         ]
                         sampler.logprobs = True
                         response = sampler(prompt_messages)
@@ -260,7 +256,7 @@ class SimpleQAEval(Eval):
                     "is_correct": is_correct,
                     "is_incorrect": is_incorrect,
                     "is_not_attempted": is_not_attempted,
-                }, verbal_confidence=float(confidence))
+                }, confidence=float(confidence))
 
 
             # Run evaluation and collect results

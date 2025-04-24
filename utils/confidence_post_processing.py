@@ -268,7 +268,33 @@ def gpqa_regex_extract_response(response_text):
     extracted_answer = match.group(1) if match else None
     return extracted_answer
 
-mcq_regex_extractors = {"mmlu": mmlu_regex_extract_response, "gpqa": gpqa_regex_extract_response}
+def mmlu_pro_regex_extract_response(response_text):
+    def extract_final(text):
+        pattern = r"\b[A-J]\b(?!.*\b[A-J]\b)"
+        match = re.search(pattern, text, re.DOTALL)
+        if match:
+            return match.group(0)
+        else:
+            return None
+    def extract_again(text):
+        match = re.search(r'.*[aA]nswer:\s*([A-J])', text)
+        if match:
+            return match.group(1)
+        else:
+            return extract_final(text)
+    def extract_answer(text):
+        pattern = r"[answer is] \(?([A-J])\)?"
+        match = re.search(pattern, text)
+        if match:
+            return match.group(1)
+        else:
+            print("1st answer extract failed\n" + text)
+            return extract_again(text)
+    return extract_answer(response_text)
+    
+
+
+mcq_regex_extractors = {"mmlu": mmlu_regex_extract_response, "gpqa": gpqa_regex_extract_response, "mmlu_pro": mmlu_pro_regex_extract_response}
 
 def extract_mcq_answer(response_text: str, benchmark = "gpqa") -> str | None:
     """
@@ -282,7 +308,7 @@ def extract_mcq_answer(response_text: str, benchmark = "gpqa") -> str | None:
         if match:
             extracted_answer = normalize_extracted_answer(match.group(1))
             break
-    if extracted_answer == None or extracted_answer.upper() not in ["A", "B", "C", "D"]:
+    if extracted_answer == None or extracted_answer.upper() not in "ABCDEFGHIJ":
         response_text = response_text.strip().splitlines()[-1]
     for answer_regex in MULTILINGUAL_ANSWER_REGEXES:
         regex = MULTILINGUAL_ANSWER_PATTERN_TEMPLATE.format(answer_regex)
@@ -290,7 +316,7 @@ def extract_mcq_answer(response_text: str, benchmark = "gpqa") -> str | None:
         if match:
             extracted_answer = normalize_extracted_answer(match.group(1))
             break
-    if extracted_answer == None or extracted_answer.upper() not in ["A", "B", "C", "D"]:
+    if extracted_answer == None or extracted_answer.upper() not in "ABCDEFGHIJ":
         extracted_answer = mcq_regex_extractors[benchmark](response_text)
     return extracted_answer
 
@@ -323,24 +349,24 @@ def extract_answer_and_confidence(response_text: str, options) -> tuple[str | No
     # Regular expressions
     patterns_multi_choice = [
         r"The best answer is (\w): [\d.]+, (\d+)%?\.",
-        r"([A-D]):\s*[^,]+,\s*(\d+)%?",
-        r"^\s*([A-Z])\)\s*.*\n\s*(\d{1,3})\s*$"
-        r"^\s*([A-Z])\)\s*.*\n\s*(\d+)%?"
-        r"^\s*([A-Z])\)\s+.*?(\d{1,3})\s*$",
-        r"^\s*([A-Z])\s*,\s*(\d+)%?",
-        r"\s*([A-Z])\)\s*(\d+)",
-        r"\s*([A-Z])\)\s*.+?,\s*(\d+)%?",
-        r"\s*([A-Z])\)\s*.+?[\.\uFF0C,]?\s*(\d+)%?",
-        r"Answer and Confidence\s*\(0-100\):\s*[\(\[]?([A-D]+)[\)\]]?,\s*(\d+)%?",
-        r"Answer and Confidence \(0-100\): \s*[\(\[]?([A-D]+)[\)\]]?,\s*(\d+)%?",
-        r"(?:Answer and Confidence(?:\s*\([A-Z]\))?|Answer):\s*[\(\[]?([A-Z])\)?\]?[,]?\s*(?:Confidence:\s*)?(\d+)",
-        r"The best answer is ([A-D]):\s*[\d.]+,\s*(\d+)%?",
-        r"Answer: [\(\[]?([A-Z])\)?\]?[,.]?\s+Confidence(?: level)?:\s*(\d+)%?",
-        r"The best answer is ([A-D]),\s*(\d+)%?",
-        r"The best answer is ([A-D]):\s*(\d+)%?",
-        r"The best answer is ([A-D]):\.?\s,*(\d+)%?",
-        r"The best answer is ([A-D]):\s*(\d+)%?",
-        r"The best answer is ([A-D]).\s*(\d+)%?",
+        r"([A-J]):\s*[^,]+,\s*(\d+)%?",
+        r"^\s*([A-J])\)\s*.*\n\s*(\d{1,3})\s*$"
+        r"^\s*([A-J])\)\s*.*\n\s*(\d+)%?"
+        r"^\s*([A-J])\)\s+.*?(\d{1,3})\s*$",
+        r"^\s*([A-J])\s*,\s*(\d+)%?",
+        r"\s*([A-J])\)\s*(\d+)",
+        r"\s*([A-J])\)\s*.+?,\s*(\d+)%?",
+        r"\s*([A-J])\)\s*.+?[\.\uFF0C,]?\s*(\d+)%?",
+        r"Answer and Confidence\s*\(0-100\):\s*[\(\[]?([A-J]+)[\)\]]?,\s*(\d+)%?",
+        r"Answer and Confidence \(0-100\): \s*[\(\[]?([A-J]+)[\)\]]?,\s*(\d+)%?",
+        r"(?:Answer and Confidence(?:\s*\([A-J]\))?|Answer):\s*[\(\[]?([A-J])\)?\]?[,]?\s*(?:Confidence:\s*)?(\d+)",
+        r"The best answer is ([A-J]):\s*[\d.]+,\s*(\d+)%?",
+        r"Answer: [\(\[]?([A-J])\)?\]?[,.]?\s+Confidence(?: level)?:\s*(\d+)%?",
+        r"The best answer is ([A-J]),\s*(\d+)%?",
+        r"The best answer is ([A-J]):\s*(\d+)%?",
+        r"The best answer is ([A-J]):\.?\s,*(\d+)%?",
+        r"The best answer is ([A-J]):\s*(\d+)%?",
+        r"The best answer is ([A-J]).\s*(\d+)%?",
     ]
 
     patterns_multi_choice_without_option = [
@@ -349,9 +375,9 @@ def extract_answer_and_confidence(response_text: str, options) -> tuple[str | No
     ]
 
     patterns_multi_choice_weird = [
-        r"Answer: [\(\[]?([A-Z])\)?\]?[,.]?\s+Confidence level: (\d+)%",
-        r"Answer: [\(\[]?([A-Z])\)?\]?[,.]?.*\s+Confidence(?: level)?: (\d+)%",
-        r"Answer:\s*[\(\[]?([A-Z])\)?\]?[,.]?\s+Confidence level:\s*(\d+)%",
+        r"Answer: [\(\[]?([A-J])\)?\]?[,.]?\s+Confidence level: (\d+)%",
+        r"Answer: [\(\[]?([A-J])\)?\]?[,.]?.*\s+Confidence(?: level)?: (\d+)%",
+        r"Answer:\s*[\(\[]?([A-J])\)?\]?[,.]?\s+Confidence level:\s*(\d+)%",
     ]
 
     patterns_and_postprocess_multi_choice = []
@@ -399,9 +425,7 @@ def extract_answer_and_confidence(response_text: str, options) -> tuple[str | No
 
     print("Extraction Failed")
     if answer == None:
-        # answer is one of A, B, C, D ramdomly
-        # answer = random.choice(['A', 'B', 'C', 'D'])
-        answer = "F"
+        answer = "Z"
         conf = 0
     return answer, float(conf)
 
@@ -454,7 +478,7 @@ def confidence_by_contradiction(sampler, original_response, candidate_sample):
     return float(1 - np.mean(contradictions))
 
 def decisiveness_score(sampler, question, response) -> tuple[str, float]:
-    dec_prompt = """You will be given a question and a proposed answer. Your task is to extract any assertions made by the proposed answer; for each assertion, you should output a decisiveness score: a number in [0,1] representing how likely you think this assertion is to be true, judged solely based on the provided answer. You should pay special attention to the usage of any hedging modifiers in the original answer, used to convey uncertainty in the truthfulness of the assertion. If the proposed answer punts the question, the extracted assertion should be the empty string and the decisiveness score should be 1.0.\n"""
+    dec_prompt = """You will be given a question and a proposed answer. Your task is to extract the assertion made by the proposed answer; you should output a decisiveness score: a number in [0,1] representing how likely you think this assertion is to be true, judged solely based on the provided answer. You should pay special attention to the usage of any hedging modifiers in the original answer, used to convey uncertainty in the truthfulness of the assertion. If the proposed answer punts the question, the extracted assertion should be the empty string and the decisiveness score should be 1.0.\n"""
     vanilla_prompt = """Answer the following question using a succinct (at most one sentence) and full answer\n"""
     msg = [{"role":"user","content":vanilla_prompt + " " + dec_prompt  + f" Question: {question} \nProposed answer: {response}.\n Only outputs a assertion of the entire answer after 'Assertion:',  and its decisiveness score, after 'Decisiveness score: ' in two lines."}]
     score_pattern = r"[Dd]ecisiveness [Ss]core:\s*([0-9]*\.?[0-9]+)"

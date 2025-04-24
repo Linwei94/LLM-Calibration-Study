@@ -112,95 +112,104 @@ class MMLUEval(Eval):
                 
                 case "verbal_numerical" | "verbal_numerical_shared_sampling":
                     if self.cache_found:
-                        response_tuple = row["sampler_responses"]
-                        prompt_messages = row["prompt_messages"]
+                        response = row["response"] 
+                        top_logprobs = row["top_logprobs"] 
+                        prompt_messages = row["prompt_messages"] 
                     else:
                         prompt_messages = [
                             sampler._pack_message(
                                 content=format_multichoice_question(row, conf_mode="verbal_numerical"), role="user"
                             )
                         ]
-                        response_tuple = sampler(prompt_messages)
-                        row["sampler_responses"] = response_tuple
+                        response = sampler(prompt_messages)
                         row["prompt_messages"] = prompt_messages
-                    response_text = normalize_response(response_tuple[0])
-                    logprobs = response_tuple[2]
+                        row["response"] = response
+                        row["logprobs"] = sampler.logprobs
+                        row["top_logprobs"] = sampler.top_logprobs
+                        row["logit_perplexity"] = sampler.logit_perplexity
+
+                    response_text = normalize_response(response)
+                    logprobs = row["logprobs"]
                     # Extract the answer from the response text
-                    extracted_answer, confidence = extract_answer_and_confidence(response_text, options={k: row[k] for k in ['A', 'B', 'C', 'D']})
+                    extracted_answer, confidence = extract_answer_and_confidence("\n".join(response_text.splitlines()[-2:]), options={k: row[k] for k in ['A', 'B', 'C', 'D']})
+                    if extracted_answer is None or extracted_answer not in "ABCD" or float(confidence) < 10:
+                        extracted_answer, confidence = extract_answer_and_confidence(response_text, options={k: row[k] for k in ['A', 'B', 'C', 'D']})
                     confidence /= 100
+
 
                 case "logit_perplexity" | "logit_perplexity_shared_sampling":
                     sampler.logprobs = True
                     if self.cache_found:
-                        response_with_conf = row["sampler_responses"]
-                        prompt_messages = row["prompt_messages"]
+                        response = row["response"] 
+                        top_logprobs = row["top_logprobs"] 
+                        prompt_messages = row["prompt_messages"] 
                     else:
                         prompt_messages = [
                             sampler._pack_message(
                                 content=format_multichoice_question(row, conf_mode="logit_perplexity"), role="user"
                             )
                         ]
-                        response_with_conf = sampler(prompt_messages)
-                        row["sampler_responses"] = response_with_conf
+                        response = sampler(prompt_messages)
                         row["prompt_messages"] = prompt_messages
+                        row["response"] = response
+                        row["logprobs"] = sampler.logprobs
+                        row["top_logprobs"] = sampler.top_logprobs
+                        row["logit_perplexity"] = sampler.logit_perplexity
 
-                    response_text, confidence, logprobs = response_with_conf 
-                    extracted_answer, _ = extract_answer_and_confidence(response_text, options={k: row[k] for k in ['A', 'B', 'C', 'D']})
+                    response_text = normalize_response(response)
+                    confidence = row["logit_perplexity"]
+                    logprobs = row["logprobs"]
 
-                case "semantic_entropy":
-                    if self.cache_found:
-                        response_with_conf = row["sampler_responses"]
-                        prompt_messages = row["prompt_messages"]
-                    else:
-                        prompt_messages = [
-                            sampler._pack_message(
-                                content=format_multichoice_question(row, conf_mode="semantic_entropy"), role="user"
-                            )
-                        ]
-                        response_with_conf = [sampler(prompt_messages) for _ in range(sampling)]
-                        row["sampler_responses"] = response_with_conf
-                        row["prompt_messages"] = prompt_messages
-                    
-                    # extracted_answers = [mmlu_regex_extract_response(text[0]) for text in response_with_conf]
-                    response_texts, lnll_lst, labels = get_mcq_clusters(response_with_conf, "mmlu")
-                    response_text, confidence, index = empirical_semantic_confidence(lnll_lst, response_texts, labels)
-                    extracted_answer, _ = extract_answer_and_confidence(response_text, options={k: row[k] for k in ['A', 'B', 'C', 'D']})
-                    logprobs = response_with_conf[index][2]
+                    extracted_answer, _ = extract_answer_and_confidence("\n".join(response_text.splitlines()[-2:]), options={k: row[k] for k in ['A', 'B', 'C', 'D']})
+                    if extracted_answer is None or extracted_answer not in "ABCD":
+                        extracted_answer, _ = extract_answer_and_confidence(response_text, options={k: row[k] for k in ['A', 'B', 'C', 'D']})
+                    if extracted_answer is None or extracted_answer not in "ABCD":
+                        extracted_answer = extract_mcq_answer("\n".join(response_text.splitlines()[-3:]), "mmlu")
+
 
                 case "verbal_linguistic" | "verbal_linguistic_shared_sampling":
                     if self.cache_found:
-                        response_with_conf = row["sampler_responses"]
-                        prompt_messages = row["prompt_messages"]
-                        candidate_sample = row["candidate_sample"]
+                        response = row["response"] 
+                        top_logprobs = row["top_logprobs"] 
+                        prompt_messages = row["prompt_messages"] 
                     else:
                         prompt_messages = [
                             sampler._pack_message(
                                 content=format_multichoice_question(row, conf_mode="verbal_linguistic"), role="user"
                             )
                         ]
-                        response_with_conf = sampler(prompt_messages)
-                        row["sampler_responses"] = response_with_conf
+                        response = sampler(prompt_messages)
                         row["prompt_messages"] = prompt_messages
-                        candidate_sample = [sampler(prompt_messages)[0] for _ in range(sampling)]
-                        row["candidate_sample"] = candidate_sample
+                        row["response"] = response
+                        row["logprobs"] = sampler.logprobs
+                        row["top_logprobs"] = sampler.top_logprobs
+                        row["logit_perplexity"] = sampler.logit_perplexity
 
-                    response_text, _, logprobs = response_with_conf
-                    extracted_answer, _ = extract_answer_and_confidence(response_text, options={k: row[k] for k in ['A', 'B', 'C', 'D']})
-                    score = 1.0 if extracted_answer == row["Answer"] else 0.0
-                    # confM = confidence_by_contradiction(self.decisiveness_grader, response_text, candidate_sample)
-                    confidence = decisiveness_score(self.decisiveness_grader, format_multichoice_question(row), response_text)
+                    logprobs = row["logprobs"]
+                    response_text = normalize_response(response)
+
+                    extracted_answer, _ = extract_answer_and_confidence("\n".join(response_text.splitlines()[-2:]), options={k: row[k] for k in ['A', 'B', 'C', 'D']})
+                    if extracted_answer is None or extracted_answer not in "ABCD":
+                        extracted_answer, _ = extract_answer_and_confidence(response_text, options={k: row[k] for k in ['A', 'B', 'C', 'D']})
+                    if extracted_answer is None or extracted_answer not in "ABCD":
+                        extracted_answer = extract_mcq_answer("\n".join(response_text.splitlines()[-3:]), "mmlu")
+                    
+                    confidence = decisiveness_score(self.decisiveness_grader, format_multichoice_question(row, "verbal_linguistic"), response_text)
 
                 case "sampling":
                     sampler.logprobs = True
                     prompt_messages = [
-                            sampler._pack_message(
-                                content=format_multichoice_question(row, conf_mode=self.conf_mode), role="user"
-                            )
-                        ]
-                    response_with_conf = sampler(prompt_messages)
-                    row["sampler_responses"] = response_with_conf
+                        sampler._pack_message(
+                            content=format_multichoice_question(row, conf_mode="sampling"), role="user"
+                        )
+                    ]
+                    response = sampler(prompt_messages)
                     row["prompt_messages"] = prompt_messages
+                    row["response"] = response
+                    row["logprobs"] = sampler.logprobs
                     row["top_logprobs"] = sampler.top_logprobs
+                    row["logit_perplexity"] = sampler.logit_perplexity
+                    return
 
                 case _:
                     raise Exception(f"Unrecognized confidence type: {self.conf_mode}")
@@ -221,7 +230,7 @@ class MMLUEval(Eval):
             )
             convo = prompt_messages + [dict(content=response_text, role="assistant")]
             return SingleEvalResult(
-                html=html, score=score, metrics={category: score}, convo=convo, verbal_confidence=float(confidence)
+                html=html, score=score, metrics={category: score}, convo=convo, confidence=float(confidence)
             )
 
 
@@ -231,7 +240,7 @@ class MMLUEval(Eval):
             regen_stored_path = shared_sampling_path("mmlu", sampler.model, self.conf_mode, self.num_examples, None)
         else:
             regen_stored_path = ind_sampling_path("mmlu", sampler.model, self.conf_mode, self.num_examples, None)
-
+            
 
         if self.regenerate:
             if os.path.exists(regen_stored_path):
@@ -247,5 +256,11 @@ class MMLUEval(Eval):
                     pickle.dump(self.examples, f)
         else:
             results = common.map_with_progress(fn, self.examples)
+
+        if self.conf_mode == "sampling":
+            with open(regen_stored_path, 'wb') as f:
+                pickle.dump(self.examples, f)
+            print(f"Shared sampling complete and saved to: {regen_stored_path}")
+            sys.exit()
 
         return common.aggregate_results(results)

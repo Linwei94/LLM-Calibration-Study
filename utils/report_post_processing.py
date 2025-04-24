@@ -56,7 +56,7 @@ def aggregate_results(
     name2values = defaultdict(list)
     htmls = []
     convos = []
-    verbal_confidence_list = []
+    confidence_list = []
     for single_eval_result in single_eval_results:
         for name, value in single_eval_result.metrics.items():
             name2values[name].append(value)
@@ -64,7 +64,7 @@ def aggregate_results(
             name2values["score"].append(single_eval_result.score)
         htmls.append(single_eval_result.html)
         convos.append(single_eval_result.convo)
-        verbal_confidence_list.append(single_eval_result.verbal_confidence)
+        confidence_list.append(single_eval_result.confidence)
     final_metrics = {}
     for name, values in name2values.items():
         stats = name2stats.get(name, default_stats)
@@ -73,7 +73,7 @@ def aggregate_results(
             final_metrics[key] = _compute_stat(values, stat)
 
     # Calculate the verbalized ECE
-    final_metrics['ECE'] = calculate_ece(confidences=verbal_confidence_list, accuracies=name2values["score"])
+    final_metrics['ECE'] = calculate_ece(confidences=confidence_list, accuracies=name2values["score"])
     return EvalResult(
         score=final_metrics.pop("score", None), metrics=final_metrics, htmls=htmls, convos=convos
     )
