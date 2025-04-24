@@ -65,10 +65,8 @@ class GPQAEval(Eval):
                 A=choices[0], B=choices[1], C=choices[2], D=choices[3], Question=row["Question"]
             )
 
-            sampling = 20
             extracted_answer = ""
             confidence = 0
-
 
             match self.conf_mode:
 
@@ -92,9 +90,10 @@ class GPQAEval(Eval):
                     
                     logprobs = row["logprobs"]
                     response_text = normalize_response(response)
-                    extracted_answer, confidence = extract_answer_and_confidence("\n".join(response_text.splitlines()[-2:]), options={k: choices_dict[k] for k in ['A', 'B', 'C', 'D']})
-                    if extracted_answer is None or extracted_answer not in ["A", "B", "C", "D"] or float(confidence) < 10:
-                        extracted_answer, confidence = extract_answer_and_confidence(response_text, options={k: choices_dict[k] for k in ['A', 'B', 'C', 'D']})
+
+                    extracted_answer, confidence = extract_answer_and_confidence("\n".join(response_text.splitlines()[-2:]), options={k: choices_dict[k] for k in "ABCD"})
+                    if extracted_answer is None or extracted_answer not in "ABCD" or float(confidence) < 10:
+                        extracted_answer, confidence = extract_answer_and_confidence(response_text, options={k: choices_dict[k] for k in "ABCD"})
                     confidence /= 100
                     print(f"extracted_answer: {extracted_answer}, confidence: {confidence}")
                     score = 1.0 if extracted_answer == correct_answer else 0.0
@@ -122,10 +121,10 @@ class GPQAEval(Eval):
                     confidence = row["logit_perplexity"]
                     logprobs = row["logprobs"]
 
-                    extracted_answer, _ = extract_answer_and_confidence("\n".join(response_text.splitlines()[-2:]), options={k: choices_dict[k] for k in ['A', 'B', 'C', 'D']})
-                    if extracted_answer is None or extracted_answer not in ["A", "B", "C", "D"]:
-                        extracted_answer, _ = extract_answer_and_confidence(response_text, options={k: choices_dict[k] for k in ['A', 'B', 'C', 'D']})
-                    if extracted_answer is None or extracted_answer not in ["A", "B", "C", "D"]:
+                    extracted_answer, _ = extract_answer_and_confidence("\n".join(response_text.splitlines()[-2:]), options={k: choices_dict[k] for k in "ABCD"})
+                    if extracted_answer is None or extracted_answer not in "ABCD":
+                        extracted_answer, _ = extract_answer_and_confidence(response_text, options={k: choices_dict[k] for k in "ABCD"})
+                    if extracted_answer is None or extracted_answer not in "ABCD":
                         extracted_answer = extract_mcq_answer(" ".join(response_text.splitlines()[-3:]), "gpqa")
 
                     print(f"extracted_answer: {extracted_answer}, confidence: {confidence}")
@@ -153,25 +152,24 @@ class GPQAEval(Eval):
                     response_text = normalize_response(response)
                     logprobs = row["logprobs"]
 
-                    extracted_answer, _ = extract_answer_and_confidence("\n".join(response_text.splitlines()[-2:]), options={k: choices_dict[k] for k in ['A', 'B', 'C', 'D']})
-                    if extracted_answer is None or extracted_answer not in ["A", "B", "C", "D"]:
-                        extracted_answer, _ = extract_answer_and_confidence(response_text, options={k: choices_dict[k] for k in ['A', 'B', 'C', 'D']})
-                    if extracted_answer is None or extracted_answer not in ["A", "B", "C", "D"]:
+                    extracted_answer, _ = extract_answer_and_confidence("\n".join(response_text.splitlines()[-2:]), options={k: choices_dict[k] for k in "ABCD"})
+                    if extracted_answer is None or extracted_answer not in "ABCD":
+                        extracted_answer, _ = extract_answer_and_confidence(response_text, options={k: choices_dict[k] for k in "ABCD"})
+                    if extracted_answer is None or extracted_answer not in "ABCD":
                         extracted_answer = extract_mcq_answer(" ".join(response_text.splitlines()[-3:]), "gpqa")
 
                     score = 1.0 if extracted_answer == correct_answer else 0.0
-                    # confM = confidence_by_contradiction(self.decisiveness_grader, response_text, candidate_sample)
-                    confidence = decisiveness_score(self.decisiveness_grader, format_multichoice_question(choices_dict), response_text)
+                    confidence = decisiveness_score(self.decisiveness_grader, format_multichoice_question(choices_dict, "verbal_linguistic"), response_text)
                     print(f"extracted_answer: {extracted_answer}, confidence: {confidence}")
 
                 # sample and cache responses: 
                 case "sampling":
+                    sampler.logprobs = True
                     prompt_messages = [
                         sampler._pack_message(
                             content=format_multichoice_question(choices_dict, conf_mode=self.conf_mode), role="user"
                         )
                     ]
-                    sampler.logprobs = True
                     response = sampler(prompt_messages)
                     row["prompt_messages"] = prompt_messages
                     row["response"] = response
@@ -202,7 +200,7 @@ class GPQAEval(Eval):
                 score=score, 
                 convo=convo, 
                 metrics={"chars": len(response_text)}, 
-                verbal_confidence=float(confidence)
+                confidence=float(confidence)
             )
 
 

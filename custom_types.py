@@ -38,7 +38,7 @@ class SingleEvalResult:
     metrics: dict[str, float] = field(default_factory=dict)
     html: str | None = None
     convo: MessageList | None = None  # sampled conversation
-    verbal_confidence: float | None = None
+    confidence: float | None = None
 
 
 class Eval:
