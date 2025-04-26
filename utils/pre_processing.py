@@ -13,21 +13,30 @@ def format_multichoice_question(row, conf_mode="verbal_numerical", choices = 4):
             return MULTI_CHOICE_4_COT_HEDGING_TEMPLATE.format(**row)
         elif conf_mode == "logit_perplexity":
             return MULTI_CHOICE_4_COT_TEMPLATE.format(**row)
+        elif conf_mode == "token_sar":
+            return MULTI_CHOICE_4_COT_TEMPLATE.format(**row)
+        elif conf_mode == "decisiveness_grading":
+            return MULTI_CHOICE_TEMPLATE.format(**row)
         else:
             raise ValueError(f"Unknown conf_mode: {conf_mode}")
     elif choices == 0: # MMLU PRO without set placeholders
         options = dict(zip([chr(ord('A') + i) for i in range(len(row["options"]))], row["options"]))
-        options_str = "\n\n"
+        letters = ",".join(options.keys())
+        options_str = "\n"
         for k, v in options.items():
             options_str += "{}) {}\n".format(k, v)
         if conf_mode == "sampling":
-            return MULTI_CHOICE_NO_OPTIONS_SHARED_SAMPLING_TEMPLATE.format(Question = row["question"]) + options_str
+            return MULTI_CHOICE_NO_OPTIONS_SHARED_SAMPLING_TEMPLATE.format(Question = row["question"], Letters = letters) + options_str
         elif conf_mode == "verbal_numerical":
-            return MULTI_CHOICE_NO_OPTIONS_COT_VERBAL_CONFIDENCE_TEMPLATE.format(Question = row["question"]) + options_str
+            return MULTI_CHOICE_NO_OPTIONS_COT_VERBAL_CONFIDENCE_TEMPLATE.format(Question = row["question"], Letters = letters) + options_str
         elif conf_mode == "verbal_linguistic":
-            return MULTI_CHOICE_NO_OPTIONS_COT_HEDGING_TEMPLATE.format(Question = row["question"]) + options_str
+            return MULTI_CHOICE_NO_OPTIONS_COT_HEDGING_TEMPLATE.format(Question = row["question"], Letters = letters) + options_str
         elif conf_mode == "logit_perplexity":
-            return MULTI_CHOICE_NO_OPTIONS_COT_TEMPLATE.format(Question = row["question"]) + options_str
+            return MULTI_CHOICE_NO_OPTIONS_COT_TEMPLATE.format(Question = row["question"], Letters = letters) + options_str
+        elif conf_mode == "token_sar":
+            return MULTI_CHOICE_NO_OPTIONS_COT_TEMPLATE.format(Question = row["question"], Letters = letters) + options_str
+        elif conf_mode == "decisiveness_grading":
+            return row["question"] + "\n" + options_str
         else:
             raise ValueError(f"Unknown conf_mode: {conf_mode}")
     else:
@@ -42,6 +51,8 @@ def format_open_ended_question(row, conf_mode="verbal_numerical"):
     elif conf_mode == "verbal_linguistic":
         return OPEN_ENDED_COT_HEDGING_TEMPLATE.format(Question=row.get("problem", ""))
     elif conf_mode == "logit_perplexity":
+        return OPEN_ENDED_COT_TEMPLATE.format(Question=row.get("problem", ""))
+    elif conf_mode == "token_sar":
         return OPEN_ENDED_COT_TEMPLATE.format(Question=row.get("problem", ""))
     else:
         raise ValueError(f"Unknown conf_mode: {conf_mode}")

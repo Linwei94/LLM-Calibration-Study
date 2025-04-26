@@ -1,30 +1,22 @@
 """
-Measuring Massive Multitask Language Understanding
-Dan Hendrycks, Collin Burns, Steven Basart, Andy Zou, Mantas Mazeika, Dawn Song, Jacob Steinhardt
-https://arxiv.org/abs/2009.03300
+MMLU-Pro: A More Robust and Challenging Multi-Task Language Understanding Benchmark
+Paper Reference: https://arxiv.org/abs/2406.01574
+Dataset and code: https://github.com/TIGER-AI-Lab/MMLU-Pro?tab=readme-ov-file
 """
 
 import random
 import pickle
 import os
-import pandas
 import sys
 from datasets import load_dataset
-
-from .sampler.chat_completion_sampler import ChatCompletionSampler
-
 from . import common
-from .common import (
-    HTML_JINJA,
-    format_multichoice_question,
-    normalize_response,
-    extract_answer_and_confidence,
-)
+from .common import *
 from .custom_types import Eval, EvalResult, SamplerBase, SingleEvalResult
-
-from .utils.report_post_processing import *
-from .utils.confidence_post_processing import *
 from .utils.pre_processing import *
+from .utils.post_processing_report import *
+from .utils.post_processing_answer import *
+from .utils.post_processing_confidence import *
+
 
 def preprocess(test_df):
     res_df = []
@@ -46,7 +38,7 @@ def preprocess(test_df):
     return examples
 
 class MMLUProEval(Eval):
-    def __init__(self, decisiveness_grader: ChatCompletionSampler, num_examples: int | None = None, conf_mode: str = "verbal_vanilla", regenerate=True):
+    def __init__(self, decisiveness_grader: SamplerBase, num_examples: int | None = None, conf_mode: str = "verbal_vanilla", regenerate=True):
         self.examples = preprocess(load_dataset("TIGER-Lab/MMLU-Pro")["test"])
         if num_examples:
             self.examples = random.Random(0).sample(self.examples, num_examples)
@@ -56,11 +48,10 @@ class MMLUProEval(Eval):
         self.cache_found = False
         self.decisiveness_grader = decisiveness_grader
 
-    def __call__(self, sampler: ChatCompletionSampler) -> EvalResult:
+    def __call__(self, sampler: SamplerBase) -> EvalResult:
         def fn(row: dict):
 
-            sampling = 5
-            extracted_answer = ""
+            extracted_answer = None
             confidence = 0
 
             match self.conf_mode:
@@ -68,7 +59,6 @@ class MMLUProEval(Eval):
                 case "verbal_numerical" | "verbal_numerical_shared_sampling":
                     if self.cache_found:
                         response = row["response"] 
-                        top_logprobs = row["top_logprobs"] 
                         prompt_messages = row["prompt_messages"] 
                     else:
                         prompt_messages = [
@@ -81,54 +71,14 @@ class MMLUProEval(Eval):
                         row["response"] = response
                         row["logprobs"] = sampler.logprobs
                         row["top_logprobs"] = sampler.top_logprobs
-                        row["logit_perplexity"] = sampler.logit_perplexity
-
                     logprobs = row["logprobs"]
                     response_text = normalize_response(response)
+                    extracted_answer, confidence = consolidated_answer_extraction(benchmark="mmlu_pro", response_text=response_text, row=row, with_verbal_confidence=True)
 
-                    extracted_answer, confidence = extract_answer_and_confidence("\n".join(response_text.splitlines()[-2:]), options=dict(zip([chr(ord('A') + i) for i in range(len(row["options"]))], row["options"])))
-                    if extracted_answer is None or extracted_answer not in "ABCDEFGHIJ" or float(confidence) < 10:
-                        extracted_answer, confidence = extract_answer_and_confidence(response_text, options=dict(zip([chr(ord('A') + i) for i in range(len(row["options"]))], row["options"])))
-                    confidence /= 100
-                    print(f"extracted_answer: {extracted_answer}, confidence: {confidence}")
-
-
-                case "logit_perplexity" | "logit_perplexity_shared_sampling":
-                    sampler.logprobs = True
-                    if self.cache_found:
-                        response = row["response"] 
-                        top_logprobs = row["top_logprobs"] 
-                        prompt_messages = row["prompt_messages"] 
-                    else:
-                        prompt_messages = [
-                            sampler._pack_message(
-                                content=format_multichoice_question(row, conf_mode="logit_perplexity", choices=0), role="user"
-                            )
-                        ]
-                        response = sampler(prompt_messages)
-                        row["prompt_messages"] = prompt_messages
-                        row["response"] = response
-                        row["logprobs"] = sampler.logprobs
-                        row["top_logprobs"] = sampler.top_logprobs
-                        row["logit_perplexity"] = sampler.logit_perplexity
-
-                    response_text = normalize_response(response)
-                    confidence = row["logit_perplexity"]
-                    logprobs = row["logprobs"]
-
-                    extracted_answer, _ = extract_answer_and_confidence("\n".join(response_text.splitlines()[-2:]), options=dict(zip([chr(ord('A') + i) for i in range(len(row["options"]))], row["options"])))
-                    if extracted_answer is None or extracted_answer not in "ABCDEFGHIJ":
-                        extracted_answer, _ = extract_answer_and_confidence(response_text, options=dict(zip([chr(ord('A') + i) for i in range(len(row["options"]))], row["options"])))
-                    if extracted_answer is None or extracted_answer not in "ABCDEFGHIJ":
-                        extracted_answer = extract_mcq_answer("\n".join(response_text.splitlines()[-3:]), "mmlu_pro")
-
-                    print(f"extracted_answer: {extracted_answer}, confidence: {confidence}")
-
-
+                
                 case "verbal_linguistic" | "verbal_linguistic_shared_sampling":
                     if self.cache_found:
                         response = row["response"] 
-                        top_logprobs = row["top_logprobs"] 
                         prompt_messages = row["prompt_messages"] 
                     else:
                         prompt_messages = [
@@ -141,21 +91,65 @@ class MMLUProEval(Eval):
                         row["response"] = response
                         row["logprobs"] = sampler.logprobs
                         row["top_logprobs"] = sampler.top_logprobs
-                        row["logit_perplexity"] = sampler.logit_perplexity
-
                     logprobs = row["logprobs"]
+                    response_text = remove_verbal_confidence(normalize_response(response)) # remove verbal confidence to avoid judgement biases
+                    extracted_answer = consolidated_answer_extraction(benchmark="mmlu_pro", response_text=response_text, row=row, with_verbal_confidence=False)
+                    confidence = decisiveness_score(self.decisiveness_grader, format_multichoice_question(row, conf_mode="decisiveness_grading", choices=0), response_text)
+
+
+                case "logit_perplexity" | "logit_perplexity_shared_sampling":
+                    if sampler.get_logprobs == False:
+                        raise NotImplementedError("The selected model does not support logprobs. Force switching on by setting the model's get_logprobs to True in utils/models.py only after checking with the provider.")
+                    if self.cache_found:
+                        response = row["response"] 
+                        prompt_messages = row["prompt_messages"] 
+                    else:
+                        prompt_messages = [
+                            sampler._pack_message(
+                                content=format_multichoice_question(row, conf_mode="logit_perplexity", choices=0), role="user"
+                            )
+                        ]
+                        response = sampler(prompt_messages)
+                        row["prompt_messages"] = prompt_messages
+                        row["response"] = response
+                        row["logprobs"] = sampler.logprobs
+                        row["top_logprobs"] = sampler.top_logprobs
+
                     response_text = normalize_response(response)
+                    extracted_answer = consolidated_answer_extraction(benchmark="mmlu_pro", response_text=response_text, row=row, with_verbal_confidence=False)
+                    logprobs = row["logprobs"]
+                    confidence = calculate_logit_perplexity(logprobs)
 
-                    extracted_answer, _ = extract_answer_and_confidence("\n".join(response_text.splitlines()[-2:]), options=dict(zip([chr(ord('A') + i) for i in range(len(row["options"]))], row["options"])))
-                    if extracted_answer is None or extracted_answer not in "ABCDEFGHIJ":
-                        extracted_answer, _ = extract_answer_and_confidence(response_text, options=dict(zip([chr(ord('A') + i) for i in range(len(row["options"]))], row["options"])))
-                    if extracted_answer is None or extracted_answer not in "ABCDEFGHIJ":
-                        extracted_answer = extract_mcq_answer("\n".join(response_text.splitlines()[-3:]), "mmlu_pro")
 
-                    confidence = decisiveness_score(self.decisiveness_grader, format_multichoice_question(row, conf_mode="verbal_linguistic", choices=0), response_text)
+                case "token_sar" | "token_sar_shared_sampling":
+                    if sampler.get_logprobs == False:
+                        raise NotImplementedError("The selected model does not support logprobs. Force switching on by setting the model's get_logprobs to True in utils/models.py only after checking with the provider.")
+                    if self.cache_found:
+                        response = row["response"] 
+                        top_logprobs = row["top_logprobs"] 
+                        prompt_messages = row["prompt_messages"] 
+                    else:
+                        prompt_messages = [
+                            sampler._pack_message(
+                                content=format_multichoice_question(row, conf_mode="token_sar", choices=0), role="user"
+                            )
+                        ]
+                        response = sampler(prompt_messages)
+                        row["prompt_messages"] = prompt_messages
+                        row["response"] = response
+                        row["logprobs"] = sampler.logprobs
+                        row["top_logprobs"] = sampler.top_logprobs
+
+                    response_text = normalize_response(response)
+                    extracted_answer = consolidated_answer_extraction(benchmark="mmlu_pro", response_text=response_text, row=row, with_verbal_confidence=False)
+                    logprobs = row["logprobs"]
+                    confidence = token_sar_confidence(top_logprobs)
 
                 case "sampling":
-                    sampler.logprobs = True
+                    if sampler.get_logprobs == False:
+                        print("Sampling without logprobs.")
+                    else:
+                        print("Sampling with logprobs.")
                     prompt_messages = [
                         sampler._pack_message(
                             content=format_multichoice_question(row, conf_mode="sampling", choices=0), role="user"
@@ -166,14 +160,14 @@ class MMLUProEval(Eval):
                     row["response"] = response
                     row["logprobs"] = sampler.logprobs
                     row["top_logprobs"] = sampler.top_logprobs
-                    row["logit_perplexity"] = sampler.logit_perplexity
-                    return
+                    return 
 
                 case _:
                     raise Exception(f"Unrecognized confidence type: {self.conf_mode}")
 
             print(f"extracted_answer: {extracted_answer}, confidence: {confidence}")
             score = 1.0 if extracted_answer == row["answer"] else 0.0
+
             category = row["category"]
             html = common.jinja_env.from_string(HTML_JINJA).render(
                 prompt_messages=prompt_messages,
