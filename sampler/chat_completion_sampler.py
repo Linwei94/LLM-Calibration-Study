@@ -5,6 +5,7 @@ from typing import Any
 import openai
 from openai import OpenAI
 import numpy as np
+import os
 
 from ..custom_types import MessageList, SamplerBase
 
@@ -30,10 +31,12 @@ class ChatCompletionSampler(SamplerBase):
         api_key=None,
         get_logprobs = False
     ):
-        self.api_key_name = "OPENAI_API_KEY"
-        if base_url and any(provider in base_url for provider in ["google", "databricks", "together"]):
-            self.client = OpenAI(base_url=base_url, api_key=api_key)
+        # self.api_key_name = "OPENAI_API_KEY"
+        if base_url:
+            if any(provider in base_url for provider in ["google", "databricks", "together"]):
+                self.client = OpenAI(base_url=base_url, api_key=api_key)
         else:
+            OpenAI.api_key = os.environ["OPENAI_API_KEY"]
             self.client = OpenAI()
         self.base_url = base_url
         self.model = model
@@ -42,10 +45,8 @@ class ChatCompletionSampler(SamplerBase):
         self.max_tokens = max_tokens
         self.image_format = "url"
         self.get_logprobs = get_logprobs
-
         self.logprobs = None
         self.top_logprobs = None
-        self.logit_perplexity = None
 
     def _handle_image(
         self, image: str, encoding: str = "base64", format: str = "png", fovea: int = 768
@@ -70,26 +71,22 @@ class ChatCompletionSampler(SamplerBase):
         trial = 0
         while True:
             try:
-                if self.logprobs:
-                    if "together" in self.base_url:
-                            print("Together API")
-                            # Together AI format
-                            response = self.client.chat.completions.create(
-                                model=self.model,
-                                messages=message_list,
-                                temperature=self.temperature,
-                                max_tokens=self.max_tokens,
-                                logprobs=5, # max 5
-                                seed=42
-                            )
-                            self.top_logprobs = response.choices[0].logprobs.top_logprobs # a list of dicts each of which is a dict of possible candidates with its logprob
-                            self.logit_perplexity = float(np.exp(np.array(response.choices[0].logprobs.token_logprobs)).mean()) 
-                            self.logprobs = response.choices[0].logprobs.token_logprobs
-                            print(self.top_logprobs)
-                            return response.choices[0].message.content
-                    elif "databricks" in self.base_url:
+                if self.get_logprobs:
+                    if self.base_url and "together" in self.base_url:
+                        print("Together API")
+                        response = self.client.chat.completions.create(
+                            model=self.model,
+                            messages=message_list,
+                            temperature=self.temperature,
+                            max_tokens=self.max_tokens,
+                            logprobs=5, # max 5
+                            seed=42
+                        )
+                        self.top_logprobs = response.choices[0].logprobs.top_logprobs # a list of dicts each of which is a dict of possible candidates with its logprob
+                        self.logprobs = response.choices[0].logprobs.token_logprobs
+                        return response.choices[0].message.content
+                    elif self.base_url and "databricks" in self.base_url:
                         print("Databricks API")
-                        # Databricks format
                         response = self.client.chat.completions.create(
                             messages=message_list, 
                             model=self.model, 
@@ -100,9 +97,27 @@ class ChatCompletionSampler(SamplerBase):
                         )
                         self.top_logprobs = [t.top_logprobs for t in response.choices[0].logprobs.content]
                         self.logprobs = [t.logprob for t in response.choices[0].logprobs.content]
-                        self.logit_perplexity = float(np.exp(np.array([t.logprob for t in response.choices[0].logprobs.content])).mean())
                         return response.choices[0].message.content
+                    else:
+                        print("OpenAI API")
+                        response = self.client.chat.completions.create(
+                            messages=message_list, 
+                            model=self.model, 
+                            max_tokens=self.max_tokens, 
+                            logprobs=True,
+                            top_logprobs=5,
+                            temperature=0,
+                            seed=42
+                        )
+                        top_logprob_lst = []
+                        for top_list in [t.top_logprobs for t in response.choices[0].logprobs.content]: 
+                            top_logprob_lst.append({t.token: t. logprob for t in top_list})
+                        self.top_logprobs = top_logprob_lst
+                        self.logprobs = [t.logprob for t in response.choices[0].logprobs.content]
+                        return response.choices[0].message.content
+
                 else:
+                    print("No logprobs")
                     response = self.client.chat.completions.create(
                         model=self.model,
                         messages=message_list,

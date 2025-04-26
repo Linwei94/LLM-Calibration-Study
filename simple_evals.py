@@ -121,7 +121,7 @@ def main():
                 os.makedirs("LLM-Calibration-Study/results")
             print(f"Writing report to {report_filename}")
             with open(report_filename, "w") as fh:
-                fh.write(common.make_report(result))
+                fh.write(common.make_report(result, model_name, args.conf_mode, eval_name))
             metrics = result.metrics | {"score": result.score}
             print(metrics)
             result_filename = f"LLM-Calibration-Study/results/{file_stem}{debug_suffix}.json"

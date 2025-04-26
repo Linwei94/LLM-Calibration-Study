@@ -16,7 +16,28 @@ def get_model_dict(model_name: str):
     Get the model dict from the model name.
     """
     models = {}
-    if model_name == "gpt-4o-2024-11-20_assistant":
+    if model_name == "gpt-4.1-mini":
+        models["gpt-4.1-mini"] = ChatCompletionSampler(
+            model="gpt-4.1-mini",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=1024,
+            get_logprobs=True
+        )
+    elif model_name == "gpt-4.1-nano":
+        models["gpt-4.1-nano"] = ChatCompletionSampler(
+            model="gpt-4.1-nano",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=1024,
+            get_logprobs=True
+        )
+    elif model_name == "gpt-4.1":
+        models["gpt-4.1"] = ChatCompletionSampler(
+            model="gpt-4.1",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=1024,
+            get_logprobs=True
+        )
+    elif model_name == "gpt-4o-2024-11-20_assistant":
         models["gpt-4o-2024-11-20_assistant"] = ChatCompletionSampler(
             model="gpt-4o-2024-11-20",
             system_message=OPENAI_SYSTEM_MESSAGE_API,
@@ -250,8 +271,13 @@ def get_model_dict(model_name: str):
             api_key=credentials.token
         )
     
-
-
+    models["mistral/mistral-large-2402"] = ChatCompletionSampler(
+            model="mistral/mistral-large-2402",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=1024,
+            base_url=f"https://{"us-central1-aiplatform.googleapis.com"}/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
+            api_key=credentials.token
+        )
 
 
 
@@ -264,6 +290,7 @@ def get_model_dict(model_name: str):
             model="databricks-llama-4-maverick",
             system_message=OPENAI_SYSTEM_MESSAGE_API,
             max_tokens=1024,
+            get_logprobs=True
     )
 
 
@@ -275,6 +302,7 @@ def get_model_dict(model_name: str):
             model="meta-llama/Llama-4-Scout-17B-16E-Instruct",
             system_message=OPENAI_SYSTEM_MESSAGE_API,
             max_tokens=1024,
+            get_logprobs=True
     )
 
     models["meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"] = ChatCompletionSampler(
@@ -283,6 +311,7 @@ def get_model_dict(model_name: str):
             model="meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
             system_message=OPENAI_SYSTEM_MESSAGE_API,
             max_tokens=1024,
+            get_logprobs=True
     )
     
     # 3B Model
@@ -292,6 +321,7 @@ def get_model_dict(model_name: str):
             model="meta-llama/Llama-3.2-3B-Instruct-Turbo",
             system_message=OPENAI_SYSTEM_MESSAGE_API,
             max_tokens=1024,
+            get_logprobs=True
     )
 
     # 8B Model
@@ -301,6 +331,7 @@ def get_model_dict(model_name: str):
             model="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
             system_message=OPENAI_SYSTEM_MESSAGE_API,
             max_tokens=1024,
+            get_logprobs=True
     )
 
     # 70B Model
@@ -310,6 +341,7 @@ def get_model_dict(model_name: str):
             model="meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
             system_message=OPENAI_SYSTEM_MESSAGE_API,
             max_tokens=1024,
+            get_logprobs=True
     )
 
     # 405B Model
@@ -319,6 +351,7 @@ def get_model_dict(model_name: str):
             model="meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo",
             system_message=OPENAI_SYSTEM_MESSAGE_API,
             max_tokens=1024,
+            get_logprobs=True
     )
 
     # free
@@ -328,6 +361,7 @@ def get_model_dict(model_name: str):
             model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
             system_message=OPENAI_SYSTEM_MESSAGE_API,
             max_tokens=1024,
+            get_logprobs=True
     )
 
     # free
@@ -337,7 +371,7 @@ def get_model_dict(model_name: str):
             model="deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free",
             system_message=OPENAI_SYSTEM_MESSAGE_API,
             max_tokens=1024,
+            get_logprobs=True
     )
     
-        
     return models

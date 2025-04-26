@@ -10,7 +10,10 @@ class SamplerBase:
     Base class for defining a sampling model, which can be evaluated,
     or used as part of the grading process.
     """
-
+    model: str
+    get_logprobs: bool
+    logprobs = None | list
+    top_logprobs = None | list[dict]
     def __call__(self, message_list: MessageList) -> str:
         raise NotImplementedError
 
