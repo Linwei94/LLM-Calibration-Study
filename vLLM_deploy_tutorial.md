@@ -11,7 +11,7 @@ scp -P 8003 -r ~/.cache/huggingface/hub/models--Qwen--Qwen2.5-32B-Instruct-AWQ h
 
 
 
-## Step 3: Start a vLLM service on Tao Huang's server
+## Step 2: Start a vLLM service on Tao Huang's server
 ```bash
 screen -S vllm
 ```
