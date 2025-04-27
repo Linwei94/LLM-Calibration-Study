@@ -16,10 +16,13 @@ scp -P 8003 -r ~/.cache/huggingface/hub/models--Qwen--Qwen2.5-32B-Instruct-AWQ h
 screen -S vllm
 ```
 ```bash
+export MODEL_ID="Qwen/Qwen2.5-32B-Instruct-AWQ"
+export MODEL_DIR=$(ls -d ~/.cache/huggingface/hub/models--${MODEL_ID//\//--}/snapshots/* | head -n 1)
+
 CUDA_VISIBLE_DEVICES=7 \
 python3 -m vllm.entrypoints.openai.api_server \
-  --model /mnt/afs/intern/huangtao3/.cache/huggingface/hub/models--Qwen--Qwen2.5-32B-Instruct-AWQ/snapshots/5c7cb76a268fc6cfbb9c4777eb24ba6e27f9ee6c \
-  --served-model-name "Qwen/Qwen2.5-32B-Instruct-AWQ" \
+  --model $MODEL_DIR \
+  --served-model-name "$MODEL_ID" \
   --quantization awq \
   --host 0.0.0.0 \
   --port 8000
