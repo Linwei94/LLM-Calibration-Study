@@ -73,7 +73,7 @@ class ChatCompletionSampler(SamplerBase):
             try:
                 if self.get_logprobs:
                     if self.base_url and "together" in self.base_url:
-                        print("Together API")
+                        print(self.model, "Together API")
                         response = self.client.chat.completions.create(
                             model=self.model,
                             messages=message_list,
@@ -82,11 +82,17 @@ class ChatCompletionSampler(SamplerBase):
                             logprobs=5, # max 5
                             seed=42
                         )
-                        self.top_logprobs = response.choices[0].logprobs.top_logprobs # a list of dicts each of which is a dict of possible candidates with its logprob
-                        self.logprobs = response.choices[0].logprobs.token_logprobs
+                        try:
+                            self.top_logprobs = response.choices[0].logprobs.top_logprobs # a list of dicts each of which is a dict of possible candidates with its logprob
+                        except:
+                            print(self.model, "Top logprobs not found")
+                        try:
+                            self.logprobs = response.choices[0].logprobs.token_logprobs
+                        except:
+                            print(self.model, "Token logprobs not found")
                         return response.choices[0].message.content
                     elif self.base_url and "databricks" in self.base_url:
-                        print("Databricks API")
+                        print(self.model, "Databricks API")
                         response = self.client.chat.completions.create(
                             messages=message_list, 
                             model=self.model, 
@@ -99,7 +105,7 @@ class ChatCompletionSampler(SamplerBase):
                         self.logprobs = [t.logprob for t in response.choices[0].logprobs.content]
                         return response.choices[0].message.content
                     else:
-                        print("OpenAI API")
+                        print(self.model, "OpenAI API")
                         response = self.client.chat.completions.create(
                             messages=message_list, 
                             model=self.model, 
@@ -117,7 +123,7 @@ class ChatCompletionSampler(SamplerBase):
                         return response.choices[0].message.content
 
                 else:
-                    print("No logprobs")
+                    print(self.model, "No logprobs")
                     response = self.client.chat.completions.create(
                         model=self.model,
                         messages=message_list,
