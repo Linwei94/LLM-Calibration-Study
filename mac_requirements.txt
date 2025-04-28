@@ -54,7 +54,6 @@ httpcore==1.0.8
 httplib2==0.22.0
 httpx==0.28.1
 huggingface-hub==0.29.3
-human-eval==1.0
 idna==3.10
 ipykernel==6.29.5
 ipython==9.0.2
