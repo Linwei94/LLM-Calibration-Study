@@ -96,7 +96,7 @@ class SimpleQAEval(Eval):
                         row["top_logprobs"] = sampler.top_logprobs
                     logprobs = row["logprobs"]
                     response_text = remove_verbal_confidence(response_text)
-                    confidence = decisiveness_score(self.decisiveness_grader, format_open_ended_question(row=row, conf_mode="verbal_linguistic"), response_text)
+                    confidence = linguistic_confidence_score(self.decisiveness_grader, format_open_ended_question(row=row, conf_mode="verbal_linguistic"), response_text)
 
 
                 case "logit_perplexity" | "logit_perplexity_shared_sampling":

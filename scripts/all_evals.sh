@@ -26,3 +26,30 @@ done
 #         (python -m LLM-Calibration-Study.simple_evals --model "$MODEL" --benchmark "$BENCHMARK" --conf_mode "$CONF")
 #     fi
 # done
+
+
+
+# done: 
+python -m LLM-Calibration-Study.simple_evals --model meta-llama/Llama-3.2-3B-Instruct-Turbo --benchmark mmlu_pro --conf_mode verbal_linguistic_shared_sampling 
+# not working"
+# python -m LLM-Calibration-Study.simple_evals --model meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8 --benchmark mmlu_pro --conf_mode sampling
+# python -m LLM-Calibration-Study.simple_evals --model meta-llama/Llama-4-Scout-17B-16E-Instruct --benchmark mmlu_pro --conf_mode sampling
+
+#Pending:
+python -m LLM-Calibration-Study.simple_evals --model meta-llama/Llama-3.3-70B-Instruct-Turbo --benchmark mmlu_pro --conf_mode sampling
+
+
+# Currently running:
+python -m LLM-Calibration-Study.simple_evals --model meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo --benchmark mmlu_pro --conf_mode sampling
+python -m LLM-Calibration-Study.simple_evals --model meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo --benchmark mmlu_pro --conf_mode sampling
+python -m LLM-Calibration-Study.simple_evals --model meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo --benchmark mmlu_pro --conf_mode sampling
+python -m LLM-Calibration-Study.simple_evals --model meta-llama/Llama-2-70b-hf --benchmark mmlu_pro --conf_mode sampling
+
+# 0.06 usd
+
+
+
+
+python -m LLM-Calibration-Study.simple_evals --model meta-llama/Llama-3.2-3B-Instruct-Turbo --benchmark mmlu_pro --conf_mode verbal_linguistic_shared_sampling 
+python -m LLM-Calibration-Study.simple_evals --model meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo --benchmark mmlu_pro --conf_mode verbal_linguistic_shared_sampling
+python -m LLM-Calibration-Study.simple_evals --model meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo --benchmark mmlu_pro --conf_mode verbal_linguistic_shared_sampling
