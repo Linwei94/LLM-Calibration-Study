@@ -5,17 +5,17 @@ https://arxiv.org/abs/2311.12022
 """
 
 import random
-import re
 import os
 import pandas
 import pickle
-
+import sys
+from .sampler.chat_completion_sampler import ChatCompletionSampler
 from . import common
-from .common import extract_answer_and_confidence, HTML_JINJA, format_multichoice_question
-from .types import Eval, EvalResult, SamplerBase, SingleEvalResult
-
-from .utils.report_post_processing import *
-from .utils.confidence_post_processing import *
+from .common import HTML_JINJA, format_multichoice_question
+from .custom_types import Eval, EvalResult, SamplerBase, SingleEvalResult
+from .utils.post_processing_report import *
+from .utils.post_processing_confidence import *
+from .utils.post_processing_answer import *
 from .utils.pre_processing import *
 
 
@@ -27,7 +27,8 @@ class GPQAEval(Eval):
         variant: str = "diamond",
         num_examples: int | None = None,  # restrict to a subset of the data for debugging
         conf_mode: str = "verbal_vanilla",
-        regenerate=True
+        regenerate=True,
+        get_logprobs=True
     ):
         df = pandas.read_csv(
             f"https://openaipublic.blob.core.windows.net/simple-evals/gpqa_{variant}.csv"
@@ -46,8 +47,9 @@ class GPQAEval(Eval):
         self.cache_found = False
         self.num_examples = num_examples
         self.decisiveness_grader = decisiveness_grader
+        self.get_logprobs = get_logprobs
 
-    def __call__(self, sampler: SamplerBase) -> EvalResult:
+    def __call__(self, sampler: ChatCompletionSampler) -> EvalResult:
         def fn(row: dict):
             choices = [
                 row["Correct Answer"],
@@ -62,101 +64,124 @@ class GPQAEval(Eval):
                 A=choices[0], B=choices[1], C=choices[2], D=choices[3], Question=row["Question"]
             )
 
-            sampling = 5
             extracted_answer = ""
             confidence = 0
 
             match self.conf_mode:
 
-                case "verbal_numerical":
+                case "verbal_numerical" | "verbal_numerical_shared_sampling":
                     if self.cache_found:
-                        response_tuple = row["sampler_responses"]
-                        prompt_messages = row["prompt_messages"]
+                        response = row["response"] 
+                        prompt_messages = row["prompt_messages"] 
                     else:
                         prompt_messages = [
                             sampler._pack_message(
-                                content=format_multichoice_question(choices_dict, conf_mode=self.conf_mode), role="user"
+                                content=format_multichoice_question(choices_dict, conf_mode="verbal_numerical"), role="user"
                             )
                         ]
-                        response_tuple = sampler(prompt_messages)
-                        row["sampler_responses"] = response_tuple
+                        response = sampler(prompt_messages)
                         row["prompt_messages"] = prompt_messages
-                    
-                    response_text = normalize_response(response_tuple[0])
-                    logprobs = response_tuple[2]
-                    # Extract the answer from the response text
-                    extracted_answer, confidence = extract_answer_and_confidence(response_text, options={k: choices_dict[k] for k in ['A', 'B', 'C', 'D']})
-                    confidence /= 100
-
+                        row["response"] = response
+                        row["logprobs"] = sampler.logprobs
+                        row["top_logprobs"] = sampler.top_logprobs
+                    logprobs = row["logprobs"]
+                    response_text = normalize_response(response)
+                    extracted_answer, confidence = consolidated_answer_extraction(benchmark="gpqa", response_text=response_text, choices_dict=choices_dict, with_verbal_confidence=True)
                 
-                case "logit_perplexity":
-                    sampler.logprobs = True
+
+                case "verbal_linguistic" | "verbal_linguistic_shared_sampling":
                     if self.cache_found:
-                        response_with_conf = row["sampler_responses"]
-                        prompt_messages = row["prompt_messages"]
+                        response = row["response"] 
+                        prompt_messages = row["prompt_messages"] 
                     else:
                         prompt_messages = [
                             sampler._pack_message(
-                                content=format_multichoice_question(choices_dict, conf_mode=self.conf_mode), role="user"
+                                content=format_multichoice_question(choices_dict, conf_mode="verbal_linguistic"), role="user"
                             )
                         ]
-                        response_with_conf = sampler(prompt_messages)
-                        row["sampler_responses"] = response_with_conf
+                        response = sampler(prompt_messages)
                         row["prompt_messages"] = prompt_messages
+                        row["response"] = response
+                        row["logprobs"] = sampler.logprobs
+                        row["top_logprobs"] = sampler.top_logprobs
 
-                    response_text, confidence, logprobs = response_with_conf 
-                    extracted_answer = gpqa_regex_extract_response(response_text)
+                    response_text = remove_verbal_confidence(normalize_response(response)) # remove verbal confidence to avoid judgement biases
+                    extracted_answer = consolidated_answer_extraction(benchmark="gpqa", response_text=response_text, choices_dict=choices_dict, with_verbal_confidence=False)
+                    logprobs = row["logprobs"]
+                    confidence = decisiveness_score(self.decisiveness_grader, format_multichoice_question(choices_dict, "verbal_linguistic"), response_text)
 
 
-                case "semantic_entropy":
+                case "logit_perplexity" | "logit_perplexity_shared_sampling":
+                    if sampler.get_logprobs == False:
+                        raise NotImplementedError("The selected model does not support logprobs. Force switching on by setting the model's get_logprobs to True in utils/models.py only after checking with the provider.")
                     if self.cache_found:
-                        response_with_conf = row["sampler_responses"]
-                        prompt_messages = row["prompt_messages"]
+                        response = row["response"] 
+                        prompt_messages = row["prompt_messages"] 
                     else:
                         prompt_messages = [
                             sampler._pack_message(
-                                content=format_multichoice_question(choices_dict, conf_mode=self.conf_mode), role="user"
+                                content=format_multichoice_question(choices_dict, conf_mode="logit_perplexity"), role="user"
                             )
                         ]
-                        response_with_conf = [sampler(prompt_messages) for _ in range(sampling)]
-                        row["sampler_responses"] = response_with_conf
+                        response = sampler(prompt_messages)
                         row["prompt_messages"] = prompt_messages
+                        row["response"] = response
+                        row["logprobs"] = sampler.logprobs
+                        row["top_logprobs"] = sampler.top_logprobs
+                    response_text = normalize_response(response)
+                    extracted_answer = consolidated_answer_extraction(benchmark="gpqa", response_text=response_text, choices_dict=choices_dict, with_verbal_confidence=False)
+                    logprobs = row["logprobs"]
+                    confidence = calculate_logit_perplexity(logprobs)
 
-                    logprobs = [(r[2]) for r in response_with_conf]
-                    # extracted_answers = [gpqa_regex_extract_response(text[0]) for text in response_with_conf]
-                    response_texts, lnll_lst, labels = get_mcq_clusters(response_with_conf, "gpqa")
-                    response_text, confidence, index = empirical_semantic_confidence(lnll_lst, response_texts, labels)
-                    extracted_answer = gpqa_regex_extract_response(response_text)
-                    logprobs = response_with_conf[index][2] 
 
-                case "verbal_linguistic":
+                case "token_sar" | "token_sar_shared_sampling":
+                    if sampler.get_logprobs == False:
+                        raise NotImplementedError("The selected model does not support logprobs. Force switching on by setting the model's get_logprobs to True in utils/models.py only after checking with the provider.")
                     if self.cache_found:
-                        response_with_conf = row["sampler_responses"]
-                        prompt_messages = row["prompt_messages"]
-                        candidate_sample = row["candidate_sample"]
+                        response = row["response"] 
+                        top_logprobs = row["top_logprobs"] 
+                        prompt_messages = row["prompt_messages"] 
                     else:
                         prompt_messages = [
                             sampler._pack_message(
-                                content=format_multichoice_question(choices_dict, conf_mode=self.conf_mode), role="user"
+                                content=format_multichoice_question(row, conf_mode="token_sar", choices=0), role="user"
                             )
                         ]
-                        row["sampler_responses"] = (response_with_conf := sampler(prompt_messages))
+                        response = sampler(prompt_messages)
                         row["prompt_messages"] = prompt_messages
-                        row["candidate_sample"] = (candidate_sample := [sampler(prompt_messages)[0] for _ in range(sampling)])
-
-                    response_text, _, logprobs = response_with_conf
-                    extracted_answer = gpqa_regex_extract_response(response_text)
-                    score = 1.0 if extracted_answer == correct_answer else 0.0
-                    confM = confidence_by_contradiction(self.decisiveness_grader, response_text, candidate_sample)
-                    dec = decisiveness_score(self.decisiveness_grader, format_multichoice_question(choices_dict), response_text)
-                    confidence = float(1 - np.abs(dec - confM))
+                        row["response"] = response
+                        row["logprobs"] = sampler.logprobs
+                        row["top_logprobs"] = sampler.top_logprobs
+                    response_text = normalize_response(response)
+                    extracted_answer = consolidated_answer_extraction(benchmark="gpqa", response_text=response_text, choices_dict=choices_dict, with_verbal_confidence=False)
+                    logprobs = row["logprobs"]
+                    confidence = token_sar_confidence(top_logprobs)
+                
+                    
+                case "sampling":
+                    if sampler.get_logprobs == False:
+                        print("Sampling without logprobs.")
+                    else:
+                        print("Sampling with logprobs.")
+                    prompt_messages = [
+                        sampler._pack_message(
+                            content=format_multichoice_question(choices_dict, conf_mode=self.conf_mode), role="user"
+                        )
+                    ]
+                    response = sampler(prompt_messages)
+                    row["prompt_messages"] = prompt_messages
+                    row["response"] = response
+                    row["logprobs"] = sampler.logprobs
+                    row["top_logprobs"] = sampler.top_logprobs
+                    return
+                
 
                 case _:
                     raise Exception(f"Unrecognized confidence type: {self.conf_mode}")
 
-
-            print(f"extracted_answer: {extracted_answer}, confidence: {confidence}")
             score = 1.0 if extracted_answer == correct_answer else 0.0
+            print(f"extracted_answer: {extracted_answer}, confidence: {confidence}")
+
             html = common.jinja_env.from_string(HTML_JINJA).render(
                 prompt_messages=prompt_messages,
                 next_message=dict(content=response_text, role="assistant"),
@@ -174,16 +199,17 @@ class GPQAEval(Eval):
                 score=score, 
                 convo=convo, 
                 metrics={"chars": len(response_text)}, 
-                verbal_confidence=float(confidence)
+                confidence=float(confidence)
             )
 
 
         # Run evaluation and collect results
-        if not self.num_examples:
-            regen_stored_path = f"LLM-Calibration-Study/cache/gpqa_{sampler.model.split("/")[-1]}_{self.conf_mode}_full_{self.n_repeats}"
+        if self.conf_mode in ["sampling", "eval_all"] or "_shared_sampling" in self.conf_mode:
+            self.regenerate = True
+            regen_stored_path = shared_sampling_path("gpqa", sampler.model, self.conf_mode, self.num_examples, self.n_repeats)
         else:
-            regen_stored_path = f"LLM-Calibration-Study/cache/gpqa_{sampler.model.split("/")[-1]}_{self.conf_mode}_{self.num_examples}_{self.n_repeats}"
-
+            regen_stored_path = ind_sampling_path("gpqa", sampler.model, self.conf_mode, self.num_examples, self.n_repeats)
+            
 
         if self.regenerate:
             if os.path.exists(regen_stored_path):
@@ -200,4 +226,10 @@ class GPQAEval(Eval):
         else:
             results = common.map_with_progress(fn, self.examples)
 
+        if self.conf_mode == "sampling":
+            with open(regen_stored_path, 'wb') as f:
+                pickle.dump(self.examples, f)
+            print(f"Shared sampling complete and saved to: {regen_stored_path}")
+            sys.exit()
+            
         return common.aggregate_results(results)

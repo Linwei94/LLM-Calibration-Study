@@ -2,7 +2,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+cache/
+sampler/local-models
 # C extensions
 *.so
 

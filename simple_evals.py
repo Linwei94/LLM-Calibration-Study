@@ -9,6 +9,7 @@ from .humaneval_eval import HumanEval
 from .math_eval import MathEval
 from .mgsm_eval import MGSMEval
 from .mmlu_eval import MMLUEval
+from .mmlu_pro_eval import MMLUProEval
 from .simpleqa_eval import SimpleQAEval
 from .sampler.chat_completion_sampler import ChatCompletionSampler
 
@@ -23,7 +24,7 @@ def main():
     parser.add_argument("--model", type=str, help="Select a model by name")
     parser.add_argument("--conf_mode", type=str, help="Select a mode to extract confidence from verbal, verbal_cot", default="verbal")
     parser.add_argument("--benchmark", type=str, help="if None, use all benchmarks, otherwise use the benchmark name",
-                        default="simpleqa,mmlu,math,gpqa,mgsm,drop,humaneval")
+                        default="simpleqa,mmlu,mmlu_pro,math,gpqa,mgsm,drop,humaneval")
     parser.add_argument("--debug", action="store_true", help="Run in debug mode")
     parser.add_argument("--regenerate", action="store_true", help="Run with previously generated responses")
     parser.add_argument(
@@ -68,6 +69,8 @@ def main():
         match eval_name:
             case "mmlu":
                 return MMLUEval(num_examples=1 if debug_mode else num_examples, decisiveness_grader=decisiveness_grader, conf_mode=conf_mode, regenerate=regenerate)
+            case "mmlu_pro":
+                return MMLUProEval(num_examples=1 if debug_mode else num_examples, decisiveness_grader=decisiveness_grader, conf_mode=conf_mode, regenerate=regenerate)
             case "math":
                 return MathEval(
                     equality_checker=equality_checker,
@@ -118,7 +121,7 @@ def main():
                 os.makedirs("LLM-Calibration-Study/results")
             print(f"Writing report to {report_filename}")
             with open(report_filename, "w") as fh:
-                fh.write(common.make_report(result))
+                fh.write(common.make_report(result, model_name, args.conf_mode, eval_name))
             metrics = result.metrics | {"score": result.score}
             print(metrics)
             result_filename = f"LLM-Calibration-Study/results/{file_stem}{debug_suffix}.json"
