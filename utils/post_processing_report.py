@@ -3,7 +3,7 @@ import jinja2
 import numpy as np
 
 import regex as re
-from ..types import EvalResult, Message, SingleEvalResult
+from ..custom_types import EvalResult, Message, SingleEvalResult
 from .metrics import calculate_ece
 
 
@@ -56,7 +56,7 @@ def aggregate_results(
     name2values = defaultdict(list)
     htmls = []
     convos = []
-    verbal_confidence_list = []
+    confidence_list = []
     for single_eval_result in single_eval_results:
         for name, value in single_eval_result.metrics.items():
             name2values[name].append(value)
@@ -64,7 +64,7 @@ def aggregate_results(
             name2values["score"].append(single_eval_result.score)
         htmls.append(single_eval_result.html)
         convos.append(single_eval_result.convo)
-        verbal_confidence_list.append(single_eval_result.verbal_confidence)
+        confidence_list.append(single_eval_result.confidence)
     final_metrics = {}
     for name, values in name2values.items():
         stats = name2stats.get(name, default_stats)
@@ -73,7 +73,7 @@ def aggregate_results(
             final_metrics[key] = _compute_stat(values, stat)
 
     # Calculate the verbalized ECE
-    final_metrics['ECE'] = calculate_ece(confidences=verbal_confidence_list, accuracies=name2values["score"])
+    final_metrics['ECE'] = calculate_ece(confidences=confidence_list, accuracies=name2values["score"])
     return EvalResult(
         score=final_metrics.pop("score", None), metrics=final_metrics, htmls=htmls, convos=convos
     )
@@ -149,6 +149,21 @@ _report_template = """<!DOCTYPE html>
         </style>
     </head>
     <body>
+    <h1>Benchmark Setup</h1>
+    <table>
+    <tr>
+        <td><b>Model</b></td>
+        <td>{{ model }}</td>
+    </tr>
+    <tr>
+        <td><b>Confidence Mode</b></td>
+        <td>{{ conf_mode }}</td>
+    </tr>
+    <tr>
+        <td><b>Benchmark</b></td>
+        <td>{{ eval_name }}</td>
+    </tr>
+    </table>
     {% if metrics %}
     <h1>Metrics</h1>
     <table>
@@ -178,7 +193,7 @@ _report_template = """<!DOCTYPE html>
 """
 
 
-def make_report(eval_result: EvalResult) -> str:
+def make_report(eval_result: EvalResult, model = "LLM", conf_mode = "Confidence Mode", eval_name = "Benchmark") -> str:
     """
     Create a standalone HTML report from an EvalResult.
     """
@@ -186,6 +201,9 @@ def make_report(eval_result: EvalResult) -> str:
         score=eval_result.score,
         metrics=eval_result.metrics,
         htmls=eval_result.htmls,
+        model=model,
+        conf_mode=conf_mode,
+        eval_name=eval_name
     )
 
 

@@ -1,74 +1,61 @@
 """
-GPQA: A Graduate-Level Google-Proof Q&A Benchmark
-David Rein, Betty Li Hou, Asa Cooper Stickland, Jackson Petty, Richard Yuanzhe Pang, Julien Dirani, Julian Michael, Samuel R. Bowman
-https://arxiv.org/abs/2311.12022
+MMLU-Pro: A More Robust and Challenging Multi-Task Language Understanding Benchmark
+Paper Reference: https://arxiv.org/abs/2406.01574
+Dataset and code: https://github.com/TIGER-AI-Lab/MMLU-Pro?tab=readme-ov-file
 """
 
 import random
-import os
-import pandas
 import pickle
+import os
 import sys
-from .sampler.chat_completion_sampler import ChatCompletionSampler
+from datasets import load_dataset
 from . import common
-from .common import HTML_JINJA, format_multichoice_question
+from .common import *
 from .custom_types import Eval, EvalResult, SamplerBase, SingleEvalResult
-from .utils.post_processing_report import *
-from .utils.post_processing_confidence import *
-from .utils.post_processing_answer import *
 from .utils.pre_processing import *
+from .utils.post_processing_report import *
+from .utils.post_processing_answer import *
+from .utils.post_processing_confidence import *
 
 
-class GPQAEval(Eval):
-    def __init__(
-        self, 
-        decisiveness_grader: SamplerBase,
-        n_repeats: int = 4,
-        variant: str = "diamond",
-        num_examples: int | None = None,  # restrict to a subset of the data for debugging
-        conf_mode: str = "verbal_vanilla",
-        regenerate=True,
-        get_logprobs=True
-    ):
-        df = pandas.read_csv(
-            f"https://openaipublic.blob.core.windows.net/simple-evals/gpqa_{variant}.csv"
-        )
-        examples = [row.to_dict() for _, row in df.iterrows()]
-        rng = random.Random(0)
+def preprocess(test_df):
+    res_df = []
+    for each in test_df:
+        options = []
+        for opt in each["options"]:
+            if opt == "N/A":
+                continue
+            options.append(opt)
+        each["options"] = options
+        res_df.append(each)
+    res = {}
+    for each in res_df:
+        if each["category"] not in res:
+            res[each["category"]] = []
+        res[each["category"]].append(each)
+    examples = []
+    [examples.extend(lst) for lst in res.values()]
+    return examples
+
+class MMLUProEval(Eval):
+    def __init__(self, decisiveness_grader: SamplerBase, num_examples: int | None = None, conf_mode: str = "verbal_vanilla", regenerate=True):
+        self.examples = preprocess(load_dataset("TIGER-Lab/MMLU-Pro")["test"])
         if num_examples:
-            assert n_repeats == 1, "n_repeats only supported for num_examples = None"
-            examples = rng.sample(examples, num_examples)
-        examples = examples * n_repeats
-        examples = [example | {"permutation": rng.sample(range(4), 4)} for example in examples]
-        self.examples = examples
-        self.n_repeats = n_repeats
+            self.examples = random.Random(0).sample(self.examples, num_examples)
         self.conf_mode = conf_mode
         self.regenerate = regenerate
-        self.cache_found = False
         self.num_examples = num_examples
+        self.cache_found = False
         self.decisiveness_grader = decisiveness_grader
-        self.get_logprobs = get_logprobs
 
-    def __call__(self, sampler: ChatCompletionSampler) -> EvalResult:
+    def __call__(self, sampler: SamplerBase) -> EvalResult:
         def fn(row: dict):
-            choices = [
-                row["Correct Answer"],
-                row["Incorrect Answer 1"],
-                row["Incorrect Answer 2"],
-                row["Incorrect Answer 3"],
-            ]
-            choices = [choices[i] for i in row["permutation"]]
-            correct_index = choices.index(row["Correct Answer"])
-            correct_answer = "ABCD"[correct_index]
-            choices_dict = dict(
-                A=choices[0], B=choices[1], C=choices[2], D=choices[3], Question=row["Question"]
-            )
 
-            extracted_answer = ""
+            extracted_answer = None
             confidence = 0
 
             match self.conf_mode:
-
+                
                 case "verbal_numerical" | "verbal_numerical_shared_sampling":
                     if self.cache_found:
                         response = row["response"] 
@@ -76,7 +63,7 @@ class GPQAEval(Eval):
                     else:
                         prompt_messages = [
                             sampler._pack_message(
-                                content=format_multichoice_question(choices_dict, conf_mode="verbal_numerical"), role="user"
+                                content=format_multichoice_question(row, conf_mode="verbal_numerical", choices=0), role="user"
                             )
                         ]
                         response = sampler(prompt_messages)
@@ -86,9 +73,9 @@ class GPQAEval(Eval):
                         row["top_logprobs"] = sampler.top_logprobs
                     logprobs = row["logprobs"]
                     response_text = normalize_response(response)
-                    extracted_answer, confidence = consolidated_answer_extraction(benchmark="gpqa", response_text=response_text, choices_dict=choices_dict, with_verbal_confidence=True)
-                
+                    extracted_answer, confidence = consolidated_answer_extraction(benchmark="mmlu_pro", response_text=response_text, row=row, with_verbal_confidence=True)
 
+                
                 case "verbal_linguistic" | "verbal_linguistic_shared_sampling":
                     if self.cache_found:
                         response = row["response"] 
@@ -96,7 +83,7 @@ class GPQAEval(Eval):
                     else:
                         prompt_messages = [
                             sampler._pack_message(
-                                content=format_multichoice_question(choices_dict, conf_mode="verbal_linguistic"), role="user"
+                                content=format_multichoice_question(row, conf_mode="verbal_linguistic", choices=0), role="user"
                             )
                         ]
                         response = sampler(prompt_messages)
@@ -104,11 +91,10 @@ class GPQAEval(Eval):
                         row["response"] = response
                         row["logprobs"] = sampler.logprobs
                         row["top_logprobs"] = sampler.top_logprobs
-
-                    response_text = remove_verbal_confidence(normalize_response(response)) # remove verbal confidence to avoid judgement biases
-                    extracted_answer = consolidated_answer_extraction(benchmark="gpqa", response_text=response_text, choices_dict=choices_dict, with_verbal_confidence=False)
                     logprobs = row["logprobs"]
-                    confidence = decisiveness_score(self.decisiveness_grader, format_multichoice_question(choices_dict, "verbal_linguistic"), response_text)
+                    response_text = remove_verbal_confidence(normalize_response(response)) # remove verbal confidence to avoid judgement biases
+                    extracted_answer = consolidated_answer_extraction(benchmark="mmlu_pro", response_text=response_text, row=row, with_verbal_confidence=False)
+                    confidence = decisiveness_score(self.decisiveness_grader, format_multichoice_question(row, conf_mode="decisiveness_grading", choices=0), response_text)
 
 
                 case "logit_perplexity" | "logit_perplexity_shared_sampling":
@@ -120,7 +106,7 @@ class GPQAEval(Eval):
                     else:
                         prompt_messages = [
                             sampler._pack_message(
-                                content=format_multichoice_question(choices_dict, conf_mode="logit_perplexity"), role="user"
+                                content=format_multichoice_question(row, conf_mode="logit_perplexity", choices=0), role="user"
                             )
                         ]
                         response = sampler(prompt_messages)
@@ -128,8 +114,9 @@ class GPQAEval(Eval):
                         row["response"] = response
                         row["logprobs"] = sampler.logprobs
                         row["top_logprobs"] = sampler.top_logprobs
+
                     response_text = normalize_response(response)
-                    extracted_answer = consolidated_answer_extraction(benchmark="gpqa", response_text=response_text, choices_dict=choices_dict, with_verbal_confidence=False)
+                    extracted_answer = consolidated_answer_extraction(benchmark="mmlu_pro", response_text=response_text, row=row, with_verbal_confidence=False)
                     logprobs = row["logprobs"]
                     confidence = calculate_logit_perplexity(logprobs)
 
@@ -152,12 +139,12 @@ class GPQAEval(Eval):
                         row["response"] = response
                         row["logprobs"] = sampler.logprobs
                         row["top_logprobs"] = sampler.top_logprobs
+
                     response_text = normalize_response(response)
-                    extracted_answer = consolidated_answer_extraction(benchmark="gpqa", response_text=response_text, choices_dict=choices_dict, with_verbal_confidence=False)
+                    extracted_answer = consolidated_answer_extraction(benchmark="mmlu_pro", response_text=response_text, row=row, with_verbal_confidence=False)
                     logprobs = row["logprobs"]
                     confidence = token_sar_confidence(top_logprobs)
-                
-                    
+
                 case "sampling":
                     if sampler.get_logprobs == False:
                         print("Sampling without logprobs.")
@@ -165,7 +152,7 @@ class GPQAEval(Eval):
                         print("Sampling with logprobs.")
                     prompt_messages = [
                         sampler._pack_message(
-                            content=format_multichoice_question(choices_dict, conf_mode=self.conf_mode), role="user"
+                            content=format_multichoice_question(row, conf_mode="sampling", choices=0), role="user"
                         )
                     ]
                     response = sampler(prompt_messages)
@@ -173,42 +160,37 @@ class GPQAEval(Eval):
                     row["response"] = response
                     row["logprobs"] = sampler.logprobs
                     row["top_logprobs"] = sampler.top_logprobs
-                    return
-                
+                    return 
 
                 case _:
                     raise Exception(f"Unrecognized confidence type: {self.conf_mode}")
 
-            score = 1.0 if extracted_answer == correct_answer else 0.0
             print(f"extracted_answer: {extracted_answer}, confidence: {confidence}")
+            score = 1.0 if extracted_answer == row["answer"] else 0.0
 
+            category = row["category"]
             html = common.jinja_env.from_string(HTML_JINJA).render(
                 prompt_messages=prompt_messages,
                 next_message=dict(content=response_text, role="assistant"),
                 score=score,
-                correct_answer=correct_answer,
+                correct_answer=row["answer"],
                 extracted_answer=extracted_answer,
                 extracted_answer_confidence=confidence,
-                subject=row["Record ID"],
+                subject=category,
                 logprobs = logprobs,
                 conf_mode = self.conf_mode
             )
             convo = prompt_messages + [dict(content=response_text, role="assistant")]
             return SingleEvalResult(
-                html=html, 
-                score=score, 
-                convo=convo, 
-                metrics={"chars": len(response_text)}, 
-                confidence=float(confidence)
+                html=html, score=score, metrics={category: score}, convo=convo, confidence=float(confidence)
             )
-
 
         # Run evaluation and collect results
         if self.conf_mode in ["sampling", "eval_all"] or "_shared_sampling" in self.conf_mode:
             self.regenerate = True
-            regen_stored_path = shared_sampling_path("gpqa", sampler.model, self.conf_mode, self.num_examples, self.n_repeats)
+            regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
         else:
-            regen_stored_path = ind_sampling_path("gpqa", sampler.model, self.conf_mode, self.num_examples, self.n_repeats)
+            regen_stored_path = ind_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
             
 
         if self.regenerate:
@@ -231,5 +213,5 @@ class GPQAEval(Eval):
                 pickle.dump(self.examples, f)
             print(f"Shared sampling complete and saved to: {regen_stored_path}")
             sys.exit()
-            
+
         return common.aggregate_results(results)
