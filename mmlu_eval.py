@@ -140,7 +140,7 @@ class MMLUEval(Eval):
                     response_text = remove_verbal_confidence(normalize_response(response)) # remove verbal confidence to avoid judgement biases
                     extracted_answer = consolidated_answer_extraction(benchmark="mmlu", response_text=response_text, row=row, with_verbal_confidence=False)
                     logprobs = row["logprobs"]
-                    confidence = decisiveness_score(self.decisiveness_grader, format_multichoice_question(row, "verbal_linguistic"), response_text)
+                    confidence = linguistic_confidence_score(self.decisiveness_grader, format_multichoice_question(row, "verbal_linguistic"), response_text)
 
 
                 case "logit_perplexity" | "logit_perplexity_shared_sampling":

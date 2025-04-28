@@ -314,6 +314,15 @@ def get_model_dict(model_name: str):
             get_logprobs=True
     )
     
+    models["meta-llama/Llama-2-70b-hf"] = ChatCompletionSampler(
+            base_url = "https://api.together.xyz/v1",
+            api_key = os.environ['TOGETHER_API_KEY'],
+            model="meta-llama/Llama-2-70b-hf",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=1024,
+            get_logprobs=True
+    )
+    
     # 3B Model
     models["meta-llama/Llama-3.2-3B-Instruct-Turbo"] = ChatCompletionSampler(
             base_url = "https://api.together.xyz/v1",

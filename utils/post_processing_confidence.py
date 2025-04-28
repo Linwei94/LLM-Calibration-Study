@@ -51,11 +51,11 @@ def remove_verbal_confidence(text):
     return cleaned_text
 
 
-def decisiveness_score(sampler, question, response) -> tuple[str, float]:
+def linguistic_confidence_score(sampler, question, response) -> tuple[str, float]:
     # response = remove_verbal_confidence(response) # remove verbal confidence from response
-    msg = [sampler._pack_message("user", DECISIVENESS_GRADER_PROMPT.format(Question=question, Response=response))]
+    msg = [sampler._pack_message("user", LINGUISTIC_CONFIDENCE_GRADER_PROMPT.format(Question=question, Response=response))]
     print(msg)
-    score_pattern = r"[Dd]ecisiveness [Ss]core:\s*([0-9]*\.?[0-9]+)"
+    score_pattern = r"[Cc]onfidence [Ss]core:\s*([0-9]*\.?[0-9]+)"
     verdict = sampler(msg)
     scores = re.findall(score_pattern, verdict)
     # assertions = re.findall(assertion_pattern, verdict)
