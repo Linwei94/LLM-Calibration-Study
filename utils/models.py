@@ -7,6 +7,7 @@ from ..sampler.chat_completion_sampler import (
 from ..sampler.o_chat_completion_sampler import OChatCompletionSampler
 from ..sampler.claude_sampler import ClaudeCompletionSampler, CLAUDE_SYSTEM_MESSAGE_LMSYS
 from ..sampler.hfmodel_sampler import HFChatCompletionSampler
+from ..sampler.google_ai_sampler import GoogleAISampler
 
 from google.auth import default
 from google.auth.transport.requests import Request
@@ -233,6 +234,23 @@ def get_model_dict(model_name: str):
             max_tokens=1024,
             base_url=f"https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
             api_key=credentials.token
+        )
+    
+    google_models = [
+        "gemini-2.5-flash-preview-04-17",
+        "gemini-2.5-pro-preview-03-25",
+        "gemini-2.0-flash",
+        "gemini-2.0-flash-lite",
+        "gemini-1.5-flash",
+        "gemini-1.5-flash-8b",
+        "gemini-1.5-pro",
+    ]
+
+    for gm in google_models:
+        models[gm] = GoogleAISampler(
+                model=gm,
+                api_key=os.environ["GOOGLE_AI_KEY"],
+                get_logprobs=True
         )
     
 
