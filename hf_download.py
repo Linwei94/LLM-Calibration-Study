@@ -11,8 +11,8 @@ os.environ["HF_HOME"] = "hf_models/"
 model_names = [
     "Qwen/Qwen2.5-7B-Instruct",
     "google/gemma-2b-it",
-    "google/gemma3-1b",
-    "google/gemma3-4b",
+    "google/gemma-3-1b-it",
+    "google/gemma-3-4b-it",
     "mistralai/Mixtral-8x7B-Instruct-v0.1",
     "mistralai/Mixtral-8x7B-v0.1",
     "mistralai/Mistral-7B-Instruct-v0.1"
@@ -20,7 +20,10 @@ model_names = [
 
 
 for model_name in model_names:
-    print(f"Downloading: {model_name}")
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModel.from_pretrained(model_name)
+    try:
+        print(f"Downloading: {model_name}")
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        model = AutoModel.from_pretrained(model_name)
+    except:
+        print("Failed to download:", model)
 print("✅ All models downloaded.")
