@@ -54,7 +54,7 @@ def remove_verbal_confidence(text):
 def linguistic_confidence_score(sampler, question, response) -> tuple[str, float]:
     # response = remove_verbal_confidence(response) # remove verbal confidence from response
     msg = [sampler._pack_message("user", LINGUISTIC_CONFIDENCE_GRADER_PROMPT.format(Question=question, Response=response))]
-    print(msg)
+    print("Linguistic confidence judge:", sampler.model)
     score_pattern = r"[Cc]onfidence [Ss]core:\s*([0-9]*\.?[0-9]+)"
     verdict = sampler(msg)
     scores = re.findall(score_pattern, verdict)

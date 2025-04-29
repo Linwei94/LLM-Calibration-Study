@@ -400,5 +400,21 @@ def get_model_dict(model_name: str):
             max_tokens=1024,
             get_logprobs=True
     )
-    
+
+    models["gpt-4.1-mini"] = ChatCompletionSampler(
+        model="gpt-4.1-mini",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=1024,
+        get_logprobs=True
+    )
+
+    models["gpt-4.1-nano"] = ChatCompletionSampler(
+        model="gpt-4.1-nano",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=1024,
+        get_logprobs=True
+    )
+
+
+
     return models

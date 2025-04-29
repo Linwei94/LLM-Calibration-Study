@@ -55,7 +55,7 @@ def main():
 
     simpleqa_grader = all_models["meta/llama-4-maverick-17b-128e-instruct-maas"]
     equality_checker = all_models["meta/llama-4-maverick-17b-128e-instruct-maas"]
-    decisiveness_grader = all_models["meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"]
+    decisiveness_grader = all_models["gpt-4.1-nano"]
 
 
     # ^^^ used for fuzzy matching, just for math
@@ -115,7 +115,10 @@ def main():
         for eval_name, eval_obj in evals.items():
             result = eval_obj(sampler)
             # ^^^ how to use a sampler
-            file_stem = f"{eval_name}_{model_name.split("/")[-1]}_{args.conf_mode}_{args.examples}"
+            if "linguistic" in args.conf_mode:
+                file_stem = f"{eval_name}_{model_name.split("/")[-1]}_{args.conf_mode}_{args.examples}_{decisiveness_grader.model}_dec_judge"
+            else:
+                file_stem = f"{eval_name}_{model_name.split("/")[-1]}_{args.conf_mode}_{args.examples}"
             report_filename = f"LLM-Calibration-Study/results/{file_stem}{debug_suffix}.html"
             if not os.path.exists("LLM-Calibration-Study/results"):
                 os.makedirs("LLM-Calibration-Study/results")
