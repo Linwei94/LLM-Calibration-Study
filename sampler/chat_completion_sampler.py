@@ -90,6 +90,10 @@ class ChatCompletionSampler(SamplerBase):
                             self.logprobs = response.choices[0].logprobs.token_logprobs
                         except:
                             print(self.model, "Token logprobs not found")
+
+                        if self.model == "meta-llama/Llama-2-70b-hf":
+                            print(response)
+                        
                         return response.choices[0].message.content
                     elif self.base_url and "databricks" in self.base_url:
                         print(self.model, "Databricks API")
