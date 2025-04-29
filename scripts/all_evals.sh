@@ -53,3 +53,7 @@ python -m LLM-Calibration-Study.simple_evals --model meta-llama/Llama-2-70b-hf -
 python -m LLM-Calibration-Study.simple_evals --model meta-llama/Llama-3.2-3B-Instruct-Turbo --benchmark mmlu_pro --conf_mode verbal_linguistic_shared_sampling 
 python -m LLM-Calibration-Study.simple_evals --model meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo --benchmark mmlu_pro --conf_mode verbal_linguistic_shared_sampling
 python -m LLM-Calibration-Study.simple_evals --model meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo --benchmark mmlu_pro --conf_mode verbal_linguistic_shared_sampling
+
+
+python -m LLM-Calibration-Study.simple_evals --model meta-llama/Llama-2-70b-hf --benchmark mmlu_pro --conf_mode verbal_numerical_shared_sampling
+python -m LLM-Calibration-Study.simple_evals --model meta-llama/Llama-2-70b-hf --benchmark mmlu_pro --conf_mode logit_perplexity_shared_sampling
