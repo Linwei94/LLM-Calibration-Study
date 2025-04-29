@@ -320,7 +320,7 @@ def get_model_dict(model_name: str):
             model="meta-llama/Llama-2-70b-hf",
             system_message=OPENAI_SYSTEM_MESSAGE_API,
             max_tokens=1024,
-            get_logprobs=True
+            get_logprobs=False
     )
 
     models["meta-llama/Llama-3.3-70B-Instruct-Turbo"] = ChatCompletionSampler(

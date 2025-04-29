@@ -80,7 +80,7 @@ class ChatCompletionSampler(SamplerBase):
                             temperature=self.temperature,
                             max_tokens=self.max_tokens,
                             logprobs=5, # max 5
-                            seed=42
+                            seed=42,
                         )
                         try:
                             self.top_logprobs = response.choices[0].logprobs.top_logprobs # a list of dicts each of which is a dict of possible candidates with its logprob
