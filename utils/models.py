@@ -433,6 +433,25 @@ def get_model_dict(model_name: str):
         get_logprobs=True
     )
 
+    # Deep Seek API
+    models["deepseek-chat"] = ChatCompletionSampler(
+        model="deepseek-chat",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=1024,
+        api_key=os.environ["DEEPSEEK_API_KEY"],
+        base_url="https://api.deepseek.com",
+        get_logprobs=True
+    )
+
+    models["deepseek-reasoner"] = ChatCompletionSampler(
+        model="deepseek-reasoner",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=1024,
+        api_key=os.environ["DEEPSEEK_API_KEY"],
+        base_url="https://api.deepseek.com",
+        get_logprobs=True
+    )
+
 
 
     return models

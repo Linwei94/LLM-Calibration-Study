@@ -57,3 +57,6 @@ python -m LLM-Calibration-Study.simple_evals --model meta-llama/Meta-Llama-3.1-7
 
 python -m LLM-Calibration-Study.simple_evals --model meta-llama/Llama-2-70b-hf --benchmark mmlu_pro --conf_mode verbal_numerical_shared_sampling
 python -m LLM-Calibration-Study.simple_evals --model meta-llama/Llama-2-70b-hf --benchmark mmlu_pro --conf_mode logit_perplexity_shared_sampling
+
+
+python -m LLM-Calibration-Study.simple_evals --model deepseek-ai/DeepSeek-R1 --benchmark mmlu_pro --conf_mode sampling --examples 3
