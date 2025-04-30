@@ -323,6 +323,40 @@ def extract_mcq_answer(response_text: str, benchmark = "gpqa") -> str | None:
     return extracted_answer
 
 def extract_answer_and_confidence(response_text: str, options) -> tuple[str | None, float | None]:
+    # first method: decomposition:
+    answer = None
+    confidence = None
+
+    answer_patterns = [
+        r"answer:\s*(\w)",                 # e.g., Answer: H
+        r"answer:\s*\(?(\w)\)?",             # e.g., Answer: (H)
+        r"answer:\s*(\w)[,)]",             # e.g., Answer: H,
+        r"answer:\s*(\w)\s*,.*",           # e.g., Answer: H, apple
+        r"correct answer is\s*(\w)\)?",           # e.g., Answer: H, apple
+    ]
+    confidence_patterns = [
+        r"confidence\s*\(0-100\):\s*(\d+)%?",  # e.g., Confidence (0-100): 90%
+        r"confidence:\s*(\d+)%?",             # e.g., Confidence: 90%
+    ]
+
+    for line in response_text.splitlines()[::-1]:
+        line = line.strip()
+        if "answer" in line.lower() and "LETTER" not in line:
+            for pat in answer_patterns:
+                match = re.search(pat, line, re.IGNORECASE)
+                if match:
+                    answer = match.group(1)
+                    break  # Stop after the first matching pattern
+        elif "confidence" in line.lower():
+            for pat in confidence_patterns:
+                match = re.search(pat, line, re.IGNORECASE)
+                if match:
+                    confidence = int(match.group(1))
+                    break
+    # else:
+    #     return "Z", 0
+
+    # multi line and single line regex extraction
     # single-line format
     patterns_multi_choice = [
         r"[Aa]nswer:\s*([A-J])\s*\n*\s*[Cc]onfidence:\s*(\d{1,3})%?",
@@ -361,26 +395,39 @@ def extract_answer_and_confidence(response_text: str, options) -> tuple[str | No
         r"Answer:\s*[\(\[]?([A-J])\)?\]?[,.]?\s+Confidence level:\s*(\d+)%",
     ]
     multi_line_patters = [
+        r"### Answer:\s*\n*([A-J])[^\n]\n*### Confidence \(0-100\):\s*(\d+)%?"
+        r"### Answer:\s*([A-J])\)[\s\S]*?\n*### Confidence \(0-100\):\s*\[(\d+)%\]"
         r"Answer:\s*([A-Ja-j])\s*\n*\s*Confidence(?:\s*\(0-100\))?\s*:\s*(\d{1,3})%?"
+        r"Answer:\s*([A-Ja-j]).*\s*\n*\s*.*Confidence(?:\s*\(0-100\))?\s*:\s*(\d{1,3})%?"
         r"Answer:\s*([A-Ja-j])\s*\n*\s*\(0-100\)(?:\s*\(0-100\))?\s*:\s*(\d{1,3})%?"
+        r"### Answer:\s*([A-J])\)[^\n]*\n+### Confidence \(0-100\):\s*\[(\d+)%\]"
+        r"The correct answer is\s+([A-J])\)[^\n]*[\w]*\n+Confidence \(0-100\):\s*(\d+)%?"
     ]
     
     patterns = multi_line_patters + patterns_multi_choice + patterns_multi_choice_without_option + patterns_multi_choice_weird
     for pattern in patterns:
         match = re.search(pattern, response_text, re.IGNORECASE)
         if match:
-            answer = match.group(1).upper()
-            confidence = int(match.group(2))
+            if answer is None:
+                answer = match.group(1).upper()
+            if confidence is None:
+                confidence = int(match.group(2))
             if 0 <= confidence <= 100 and answer in "ABCDEFGHIJ":
                 return answer, confidence
     
     for pattern in patterns:
-        match = re.search(pattern, "\n".join(response_text.splitlines()[-5:]), re.IGNORECASE)
+        match = re.search(pattern, "\n".join(response_text.splitlines()[-8:]), re.IGNORECASE)
         if match:
-            answer = match.group(1).upper()
-            confidence = int(match.group(2))
+            if answer is None:
+                answer = match.group(1).upper()
+            if confidence is None:
+                confidence = int(match.group(2))
             if 0 <= confidence <= 100 and answer in "ABCDEFGHIJ":
                 return answer, confidence
+    if answer is not None and confidence is None:
+        return answer, 0
+    elif answer is None and confidence is not None:
+        return "Z", confidence
     return "Z", 0
 
 

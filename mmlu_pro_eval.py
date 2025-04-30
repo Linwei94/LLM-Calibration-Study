@@ -16,6 +16,9 @@ from .utils.pre_processing import *
 from .utils.post_processing_report import *
 from .utils.post_processing_answer import *
 from .utils.post_processing_confidence import *
+import threading
+
+pickle_write_lock = threading.Lock()
 
 
 def preprocess(test_df):
@@ -173,10 +176,11 @@ class MMLUProEval(Eval):
                         progress_temp_path = shared_sampling_path(f"tmp_mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
                     else:
                         progress_temp_path = ind_sampling_path(f"tmp_mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
-                    
-                    with open(progress_temp_path, 'wb') as f:
-                        pickle.dump(current_progress, f)
-                    print("Progress saved")
+                        
+                    with pickle_write_lock:
+                        with open(progress_temp_path, 'wb') as f:
+                            pickle.dump(current_progress, f)
+                        print("Progress saved")
                     return 
 
                 case _:
