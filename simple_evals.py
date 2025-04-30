@@ -116,7 +116,7 @@ def main():
             result = eval_obj(sampler)
             # ^^^ how to use a sampler
             if "linguistic" in args.conf_mode:
-                file_stem = f"{eval_name}_{model_name.split("/")[-1]}_{args.conf_mode}_{args.examples}_{decisiveness_grader.model}_dec_judge"
+                file_stem = f"linguistic-judges/{eval_name}_{model_name.split("/")[-1]}_{args.conf_mode}_{args.examples}_{decisiveness_grader.model}_dec_judge"
             else:
                 file_stem = f"{eval_name}_{model_name.split("/")[-1]}_{args.conf_mode}_{args.examples}"
             report_filename = f"LLM-Calibration-Study/results/{file_stem}{debug_suffix}.html"

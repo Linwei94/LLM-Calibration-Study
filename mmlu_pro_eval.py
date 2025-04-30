@@ -56,7 +56,7 @@ class MMLUProEval(Eval):
 
             match self.conf_mode:
                 
-                case "verbal_numerical" | "verbal_numerical_shared_sampling":
+                case "verbal_numerical" | "verbal_numerical_shared_sampling" | "tmp_verbal_numerical_shared_sampling":
                     if self.cache_found:
                         response = row["response"] 
                         prompt_messages = row["prompt_messages"] 
@@ -76,7 +76,7 @@ class MMLUProEval(Eval):
                     extracted_answer, confidence = consolidated_answer_extraction(benchmark="mmlu_pro", response_text=response_text, row=row, with_verbal_confidence=True)
 
                 
-                case "verbal_linguistic" | "verbal_linguistic_shared_sampling":
+                case "verbal_linguistic" | "verbal_linguistic_shared_sampling" | "tmp_verbal_linguistic_shared_sampling":
                     if self.cache_found:
                         response = row["response"] 
                         prompt_messages = row["prompt_messages"] 
@@ -97,7 +97,7 @@ class MMLUProEval(Eval):
                     confidence = linguistic_confidence_score(self.decisiveness_grader, format_multichoice_question(row, conf_mode="decisiveness_grading", choices=0), response_text)
 
 
-                case "logit_perplexity" | "logit_perplexity_shared_sampling":
+                case "logit_perplexity" | "logit_perplexity_shared_sampling" | "tmp_logit_perplexity_shared_sampling":
                     if sampler.get_logprobs == False:
                         raise NotImplementedError("The selected model does not support logprobs. Force switching on by setting the model's get_logprobs to True in utils/models.py only after checking with the provider.")
                     if self.cache_found:
@@ -160,6 +160,21 @@ class MMLUProEval(Eval):
                     row["response"] = response
                     row["logprobs"] = sampler.logprobs
                     row["top_logprobs"] = sampler.top_logprobs
+
+
+                    # save current progress
+                    current_progress = self.examples.copy()
+                    current_progress = [eg for eg in self.examples if "logprobs" in eg.keys()]
+
+                    if self.conf_mode in ["sampling", "eval_all"] or "_shared_sampling" in self.conf_mode:
+                        self.regenerate = True
+                        progress_temp_path = shared_sampling_path(f"tmp_mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+                    else:
+                        progress_temp_path = ind_sampling_path(f"tmp_mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+                    
+                    with open(progress_temp_path, 'wb') as f:
+                        pickle.dump(current_progress, f)
+                    print("Progress saved")
                     return 
 
                 case _:
@@ -191,9 +206,21 @@ class MMLUProEval(Eval):
             regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
         else:
             regen_stored_path = ind_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
-            
+        
 
         if self.regenerate:
+            if "tmp" in self.conf_mode:
+                regen_stored_path = shared_sampling_path(f"tmp_mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+                if os.path.exists(regen_stored_path):
+                    self.cache_found = True
+                    print("Fetching from cache (partial dataset)")
+                    with open(regen_stored_path, 'rb') as f:
+                        self.examples = pickle.load(f)
+                    results = common.map_with_progress(fn, self.examples)
+                    with open(regen_stored_path, 'wb') as f:
+                        pickle.dump(self.examples, f)
+                else:
+                    sys.exit()
             if os.path.exists(regen_stored_path):
                 print("Fetching from cache")
                 with open(regen_stored_path, 'rb') as f:
@@ -205,6 +232,7 @@ class MMLUProEval(Eval):
                 results = common.map_with_progress(fn, self.examples)
                 with open(regen_stored_path, 'wb') as f:
                     pickle.dump(self.examples, f)
+            
         else:
             results = common.map_with_progress(fn, self.examples)
 
