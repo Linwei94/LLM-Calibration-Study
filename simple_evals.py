@@ -53,8 +53,8 @@ def main():
     # grading_sampler = all_models["google-llama-3.1-405b-instruct-maas"]
     # equality_checker = ChatCompletionSampler(model="gpt-4-turbo-preview")
 
-    simpleqa_grader = all_models["meta/llama-4-maverick-17b-128e-instruct-maas"]
-    equality_checker = all_models["meta/llama-4-maverick-17b-128e-instruct-maas"]
+    simpleqa_grader = all_models["meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"]
+    equality_checker = all_models["meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"]
     decisiveness_grader = all_models["meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"]
 
 

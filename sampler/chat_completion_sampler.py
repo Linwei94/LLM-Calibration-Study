@@ -33,7 +33,7 @@ class ChatCompletionSampler(SamplerBase):
     ):
         # self.api_key_name = "OPENAI_API_KEY"
         if base_url:
-            if any(provider in base_url for provider in ["google", "databricks", "together", "local"]):
+            if any(provider in base_url for provider in ["google", "databricks", "together", "deepseek", "local"]):
                 self.client = OpenAI(base_url=base_url, api_key=api_key)
         else:
             OpenAI.api_key = os.environ["OPENAI_API_KEY"]
@@ -93,8 +93,8 @@ class ChatCompletionSampler(SamplerBase):
 
                         if self.model == "meta-llama/Llama-2-70b-hf":
                             print(response)
-                        
                         return response.choices[0].message.content
+                    
                     elif self.base_url and "databricks" in self.base_url:
                         print(self.model, "Databricks API")
                         response = self.client.chat.completions.create(
@@ -108,6 +108,7 @@ class ChatCompletionSampler(SamplerBase):
                         self.top_logprobs = [t.top_logprobs for t in response.choices[0].logprobs.content]
                         self.logprobs = [t.logprob for t in response.choices[0].logprobs.content]
                         return response.choices[0].message.content
+                    
                     elif self.base_url and "local" in self.base_url:
                         print(self.model, "vLLM API")
                         response = self.client.chat.completions.create(
@@ -117,6 +118,24 @@ class ChatCompletionSampler(SamplerBase):
                             logprobs=True,
                             top_logprobs=20,
                             temperature=0,
+                            seed=42,
+                        )
+                        top_logprob_lst = []
+                        for top_list in [t.top_logprobs for t in response.choices[0].logprobs.content]: 
+                            top_logprob_lst.append({t.token: t. logprob for t in top_list})
+                        self.top_logprobs = top_logprob_lst
+                        self.logprobs = [t.logprob for t in response.choices[0].logprobs.content]
+                        return response.choices[0].message.content
+                    
+                    elif self.base_url and "deepseek" in self.base_url: 
+                        print(self.model, "Deep Seek API")
+                        response = self.client.chat.completions.create(
+                            messages=message_list, 
+                            model=self.model, 
+                            max_tokens=self.max_tokens, 
+                            logprobs=True,
+                            top_logprobs=5,
+                            temperature=0,
                             seed=42
                         )
                         top_logprob_lst = []
@@ -125,6 +144,7 @@ class ChatCompletionSampler(SamplerBase):
                         self.top_logprobs = top_logprob_lst
                         self.logprobs = [t.logprob for t in response.choices[0].logprobs.content]
                         return response.choices[0].message.content
+                    
                     else:
                         print(self.model, "OpenAI API")
                         response = self.client.chat.completions.create(
