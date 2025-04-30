@@ -60,3 +60,25 @@ python -m LLM-Calibration-Study.simple_evals --model meta-llama/Llama-2-70b-hf -
 
 
 python -m LLM-Calibration-Study.simple_evals --model deepseek-ai/DeepSeek-R1 --benchmark mmlu_pro --conf_mode sampling --examples 3
+
+
+conda activate llm-uncertainty
+python -m LLM-Calibration-Study.simple_evals --model gemini-2.5-flash-preview-04-17 --benchmark mmlu_pro --conf_mode sampling
+
+conda activate llm-uncertainty
+python -m LLM-Calibration-Study.simple_evals --model gemini-2.5-pro-preview-03-25 --benchmark mmlu_pro --conf_mode sampling
+
+conda activate llm-uncertainty
+python -m LLM-Calibration-Study.simple_evals --model gemini-2.0-flash --benchmark mmlu_pro --conf_mode sampling
+
+conda activate llm-uncertainty
+python -m LLM-Calibration-Study.simple_evals --model gemini-2.0-flash-lite --benchmark mmlu_pro --conf_mode sampling
+
+conda activate llm-uncertainty
+python -m LLM-Calibration-Study.simple_evals --model gemini-1.5-flash --benchmark mmlu_pro --conf_mode sampling
+
+conda activate llm-uncertainty
+python -m LLM-Calibration-Study.simple_evals --model gemini-1.5-flash-8b --benchmark mmlu_pro --conf_mode sampling
+
+conda activate llm-uncertainty
+python -m LLM-Calibration-Study.simple_evals --model gemini-1.5-pro --benchmark mmlu_pro --conf_mode sampling

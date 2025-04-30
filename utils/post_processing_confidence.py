@@ -47,7 +47,8 @@ def empirical_semantic_confidence(lnll_lst, response_list, labels):
 # faithful response uncertainty
 # ------------------------------------------------------------------------------------------------------
 def remove_verbal_confidence(text):
-    cleaned_text = re.sub(r'[Cc]onfidence:? (\d+)?%?\r?\n?', '', text, flags=re.MULTILINE)
+    cleaned_text = re.sub(r'[Cc]onfidence:?\s*(\d+)?%?\r?\n?', '', text, flags=re.MULTILINE)
+    cleaned_text = re.sub(r'\(0-100\):?\s*(\d+)?%?\r?\n?', '', cleaned_text, flags=re.MULTILINE)
     return cleaned_text
 
 

@@ -361,7 +361,8 @@ def extract_answer_and_confidence(response_text: str, options) -> tuple[str | No
         r"Answer:\s*[\(\[]?([A-J])\)?\]?[,.]?\s+Confidence level:\s*(\d+)%",
     ]
     multi_line_patters = [
-        r"Answer:\s*([A-Ja-j])\s*\n*\s*Confidence(?:\s*\(0-100\))?:\s*(\d{1,3})%?"
+        r"Answer:\s*([A-Ja-j])\s*\n*\s*Confidence(?:\s*\(0-100\))?\s*:\s*(\d{1,3})%?"
+        r"Answer:\s*([A-Ja-j])\s*\n*\s*\(0-100\)(?:\s*\(0-100\))?\s*:\s*(\d{1,3})%?"
     ]
     
     patterns = multi_line_patters + patterns_multi_choice + patterns_multi_choice_without_option + patterns_multi_choice_weird
