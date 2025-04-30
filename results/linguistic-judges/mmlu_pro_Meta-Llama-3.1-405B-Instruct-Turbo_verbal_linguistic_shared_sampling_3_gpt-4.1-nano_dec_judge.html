@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            .message {
+                padding: 8px 16px;
+                margin-bottom: 8px;
+                border-radius: 4px;
+            }
+            .message.user {
+                background-color: #B2DFDB;
+                color: #00695C;
+            }
+            .message.assistant {
+                background-color: #B39DDB;
+                color: #4527A0;
+            }
+            .message.system {
+                background-color: #EEEEEE;
+                color: #212121;
+            }
+            .role {
+                font-weight: bold;
+                margin-bottom: 4px;
+            }
+            .variant {
+                color: #795548;
+            }
+            table, th, td {
+                border: 1px solid black;
+            }
+            pre {
+                white-space: pre-wrap;
+            }
+        </style>
+    </head>
+    <body>
+    <h1>Benchmark Setup</h1>
+    <table>
+    <tr>
+        <td><b>Model</b></td>
+        <td>meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo</td>
+    </tr>
+    <tr>
+        <td><b>Confidence Mode</b></td>
+        <td>verbal_linguistic_shared_sampling</td>
+    </tr>
+    <tr>
+        <td><b>Benchmark</b></td>
+        <td>mmlu_pro</td>
+    </tr>
+    </table>
+    
+    <h1>Metrics</h1>
+    <table>
+    <tr>
+        <th>Metric</th>
+        <th>Value</th>
+    </tr>
+    <tr>
+        <td><b>Score</b></td>
+        <td>1.0</td>
+    </tr>
+    
+    <tr>
+        <td>health</td>
+        <td>1.0</td>
+    </tr>
+    
+    <tr>
+        <td>health:std</td>
+        <td>0.0</td>
+    </tr>
+    
+    <tr>
+        <td>score:std</td>
+        <td>0.0</td>
+    </tr>
+    
+    <tr>
+        <td>economics</td>
+        <td>1.0</td>
+    </tr>
+    
+    <tr>
+        <td>economics:std</td>
+        <td>0.0</td>
+    </tr>
+    
+    <tr>
+        <td>business</td>
+        <td>1.0</td>
+    </tr>
+    
+    <tr>
+        <td>business:std</td>
+        <td>0.0</td>
+    </tr>
+    
+    <tr>
+        <td>ECE</td>
+        <td>0.033333342522382736</td>
+    </tr>
+    
+    </table>
+    
+    <h1>Examples</h1>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, analyze step by step, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+
+If you are uncertain about your answer to the question, convey this uncertainty linguistically by precisely hedging this answer.
+
+Use the following format to answer:
+
+```
+Explanation: [insert short step-by-step analysis here]
+
+Answer: [ONLY the option LETTER, where the LETTER is one of A,B,C,D,E,F,G,H,I,J]
+
+Confidence (0-100): [Your confidence level, please only include the numerical number in the range of 0-100]%
+```
+
+Only give me the reply according to this format, don&#39;t give me any other words.
+
+If both parents are affected with the same autosomal recessive disorder then the probability that each of their children will be affected equals ___.
+A) 3 in 4
+B) 1 in 3
+C) 2 in 3
+D) 2 in 4
+E) 1 in 10
+F) 1
+G) 3 in 3
+H) 4 in 4
+I) 1 in 4
+J) 1 in 2
+</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Explanation: Autosomal recessive disorders require two copies of the mutated gene (one from each parent) to express the condition. If both parents are affected, they are both homozygous recessive (rr). The possible genotypes of their offspring are rr, as each parent can only contribute the recessive allele. Therefore, all offspring will be affected.
+
+Answer: F
+
+</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: F</p>
+<p>Extracted Answer: F</p>
+<p>Extracted Answer Confidence: 1.0</p>
+<p>Confidence Extraction Mode: verbal_linguistic_shared_sampling</p>
+<p>Score: 1.0</p>
+<p>Subject: health</p>
+<details>
+<summary>Log Probability:</summary>
+<p>[-1.013279e-05, -2.3841858e-07, -0.87890625, 0, 0, 0, -0.038085938, -0.22460938, -0.546875, -0.021362305, -4.172325e-06, -0.0052490234, -0.703125, -0.00043296814, -0.5546875, -2.3841858e-07, -8.34465e-07, 0, 0, -0.00026130676, -0.38671875, -0.16210938, -0.0052490234, -0.53125, -1.7881393e-06, -0.53515625, 0, 0, -0.20117188, -5.9604645e-06, -0.578125, -0.0055236816, -0.24316406, -0.47851562, -0.00078964233, 0, 0, -1.4305115e-06, -2.2649765e-06, -1.2993813e-05, -0.5546875, -0.05053711, -0.21386719, -0.60546875, -0.7421875, -0.0076293945, -1.4305115e-06, -0.14257812, -0.25195312, -0.34765625, -0.44140625, -0.6484375, -0.47460938, -0.12011719, -0.6796875, -0.0019836426, -0.0052490234, -1.7881393e-06, -0.03881836, -0.20703125, -0.00092315674, 0, -7.9631805e-05, -0.2265625, -0.609375, 0, -0.2890625, -0.6796875, -0.00015068054, -0.15136719, -0.18554688, -0.46875, -0.0002193451, -1.1920929e-07, -0.06982422, -0.003768921, -9.536743e-07, 0, -0.009765625, -9.536743e-07, -1.7881393e-05, -0.001739502, -5.9604645e-07]</p>
+</details>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, analyze step by step, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+
+If you are uncertain about your answer to the question, convey this uncertainty linguistically by precisely hedging this answer.
+
+Use the following format to answer:
+
+```
+Explanation: [insert short step-by-step analysis here]
+
+Answer: [ONLY the option LETTER, where the LETTER is one of A,B,C,D,E,F,G,H,I,J]
+
+Confidence (0-100): [Your confidence level, please only include the numerical number in the range of 0-100]%
+```
+
+Only give me the reply according to this format, don&#39;t give me any other words.
+
+Which of the following is likely to have a demand curve that is the least elastic?
+A) Demand for a good with many close substitutes
+B) Demand for the oligopoly firm&#39;s output with a differentiated product
+C) Demand for the monopolistic competition firm&#39;s output
+D) Demand for the perfectly competitive firm&#39;s output
+E) Demand for a luxury good
+F) Demand for a necessity good
+G) Demand for a highly substitutable good
+H) Demand for a good with no close substitutes
+I) Demand for the monopoly firm&#39;s output
+J) Demand for the oligopoly firm&#39;s output with a homogenous product
+</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Explanation: To determine which demand curve is the least elastic, we need to consider the factors that affect elasticity. Elasticity is influenced by the availability of substitutes, the degree of necessity, and the level of differentiation. A demand curve with many close substitutes will be more elastic, as consumers can easily switch to alternatives. A demand curve for a necessity good will be less elastic, as consumers are less responsive to price changes. A demand curve for a monopoly firm&#39;s output will be less elastic, as there are no close substitutes. 
+
+Answer: I
+
+</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: I</p>
+<p>Extracted Answer: I</p>
+<p>Extracted Answer Confidence: 0.9</p>
+<p>Confidence Extraction Mode: verbal_linguistic_shared_sampling</p>
+<p>Score: 1.0</p>
+<p>Subject: economics</p>
+<details>
+<summary>Log Probability:</summary>
+<p>[-4.7683716e-06, -3.5762787e-07, -0.38867188, -0.36132812, -0.20117188, -0.49414062, 0, -2.8014183e-05, -0.06591797, 0, 0, -2.861023e-06, -0.0008239746, -0.20507812, -1.1920929e-07, -0.64453125, -0.12792969, -0.40429688, -0.0052490234, -0.039794922, -0.0019683838, -0.13671875, -0.7578125, -1.013279e-05, -0.08300781, -0.5546875, 0, -0.0034484863, -0.04638672, -7.867813e-06, -0.20117188, -0.0042419434, -0.234375, -0.63671875, -6.580353e-05, -0.049316406, -0.030273438, -1.9192696e-05, -0.00023365021, -0.99609375, 0, -0.87109375, -0.05078125, -0.2578125, -0.09814453, 0, -0.40625, -0.061279297, -0.048583984, 0, -0.98046875, -0.029785156, -0.25195312, 0, -0.046142578, -0.20214844, -0.040283203, -4.7683716e-07, -0.016113281, -8.34465e-05, -0.0052490234, -0.58203125, -0.072753906, -0.59765625, -0.3046875, -1.1920929e-07, -0.28125, -3.8146973e-06, -0.35351562, -9.584427e-05, -0.69921875, -3.5762787e-06, -0.00013828278, 0, -0.00039482117, -0.0028076172, -3.862381e-05, -0.5546875, -0.07128906, -0.23730469, 0, -0.0052490234, 0, -0.2265625, -0.52734375, -0.11621094, 0, -0.25195312, -3.33786e-06, -0.43945312, -8.72612e-05, -4.553795e-05, 0, -0.984375, -0.3125, -0.004180908, 0, -0.15234375, -7.987022e-06, -0.029785156, -2.1457672e-05, -5.9604645e-07, -0.0014877319, 0, -0.2265625, -1.3828125, -0.83203125, -3.5762787e-07, -0.011413574, -0.019165039, -7.1525574e-07, 0, -0.0019302368, -2.3841858e-07, -0.17285156, -0.00035858154, -9.536743e-07]</p>
+</details>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, analyze step by step, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+
+If you are uncertain about your answer to the question, convey this uncertainty linguistically by precisely hedging this answer.
+
+Use the following format to answer:
+
+```
+Explanation: [insert short step-by-step analysis here]
+
+Answer: [ONLY the option LETTER, where the LETTER is one of A,B,C,D,E,F,G,H,I,J]
+
+Confidence (0-100): [Your confidence level, please only include the numerical number in the range of 0-100]%
+```
+
+Only give me the reply according to this format, don&#39;t give me any other words.
+
+The Colonial Cookie Company pays on a piece-rate basis at the rate of 80 centsa piece. Mrs. Batter completed the following number of acceptable pieces last week: Monday 45, Tuesday 41, Wednesday 49, Thursday 47, and Friday 43. What were her total earnings for the week?
+A) $160
+B) $195
+C) $220
+D) $185
+E) $175
+F) $200
+G) $225
+H) $210
+I) $165
+J) $180
+</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>Explanation: Calculate the total number of pieces completed by Mrs. Batter: 45 + 41 + 49 + 47 + 43 = 225. Multiply the total number of pieces by the rate per piece: 225 * 0.80 = 180.
+
+Answer: J
+
+</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: J</p>
+<p>Extracted Answer: J</p>
+<p>Extracted Answer Confidence: 1.0</p>
+<p>Confidence Extraction Mode: verbal_linguistic_shared_sampling</p>
+<p>Score: 1.0</p>
+<p>Subject: business</p>
+<details>
+<summary>Log Probability:</summary>
+<p>[-1.7762184e-05, -4.7683716e-07, -0.94921875, -0.5859375, -0.0022125244, -0.07519531, -1.1920929e-06, -0.34960938, -0.37695312, -0.37695312, -0.28125, -7.1525574e-07, 0, -0.69140625, -0.04321289, 0, -0.038085938, 0, 0, -5.9604645e-07, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.20214844, -0.18261719, -0.014404297, -1.680851e-05, -0.12695312, -9.584427e-05, 0, -0.009765625, -2.3841858e-07, -0.27539062, -0.19628906, 0, -0.27734375, 0, -1.1920929e-07, -0.049804688, -0.029785156, -0.008605957, 0, -0.014160156, -7.1525574e-07, -0.020507812, 0, -0.038330078, -1.9073486e-06, 0, -1.1920929e-07, -0.002532959, -4.7683716e-07, 0, -0.00592041, -3.5762787e-07, -4.4107437e-06, -0.00027656555, -7.1525574e-07]</p>
+</details>
+    <hr>
+    
+    </body>
+</html>
