@@ -66,7 +66,7 @@ conda activate llm-uncertainty
 python -m LLM-Calibration-Study.simple_evals --model gemini-2.5-flash-preview-04-17 --benchmark mmlu_pro --conf_mode sampling
 
 conda activate llm-uncertainty
-python -m LLM-Calibration-Study.simple_evals --model gemini-2.5-pro-preview-03-25 --benchmark mmlu_pro --conf_mode sampling
+python -m LLM-Calibration-Study.simple_evals --model gemini-2.5-pro-exp-03-25 --benchmark mmlu_pro --conf_mode sampling
 
 conda activate llm-uncertainty
 python -m LLM-Calibration-Study.simple_evals --model gemini-2.0-flash --benchmark mmlu_pro --conf_mode sampling

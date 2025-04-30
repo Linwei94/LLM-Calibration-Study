@@ -63,8 +63,8 @@ def linguistic_confidence_score(sampler, question, response) -> tuple[str, float
     verdict = verdict.split("\n")
     decisiveness_scores = [float(score) for score in scores]
     if len(decisiveness_scores) > 0:
-        return np.mean(decisiveness_scores)
-    return 1
+        return np.mean(decisiveness_scores), verdict
+    return 1, verdict
 # ------------------------------------------------------------------------------------------------------
 
 
