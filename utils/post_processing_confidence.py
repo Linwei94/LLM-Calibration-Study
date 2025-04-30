@@ -60,11 +60,12 @@ def linguistic_confidence_score(sampler, question, response) -> tuple[str, float
     verdict = sampler(msg)
     scores = re.findall(score_pattern, verdict)
     # assertions = re.findall(assertion_pattern, verdict)
+    raw_resonse = verdict
     verdict = verdict.split("\n")
     decisiveness_scores = [float(score) for score in scores]
     if len(decisiveness_scores) > 0:
-        return np.mean(decisiveness_scores), verdict
-    return 1, verdict
+        return np.mean(decisiveness_scores), raw_resonse
+    return 1, raw_resonse
 # ------------------------------------------------------------------------------------------------------
 
 
