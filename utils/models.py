@@ -332,6 +332,7 @@ def get_model_dict(model_name: str):
             get_logprobs=True
     )
 
+    # Erroneous API outputs
     models["meta-llama/Llama-2-70b-hf"] = ChatCompletionSampler(
             base_url = "https://api.together.xyz/v1",
             api_key = os.environ['TOGETHER_API_KEY'],
@@ -399,6 +400,16 @@ def get_model_dict(model_name: str):
             get_logprobs=True
     )
 
+
+    models["Qwen/Qwen3-235B-A22B-fp8"] = ChatCompletionSampler(
+            base_url = "https://api.together.xyz/v1",
+            api_key = os.environ['TOGETHER_API_KEY'],
+            model="Qwen/Qwen3-235B-A22B-fp8",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=1024,
+            get_logprobs=True
+    )
+
     # free
     models["meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"] = ChatCompletionSampler(
             base_url = "https://api.together.xyz/v1",
@@ -432,6 +443,12 @@ def get_model_dict(model_name: str):
         max_tokens=1024,
         get_logprobs=True
     )
+
+    
+
+
+    # VLLM
+    
 
 
 
