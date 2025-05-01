@@ -48,8 +48,6 @@ python -m LLM-Calibration-Study.simple_evals --model meta-llama/Llama-2-70b-hf -
 # 0.06 usd
 
 
-
-
 python -m LLM-Calibration-Study.simple_evals --model meta-llama/Llama-3.2-3B-Instruct-Turbo --benchmark mmlu_pro --conf_mode verbal_linguistic_shared_sampling 
 python -m LLM-Calibration-Study.simple_evals --model meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo --benchmark mmlu_pro --conf_mode verbal_linguistic_shared_sampling
 python -m LLM-Calibration-Study.simple_evals --model meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo --benchmark mmlu_pro --conf_mode verbal_linguistic_shared_sampling
@@ -60,7 +58,6 @@ python -m LLM-Calibration-Study.simple_evals --model meta-llama/Llama-2-70b-hf -
 
 
 python -m LLM-Calibration-Study.simple_evals --model deepseek-ai/DeepSeek-R1 --benchmark mmlu_pro --conf_mode sampling --examples 3
-
 
 conda activate llm-uncertainty
 python -m LLM-Calibration-Study.simple_evals --model gemini-2.5-flash-preview-04-17 --benchmark mmlu_pro --conf_mode sampling
