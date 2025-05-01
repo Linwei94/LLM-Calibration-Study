@@ -56,6 +56,7 @@ def main():
     simpleqa_grader = all_models["meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"]
     equality_checker = all_models["meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"]
     decisiveness_grader = all_models["meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"]
+    decisiveness_grader.get_logprobs = False
 
 
     # ^^^ used for fuzzy matching, just for math
