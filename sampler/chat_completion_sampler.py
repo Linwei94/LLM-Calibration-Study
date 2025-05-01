@@ -79,7 +79,8 @@ class ChatCompletionSampler(SamplerBase):
                             messages=message_list,
                             temperature=self.temperature,
                             max_tokens=self.max_tokens,
-                            logprobs=5, # max 5
+                            logprobs=True,
+                            top_logprobs=5,
                             seed=42,
                         )
                         try:
@@ -116,7 +117,7 @@ class ChatCompletionSampler(SamplerBase):
                             model=self.model, 
                             max_tokens=self.max_tokens, 
                             logprobs=True,
-                            top_logprobs=20,
+                            top_logprobs=10,
                             temperature=0,
                             seed=42,
                         )
