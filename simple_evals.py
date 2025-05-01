@@ -55,7 +55,7 @@ def main():
 
     simpleqa_grader = all_models["meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"]
     equality_checker = all_models["meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"]
-    decisiveness_grader = all_models["gpt-4.1-nano"]
+    decisiveness_grader = all_models["gpt-4.1-mini"]
 
 
     # ^^^ used for fuzzy matching, just for math
