@@ -55,7 +55,7 @@ def main():
 
     simpleqa_grader = all_models["meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"]
     equality_checker = all_models["meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"]
-    decisiveness_grader = all_models["meta-llama/Llama-4-Scout-17B-16E-Instruct"]
+    decisiveness_grader = all_models["meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"]
     decisiveness_grader.get_logprobs = False
 
 
@@ -117,7 +117,7 @@ def main():
             result = eval_obj(sampler)
             # ^^^ how to use a sampler
             if "linguistic" in args.conf_mode:
-                file_stem = f"linguistic-judges/{eval_name}_{model_name.split("/")[-1]}_{args.conf_mode}_{args.examples}_{decisiveness_grader.model}_dec_judge"
+                file_stem = f"linguistic-judges/{eval_name}_{model_name.split("/")[-1]}_{args.conf_mode}_{args.examples}_{decisiveness_grader.model.split("/")[-1]}_dec_judge"
             else:
                 file_stem = f"{eval_name}_{model_name.split("/")[-1]}_{args.conf_mode}_{args.examples}"
             report_filename = f"LLM-Calibration-Study/results/{file_stem}{debug_suffix}.html"

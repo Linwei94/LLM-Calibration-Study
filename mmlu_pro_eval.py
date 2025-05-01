@@ -9,6 +9,7 @@ import pickle
 import os
 import sys
 from datasets import load_dataset
+from filelock import FileLock
 from . import common
 from .common import *
 from .custom_types import Eval, EvalResult, SamplerBase, SingleEvalResult
@@ -17,6 +18,9 @@ from .utils.post_processing_report import *
 from .utils.post_processing_answer import *
 from .utils.post_processing_confidence import *
 import threading
+import asyncio
+import openai
+from openai import AsyncOpenAI
 
 pickle_write_lock = threading.Lock()
 
@@ -206,13 +210,92 @@ class MMLUProEval(Eval):
                 html=html, score=score, metrics={category: score}, convo=convo, confidence=float(confidence)
             )
 
-        # Run evaluation and collect results
+
+        # ---------------------------------- AsyncOpenAI for sampling ----------------------------------
+        if sampler.base_url and "local" in sampler.base_url and self.conf_mode == "sampling":
+            _inproc_lock = asyncio.Lock()
+            async def stream_prompt(sampler, client: AsyncOpenAI, row: str):
+                prompt_messages = [
+                    sampler._pack_message(
+                        content=format_multichoice_question(row, conf_mode="sampling", choices=0), role="user"
+                    )
+                ]
+                if sampler.system_message:
+                    message_list = [sampler._pack_message("system", sampler.system_message)] + prompt_messages 
+                else:
+                    message_list = prompt_messages
+
+                response = await client.chat.completions.create(
+                    model=sampler.model,
+                    messages=message_list,
+                    temperature=sampler.temperature,
+                    logprobs=True,
+                    top_logprobs=10,
+                    seed=42,
+                )
+                response_text = response.choices[0].message.content
+                top_logprob_lst = []
+                for top_list in [t.top_logprobs for t in response.choices[0].logprobs.content]: 
+                    top_logprob_lst.append({t.token: t. logprob for t in top_list})
+                logprobs = [t.logprob for t in response.choices[0].logprobs.content]
+
+                row["prompt_messages"] = prompt_messages
+                row["response"] = response_text
+                row["logprobs"] = logprobs
+                row["top_logprobs"] = top_logprob_lst
+                
+                current_progress = [eg for eg in self.examples.copy() if "logprobs" in eg.keys()]
+                if self.conf_mode in ["sampling", "eval_all"] or "_shared_sampling" in self.conf_mode:
+                    self.regenerate = True
+                    progress_temp_path = shared_sampling_path(f"tmp_mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+                else:
+                    progress_temp_path = ind_sampling_path(f"tmp_mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+                    # ensure directory exists
+                os.makedirs(os.path.dirname(progress_temp_path), exist_ok=True)
+
+                # filelock on progress_temp_path+".lock"
+                lock = FileLock(progress_temp_path + ".lock", timeout=30)
+
+                # first grab the in-proc lock, then the file-lock
+                async with _inproc_lock:
+                    with lock:  
+                        # write to a temp file and atomically rename
+                        tmp = progress_temp_path + ".tmp"
+                        with open(tmp, "wb") as f:
+                            pickle.dump(current_progress, f)
+                        os.replace(tmp, progress_temp_path)
+                print("Progress saved")
+            async def run_all_with_progress(sampler: SamplerBase, examples: list[dict], max_concurrent: int = 20):
+                client = AsyncOpenAI(
+                    base_url=sampler.base_url,  # Replace with your actual vLLM endpoint
+                    api_key="EMPTY"
+                )
+                sem = asyncio.Semaphore(max_concurrent)
+                async def limited(row):
+                    async with sem:
+                        return await stream_prompt(sampler, client, row)
+                # create all tasks
+                tasks = [asyncio.create_task(limited(row)) for row in examples]
+                results = []
+                # wrap tasks in as_completed so we can update tqdm as each one finishes
+                for coro in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="mmlu_pro"):
+                    res = await coro
+                    results.append(res)
+                return results
+            asyncio.run(run_all_with_progress(sampler, self.examples))
+            regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+            with open(regen_stored_path, 'wb') as f:
+                pickle.dump(self.examples, f)
+                print(f"Shared sampling with vLLM completed and saved to: {regen_stored_path}")
+            sys.exit()
+        # ----------------------------------------------------------------------------------------------
+
+
         if self.conf_mode in ["sampling", "eval_all"] or "_shared_sampling" in self.conf_mode:
             self.regenerate = True
             regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
         else:
             regen_stored_path = ind_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
-        
 
         if self.regenerate:
             if "tmp" in self.conf_mode:
@@ -245,7 +328,7 @@ class MMLUProEval(Eval):
         if self.conf_mode == "sampling":
             with open(regen_stored_path, 'wb') as f:
                 pickle.dump(self.examples, f)
-            print(f"Shared sampling complete and saved to: {regen_stored_path}")
+            print(f"Shared sampling completed and saved to: {regen_stored_path}")
             sys.exit()
 
         return common.aggregate_results(results)
