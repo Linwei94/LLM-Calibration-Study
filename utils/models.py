@@ -16,6 +16,39 @@ def get_model_dict(model_name: str):
     """
     Get the model dict from the model name.
     """
+
+    hf_models = [
+        "meta-llama/Llama-3.2-3B-Instruct",
+        "Qwen/Qwen2.5-3B-Instruct",
+        "Qwen/Qwen2.5-7B-Instruct",
+        "Qwen/Qwen2.5-32B-Instruct",
+        "Qwen/Qwen2.5-72B-Instruct",
+        "meta-llama/Llama-3.1-405B-Instruct",
+        "meta-llama/Llama-3.3-70B-Instruct",
+        "meta-llama/Llama-3.1-8B-Instruct",
+        "deepseek-ai/DeepSeek-R1",
+        "Qwen/Qwen3-0.6B",
+        "Qwen/Qwen3-0.6B-FP8",
+        "Qwen/Qwen3-0.6B-Base",
+        "Qwen/Qwen3-1.7B-FP8",
+        "Qwen/Qwen3-1.7B",
+        "Qwen/Qwen3-1.7B-Base",
+        "Qwen/Qwen3-4B-FP8",
+        "Qwen/Qwen3-4B",
+        "Qwen/Qwen3-4B-Base",
+        "Qwen/Qwen3-8B-FP8",
+        "Qwen/Qwen3-8B",
+        "Qwen/Qwen3-8B-Base",
+        "Qwen/Qwen3-14B-FP8",
+        "Qwen/Qwen3-14B-Base",
+        "Qwen/Qwen3-14B",
+        "Qwen/Qwen3-32B-FP8",
+        "Qwen/Qwen3-32B",
+        "Qwen/Qwen3-30B-A3B-Base",
+        "Qwen/Qwen3-30B-A3B-FP8"
+    ]
+
+
     models = {}
     if model_name == "gpt-4.1-mini":
         models["gpt-4.1-mini"] = ChatCompletionSampler(
@@ -121,82 +154,11 @@ def get_model_dict(model_name: str):
             model="claude-3-opus-20240229",
             system_message=CLAUDE_SYSTEM_MESSAGE_LMSYS,
         )
-    elif model_name == "Llama-3.2-3B-Instruct":
-        models["Llama-3.2-3B-Instruct"] = HFChatCompletionSampler(
-                model="meta-llama/Llama-3.2-3B-Instruct",
-                API_TOKEN=os.environ.get("HF_TOKEN", None),
-                system_message=None,
-                max_tokens=2048,
-                temperature=0,
-            )
-    elif model_name == "Qwen2.5-3B-Instruct":
-        models["Qwen2.5-3B-Instruct"] = HFChatCompletionSampler(
-                model="Qwen/Qwen2.5-3B-Instruct",
-                API_TOKEN=os.environ.get("HF_TOKEN", None),
-                system_message=None,
-                max_tokens=2048,
-                temperature=0,
-            )
-    elif model_name == "Qwen2.5-7B-Instruct":
-        models["Qwen2.5-7B-Instruct"] = HFChatCompletionSampler(
-                model="Qwen/Qwen2.5-7B-Instruct",
-                API_TOKEN=os.environ.get("HF_TOKEN", None),
-                system_message=None,
-                max_tokens=2048,
-                temperature=0,
-            )
-    elif model_name == "Qwen2.5-13B-Instruct":
-        models["Qwen2.5-13B-Instruct"] = HFChatCompletionSampler(
-                model="Qwen/Qwen2.5-32B-Instruct",
-                API_TOKEN=os.environ.get("HF_TOKEN", None),
-                system_message=None,
-                max_tokens=2048,
-                temperature=0,
-            )
-    elif model_name == "Qwen2.5-32B-Instruct":
-        models["Qwen2.5-32B-Instruct"] = HFChatCompletionSampler(
-                model="Qwen/Qwen2.5-72B-Instruct",
-                API_TOKEN=os.environ.get("HF_TOKEN", None),
-                system_message=None,
-                max_tokens=2048,
-                temperature=0,
-            )
-    elif model_name == "Llama-3.1-405B-Instruct":
-        models["Llama-3.1-405B-Instruct"] = HFChatCompletionSampler(
-                model="meta-llama/Llama-3.1-405B-Instruct",
-                API_TOKEN=os.environ.get("HF_TOKEN", None),
-                system_message=None,
-                max_tokens=2048,
-                temperature=0,
-            )
-    elif model_name == "Llama-3.3-70B-Instruct": 
-        models["Llama-3.3-70B-Instruct"] = HFChatCompletionSampler(
-                model="meta-llama/Llama-3.3-70B-Instruct",
-                API_TOKEN=os.environ.get("HF_TOKEN", None),
-                system_message=None,
-                max_tokens=2048,
-                temperature=0,
-            )
-    elif model_name == "Llama-3.1-8B-Instruct": 
-        models["Llama-3.1-8B-Instruct"] = HFChatCompletionSampler(
-                model="meta-llama/Llama-3.1-8B-Instruct",
-                API_TOKEN=os.environ.get("HF_TOKEN", None),
-                system_message=None,
-                max_tokens=2048,
-                temperature=0,
-            )
-    elif model_name == "DeepSeek-R1":
-        models["DeepSeek-R1"] = HFChatCompletionSampler(
-                model="deepseek-ai/DeepSeek-R1",
-                API_TOKEN=os.environ.get("HF_TOKEN", None),
-                system_message=None,
-                max_tokens=2048,
-                temperature=1e-6,
-            )
 
-    elif model_name == "Qwen3-0.6B-HF":
-        models["Qwen3-0.6B-HF"] = HFChatCompletionSampler(
-                model="Qwen/Qwen3-0.6B",
+    
+    elif model_name in hf_models:
+        models[model_name] = HFChatCompletionSampler(
+                model=model_name,
                 API_TOKEN=os.environ.get("HF_TOKEN", None),
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 max_new_tokens=2048,
