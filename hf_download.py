@@ -5,7 +5,7 @@ from huggingface_hub import login
 login(token=os.environ["HF_TOKEN"])
 
 # Set custom cache directory
-os.environ["HF_HOME"] = "hf_models/"
+# os.environ["HF_HOME"] = "hf_models/"
 
 # List of model names to download
 model_names = [

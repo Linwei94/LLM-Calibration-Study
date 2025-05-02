@@ -81,4 +81,4 @@ conda activate llm-uncertainty
 python -m LLM-Calibration-Study.simple_evals --model gemini-1.5-pro --benchmark mmlu_pro --conf_mode sampling
 
 conda activate llm-uncertainty
-python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-0.6B --benchmark mmlu_pro --conf_mode sampling
+python -m LLM-Calibration-Study.simple_evals --model Qwen3-0.6B-Base-HF --benchmark mmlu_pro --conf_mode sampling --examples 3
