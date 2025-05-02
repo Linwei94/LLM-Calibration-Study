@@ -121,8 +121,7 @@ def main():
             else:
                 file_stem = f"{eval_name}_{model_name.split("/")[-1]}_{args.conf_mode}_{args.examples}"
             report_filename = f"LLM-Calibration-Study/results/{file_stem}{debug_suffix}.html"
-            if not os.path.exists("LLM-Calibration-Study/results"):
-                os.makedirs("LLM-Calibration-Study/results")
+            os.makedirs(os.path.dirname(report_filename), exist_ok=True)
             print(f"Writing report to {report_filename}")
             with open(report_filename, "w") as fh:
                 fh.write(common.make_report(result, model_name, args.conf_mode, eval_name))
