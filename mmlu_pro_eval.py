@@ -210,10 +210,17 @@ class MMLUProEval(Eval):
             return SingleEvalResult(
                 html=html, score=score, metrics={category: score}, convo=convo, confidence=float(confidence)
             )
+        
+        
+        # ---------------------------------- Local vLLM for sampling -----------------------------------
+        if sampler.base_url == "" and self.conf_mode == "sampling":
+            pass
 
         
+        # ----------------------------------------------------------------------------------------------
 
-        # ---------------------------------- AsyncOpenAI for sampling ----------------------------------
+
+        # ---------------------------------- AsyncOpenAI for Sampling ----------------------------------
         if sampler.base_url and "local" in sampler.base_url and self.conf_mode == "sampling":
             self.regenerate = True
             progress_temp_path = shared_sampling_path(f"tmp_mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
@@ -318,11 +325,11 @@ class MMLUProEval(Eval):
         # ----------------------------------------------------------------------------------------------
 
 
-        # if self.conf_mode in ["sampling", "eval_all"] or "_shared_sampling" in self.conf_mode:
-        #     self.regenerate = True
-        #     regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
-        # else:
-        #     regen_stored_path = ind_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+        if self.conf_mode in ["sampling", "eval_all"] or "_shared_sampling" in self.conf_mode:
+            self.regenerate = True
+            regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+        else:
+            regen_stored_path = ind_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
 
         if self.regenerate:
             if "tmp" in self.conf_mode:
