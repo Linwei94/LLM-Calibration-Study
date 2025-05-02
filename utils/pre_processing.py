@@ -63,9 +63,9 @@ def shared_sampling_path(eval_type, model, conf_mode, num_examples, n_repeats):
     if not n_repeats:
         n_repeats = 0
     if not num_examples:
-        regen_stored_path = f"LLM-Calibration-Study/cache/{eval_type}_shared_sampling_{model.split("/")[-1]}_full_{n_repeats}"
+        regen_stored_path = f"""LLM-Calibration-Study/cache/{eval_type}_shared_sampling_{model.split("/")[-1]}_full_{n_repeats}"""
     else:
-        regen_stored_path = f"LLM-Calibration-Study/cache/{eval_type}_shared_sampling_{model.split("/")[-1]}_{num_examples}_{n_repeats}"
+        regen_stored_path = f"""LLM-Calibration-Study/cache/{eval_type}_shared_sampling_{model.split("/")[-1]}_{num_examples}_{n_repeats}"""
     if conf_mode == "eval_all" and not os.path.exists(regen_stored_path):
         print("Run tests with '--conf_mode sampling' before running '--conf_mode eval_all'")
         sys.exit()
@@ -76,7 +76,7 @@ def ind_sampling_path(eval_type, model, conf_mode, num_examples, n_repeats):
     if not n_repeats:
         n_repeats = 0
     if num_examples:
-        regen_stored_path = f"LLM-Calibration-Study/cache/{eval_type}_{model.split("/")[-1]}_{conf_mode}_full_{n_repeats}"
+        regen_stored_path = f"""LLM-Calibration-Study/cache/{eval_type}_{model.split("/")[-1]}_{conf_mode}_full_{n_repeats}"""
     else:
-        regen_stored_path = f"LLM-Calibration-Study/cache/{eval_type}_{model.split("/")[-1]}_{conf_mode}_{num_examples}_{n_repeats}"
+        regen_stored_path = f"""LLM-Calibration-Study/cache/{eval_type}_{model.split("/")[-1]}_{conf_mode}_{num_examples}_{n_repeats}"""
     return regen_stored_path
