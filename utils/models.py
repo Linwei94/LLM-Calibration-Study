@@ -191,16 +191,16 @@ def get_model_dict(model_name: str):
                 API_TOKEN=os.environ.get("HF_TOKEN", None),
                 system_message=None,
                 max_tokens=2048,
-                temperature=0,
+                temperature=1e-6,
             )
 
-    elif model_name == "Qwen3-0.6B-Base-HF":
-        models["Qwen3-0.6B-Base-HF"] = HFChatCompletionSampler(
-                model="Qwen/Qwen3-0.6B-Base",
+    elif model_name == "Qwen3-0.6B-HF":
+        models["Qwen3-0.6B-HF"] = HFChatCompletionSampler(
+                model="Qwen/Qwen3-0.6B",
                 API_TOKEN=os.environ.get("HF_TOKEN", None),
-                system_message=None,
-                max_tokens=2048,
-                temperature=0,
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                max_new_tokens=2048,
+                temperature=1e-6,
             )
         
     # ----------- Google LLMs -----------
