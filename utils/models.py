@@ -199,7 +199,7 @@ def get_model_dict(model_name: str):
                 API_TOKEN=os.environ.get("HF_TOKEN", None),
                 system_message=None,
                 max_tokens=2048,
-                temperature=0,
+                temperature=0.000001,
             )
         
     # ----------- Google LLMs -----------
