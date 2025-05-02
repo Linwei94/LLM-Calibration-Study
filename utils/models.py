@@ -449,6 +449,8 @@ def get_model_dict(model_name: str):
 
     # VLLM
     # --------------------------------------------------------------
+    # Lab 0
+    # --------------------------------------------------------------
     models["Qwen/Qwen3-0.6B-Base"] = ChatCompletionSampler(
         model="Qwen/Qwen3-0.6B-Base",
         system_message=OPENAI_SYSTEM_MESSAGE_API,
@@ -475,6 +477,86 @@ def get_model_dict(model_name: str):
         base_url="http://localhost:7002/v1",
         get_logprobs=True
     )
+    # --------------------------------------------------------------
+
+    # Lab 1
+    # --------------------------------------------------------------
+    models["Qwen/Qwen3-4B"] = ChatCompletionSampler(
+        model="Qwen/Qwen3-4B",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=2048,
+        api_key="ANY",
+        base_url="http://localhost:5001/v1",
+        get_logprobs=True
+    )
+
+    models["Qwen/Qwen3-4B-Base"] = ChatCompletionSampler(
+        model="Qwen/Qwen3-4B-Base",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=2048,
+        api_key="ANY",
+        base_url="http://localhost:5002/v1",
+        get_logprobs=True
+    )
+
+    models["Qwen/Qwen3-14B"] = ChatCompletionSampler(
+        model="Qwen/Qwen3-14B",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=2048,
+        api_key="ANY",
+        base_url="http://localhost:5005/v1",
+        get_logprobs=True
+    )
+
+    models["Qwen/Qwen3-1.7B-Base"] = ChatCompletionSampler(
+        model="Qwen/Qwen3-1.7B-Base",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=2048,
+        api_key="ANY",
+        base_url="http://localhost:5000/v1",
+        get_logprobs=True
+    )
+    # --------------------------------------------------------------
+
+    # Lab 2
+    # --------------------------------------------------------------
+    models["Qwen/Qwen3-1.7B"] = ChatCompletionSampler(
+        model="Qwen/Qwen3-1.7B",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=2048,
+        api_key="ANY",
+        base_url="http://localhost:7101/v1",
+        get_logprobs=True
+    )
+
+    models["Qwen/Qwen3-1.7B-FP8"] = ChatCompletionSampler(
+        model="Qwen/Qwen3-1.7B-FP8",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=2048,
+        api_key="ANY",
+        base_url="http://localhost:7100/v1",
+        get_logprobs=True
+    )
+
+    models["Qwen/Qwen3-8B-Base"] = ChatCompletionSampler(
+        model="Qwen/Qwen3-8B-Base",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=2048,
+        api_key="ANY",
+        base_url="http://localhost:7105/v1",
+        get_logprobs=True
+    )
+
+    models["Qwen/Qwen3-8B"] = ChatCompletionSampler(
+        model="Qwen/Qwen3-8B",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=2048,
+        api_key="ANY",
+        base_url="http://localhost:7104/v1",
+        get_logprobs=True
+    )
+
+    # --------------------------------------------------------------
 
     
     # Deep Seek API

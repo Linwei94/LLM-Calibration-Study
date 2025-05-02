@@ -82,4 +82,4 @@ python -m LLM-Calibration-Study.simple_evals --model gemini-1.5-pro --benchmark 
 
 
 
-python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-0.6B-FP8 --benchmark mmlu_pro --conf_mode sampling
+python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-0.6B --benchmark mmlu_pro --conf_mode sampling

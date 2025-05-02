@@ -8,6 +8,7 @@ import random
 import pickle
 import os
 import sys
+import time
 from datasets import load_dataset
 from filelock import FileLock
 from . import common
@@ -210,21 +211,36 @@ class MMLUProEval(Eval):
                 html=html, score=score, metrics={category: score}, convo=convo, confidence=float(confidence)
             )
 
+        
 
         # ---------------------------------- AsyncOpenAI for sampling ----------------------------------
         if sampler.base_url and "local" in sampler.base_url and self.conf_mode == "sampling":
+            self.regenerate = True
+            progress_temp_path = shared_sampling_path(f"tmp_mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
             _inproc_lock = asyncio.Lock()
             async def stream_prompt(sampler, client: AsyncOpenAI, row: str):
+                
                 prompt_messages = [
                     sampler._pack_message(
                         content=format_multichoice_question(row, conf_mode="sampling", choices=0), role="user"
                     )
                 ]
+                # resume sampling if cache exists
+                if os.path.exists(progress_temp_path):
+                    with open(progress_temp_path, 'rb') as f:
+                        saved_progress: list[dict] = pickle.load(f)
+                        answered_questions = [eg["prompt_messages"] for eg in saved_progress]
+                        if prompt_messages in answered_questions:
+                            question_idx = answered_questions.index(prompt_messages)
+                            row = saved_progress[question_idx]
+                            print("Question found in cache, skiping to the next one")
+                            return 
                 if sampler.system_message:
                     message_list = [sampler._pack_message("system", sampler.system_message)] + prompt_messages 
                 else:
                     message_list = prompt_messages
 
+                print("Sampling with vLLM:", sampler.model)
                 response = await client.chat.completions.create(
                     model=sampler.model,
                     messages=message_list,
@@ -245,11 +261,7 @@ class MMLUProEval(Eval):
                 row["top_logprobs"] = top_logprob_lst
                 
                 current_progress = [eg for eg in self.examples.copy() if "logprobs" in eg.keys()]
-                if self.conf_mode in ["sampling", "eval_all"] or "_shared_sampling" in self.conf_mode:
-                    self.regenerate = True
-                    progress_temp_path = shared_sampling_path(f"tmp_mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
-                else:
-                    progress_temp_path = ind_sampling_path(f"tmp_mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+                
                     # ensure directory exists
                 os.makedirs(os.path.dirname(progress_temp_path), exist_ok=True)
 
@@ -272,8 +284,23 @@ class MMLUProEval(Eval):
                 )
                 sem = asyncio.Semaphore(max_concurrent)
                 async def limited(row):
-                    async with sem:
-                        return await stream_prompt(sampler, client, row)
+                    retry = 0
+                    backoff = 1
+                    while True:
+                        try:
+                            async with sem:
+                                return await stream_prompt(sampler, client, row)
+                        except openai.APITimeoutError as e:
+                            retry += 1
+                            backoff += 1
+                            backoff = min(backoff, 60)
+                            time.sleep(backoff)
+                            print("Retry", retry, e)
+                            continue
+                        except Exception as e:
+                            print("Retry", retry, e)
+                            retry += 1
+                            continue
                 # create all tasks
                 tasks = [asyncio.create_task(limited(row)) for row in examples]
                 results = []
@@ -291,11 +318,11 @@ class MMLUProEval(Eval):
         # ----------------------------------------------------------------------------------------------
 
 
-        if self.conf_mode in ["sampling", "eval_all"] or "_shared_sampling" in self.conf_mode:
-            self.regenerate = True
-            regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
-        else:
-            regen_stored_path = ind_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+        # if self.conf_mode in ["sampling", "eval_all"] or "_shared_sampling" in self.conf_mode:
+        #     self.regenerate = True
+        #     regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+        # else:
+        #     regen_stored_path = ind_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
 
         if self.regenerate:
             if "tmp" in self.conf_mode:
