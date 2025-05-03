@@ -1,10 +1,10 @@
 import torch
 
-def calculate_ece(confidences, accuracies, n_bins=15) -> float:
+def calculate_ece(confidences, accuracies, n_bins=10) -> float:
     """
-    Calculate the expected calibration error (ECE) given a list of confidence scores and accuracy scores.
+    Calculate the expected calibration error (ECE) given a list of confidence scores (0-1) and accuracy scores (0 or 1).
     """
-    confidences = torch.tensor([i/100 for i in confidences]) # turn confidences to 0~1
+    confidences = torch.tensor(confidences)
     accuracies = torch.tensor(accuracies)
     bin_boundaries = torch.linspace(0, 1, n_bins + 1)
     bin_lowers = bin_boundaries[:-1]

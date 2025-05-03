@@ -119,3 +119,29 @@ This will launch evaluations through the OpenAI API.
 
 ## Legal Stuff
 By contributing to evals, you are agreeing to make your evaluation logic and data under the same MIT license as this repository. You must have adequate rights to upload any data used in an eval. OpenAI reserves the right to use this data in future service improvements to our product. Contributions to OpenAI evals will be subject to our usual Usage Policies: https://platform.openai.com/docs/usage-policies.
+
+
+# Ivan's Additions
+The model can now benchmark MMLU, GPQA and SimpleQA with the following confidence extraction methods: 
+`verbal_vanilla`, `verbal_cot`, `empirical_semantic`, `single_generation`, `faithfulness` (faithful response uncertainty).
+
+To initiate benchmarking, run:
+
+`python -m LLM-Calibration-Study.simple_evals --model [MODEL NAME] [--examples ANY NUMBER OF EXAMPLES] [--regenerate] --benchmark [BENCHMARK] --conf_mode [CONFIDENCE EXTRACTION METHOD] `
+
+`[BENCHMARK]` is one of `mmlu`, `gpqa`, `simpleqa`
+
+`[CONFIDENCE EXTRACTION METHOD]` is one of `verbal_vanilla`, `verbal_cot`, `empirical_semantic`, `single_generation`, `faithfulness`
+
+`--regenerate` is an optional argument. When used, the program saves (pickles) previously generated responses (including questions and responses) in the `\cache` directory. When a test is run again, the program first searches for the existence of the corresponding cache. If the search fails, the program then resamples as usual. When `--regenerate` is not specified, responses are sampled regardless of the existence of the corresponding cache but the results will be cached. The cache is named by `LLM-Calibration-Study/cache/[BENCHMARK]_[MODEL NAME]_[CONFIDENCE EXTRACTION METHOD]_{NUMBER OF EXAMPLES}_{NUMBER OF REPEATS}`. Thus, any changes will be treated as a new run. 
+
+Example usage:
+
+The following uses meta-llama/Llama-3.3-70B-Instruct-Turbo-Free to run 3 examples against SimpleQA with the empirical semantic confidence extraction method. When the same command runs the second time or more, the program won't resample its responses. 
+`python -m LLM-Calibration-Study.simple_evals --model meta-llama/Llama-3.3-70B-Instruct-Turbo-Free --examples 3 --benchmark simpleqa --conf_mode logit_perplexity --regenerate`
+
+
+Evaluation results are saved in an HTML file (now also includes confidence extraction mode and log probs) along with a JSON as before. 
+
+
+https://cloud.google.com/sdk/docs/install-sdk#before-you-begin

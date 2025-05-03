@@ -1,77 +1,82 @@
-QUERY_TEMPLATE_MULTICHOICE = """
-Answer the following multiple choice question. The last line of your response should be of the following format: 'Answer: $LETTER' (without quotes) where LETTER is one of ABCD. Think step by step before answering.
-
-{Question}
-
-A) {A}
-B) {B}
-C) {C}
-D) {D}
-""".strip()
-
-QUERY_TEMPLATE_MULTICHOICE_WITH_CONFIDENCE = """
-Read the following multiple choice question, analyze step by step, provide your answer and your confidence in this answer in the last line. Note: The confidence indicates how likely you think your answer is true.\nUse the following format to answer:\n```Explanation: [insert step-by-step analysis here]\nThe last line of your response should be of the following format: Answer: [ONLY the option LETTER where LETTER is one of ABCD; not a complete sentence], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%\n```\nOnly give me the reply according to this format, don't give me any other words."
-
-{Question}
-
-A) {A}
-B) {B}
-C) {C}
-D) {D}
-""".strip()
-
-LLM_UNCERTAINTY_TEMPLATE = """
-Read the question, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.\nUse the following format to answer:\n```Answer and Confidence (0-100): [ONLY the option LETTER, where the LETTER is one of A,B,C,D; not a complete sentence], [Your confidence level, please only include the numerical number in the range of 0-100]%```\nOnly the answer and confidence, don't give me the explanation.
-
-{Question}
-
-A) {A}
-B) {B}
-C) {C}
-D) {D}
-""".strip()
-
-LLM_UNCERTAINTY_COT_TEMPLATE = """
-Read the question, analyze step by step, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.\nUse the following format to answer:\n```Explanation: [insert step-by-step analysis here]\nAnswer and Confidence (0-100): [ONLY the option LETTER, where the LETTER is one of A,B,C,D], [Your confidence level, please only include the numerical number in the range of 0-100]%```\nOnly give me the reply according to this format, don't give me any other words.
-
-{Question}
-
-A) {A}
-B) {B}
-C) {C}
-D) {D}
-""".strip()
+import os
+import sys
+from .query_templates import *
 
 
+def format_multichoice_question(row, conf_mode="verbal_numerical", choices = 4):
+    if choices == 4: #  MMLU and GPQA
+        if conf_mode == "sampling":
+            return MULTI_CHOICE_4_SHARED_SAMPLING_TEMPLATE.format(**row)
+        elif conf_mode == "verbal_numerical":
+            return MULTI_CHOICE_4_COT_VERBAL_CONFIDENCE_TEMPLATE.format(**row)
+        elif conf_mode == "verbal_linguistic":
+            return MULTI_CHOICE_4_COT_HEDGING_TEMPLATE.format(**row)
+        elif conf_mode == "logit_perplexity":
+            return MULTI_CHOICE_4_COT_TEMPLATE.format(**row)
+        elif conf_mode == "token_sar":
+            return MULTI_CHOICE_4_COT_TEMPLATE.format(**row)
+        elif conf_mode == "decisiveness_grading":
+            return MULTI_CHOICE_TEMPLATE.format(**row)
+        else:
+            raise ValueError(f"Unknown conf_mode: {conf_mode}")
+    elif choices == 0: # MMLU PRO without set placeholders
+        options = dict(zip([chr(ord('A') + i) for i in range(len(row["options"]))], row["options"]))
+        letters = ",".join(options.keys())
+        options_str = "\n"
+        for k, v in options.items():
+            options_str += "{}) {}\n".format(k, v)
+        if conf_mode == "sampling":
+            return MULTI_CHOICE_NO_OPTIONS_SHARED_SAMPLING_TEMPLATE.format(Question = row["question"], Letters = letters) + options_str
+        elif conf_mode == "verbal_numerical":
+            return MULTI_CHOICE_NO_OPTIONS_COT_VERBAL_CONFIDENCE_TEMPLATE.format(Question = row["question"], Letters = letters) + options_str
+        elif conf_mode == "verbal_linguistic":
+            return MULTI_CHOICE_NO_OPTIONS_COT_HEDGING_TEMPLATE.format(Question = row["question"], Letters = letters) + options_str
+        elif conf_mode == "logit_perplexity":
+            return MULTI_CHOICE_NO_OPTIONS_COT_TEMPLATE.format(Question = row["question"], Letters = letters) + options_str
+        elif conf_mode == "token_sar":
+            return MULTI_CHOICE_NO_OPTIONS_COT_TEMPLATE.format(Question = row["question"], Letters = letters) + options_str
+        elif conf_mode == "decisiveness_grading":
+            return row["question"] + "\n" + options_str
+        else:
+            raise ValueError(f"Unknown conf_mode: {conf_mode}")
+    else:
+        raise ValueError(f"No query template for {choices}-choice multiple choice questions")
+    
 
-LLM_UNCERTAINTY_TEMPLATE_WITHOUT_OPTIONS = """
-Read the question, provide your answer and your confidence in this answer. 
-
-Use the following format to answer:
-```Answer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
-
-Only the answer and confidence, don't give me the explanation.
-
-{Question}
-""".strip()
-
-
-LLM_UNCERTAINTY_COT_TEMPLATE_WITHOUT_OPTIONS = """
-Read the question, analyze step by step, provide your answer and your confidence in this answer. 
-
-Use the following format to answer:
-```Explanation: [insert step-by-step analysis here]\nAnswer: [Your answer], Confidence: [Your confidence level, please only include the numerical number in the range of 0-100]%```
-
-Only give me the reply according to this format, don't give me any other words.
-
-{Question}
-""".strip()
-
-
-def format_multichoice_question(row, conf_mode="verbal"):
-    if conf_mode == "verbal":
-        return LLM_UNCERTAINTY_TEMPLATE.format(**row)
-    elif conf_mode == "verbal_cot":
-        return LLM_UNCERTAINTY_COT_TEMPLATE.format(**row)
+def format_open_ended_question(row, conf_mode="verbal_numerical"):
+    if conf_mode == "sampling":
+        return OPEN_ENDED_COT_SHARED_SAMPLING_TEMPLATE.format(Question=row.get("problem", ""))
+    elif conf_mode == "verbal_numerical":
+        return OPEN_ENDED_COT_VERBAL_CONFIDENCE_TEMPLATE.format(Question=row.get("problem", ""))
+    elif conf_mode == "verbal_linguistic":
+        return OPEN_ENDED_COT_HEDGING_TEMPLATE.format(Question=row.get("problem", ""))
+    elif conf_mode == "logit_perplexity":
+        return OPEN_ENDED_COT_TEMPLATE.format(Question=row.get("problem", ""))
+    elif conf_mode == "token_sar":
+        return OPEN_ENDED_COT_TEMPLATE.format(Question=row.get("problem", ""))
     else:
         raise ValueError(f"Unknown conf_mode: {conf_mode}")
+
+
+# shared sampling
+def shared_sampling_path(eval_type, model, conf_mode, num_examples, n_repeats):
+    if not n_repeats:
+        n_repeats = 0
+    if not num_examples:
+        regen_stored_path = f"""LLM-Calibration-Study/cache/{eval_type}_shared_sampling_{model.split("/")[-1]}_full_{n_repeats}"""
+    else:
+        regen_stored_path = f"""LLM-Calibration-Study/cache/{eval_type}_shared_sampling_{model.split("/")[-1]}_{num_examples}_{n_repeats}"""
+    if conf_mode == "eval_all" and not os.path.exists(regen_stored_path):
+        print("Run tests with '--conf_mode sampling' before running '--conf_mode eval_all'")
+        sys.exit()
+    return regen_stored_path
+
+# individual sampling
+def ind_sampling_path(eval_type, model, conf_mode, num_examples, n_repeats):
+    if not n_repeats:
+        n_repeats = 0
+    if num_examples:
+        regen_stored_path = f"""LLM-Calibration-Study/cache/{eval_type}_{model.split("/")[-1]}_{conf_mode}_full_{n_repeats}"""
+    else:
+        regen_stored_path = f"""LLM-Calibration-Study/cache/{eval_type}_{model.split("/")[-1]}_{conf_mode}_{num_examples}_{n_repeats}"""
+    return regen_stored_path
