@@ -8,9 +8,6 @@ from ..sampler.o_chat_completion_sampler import OChatCompletionSampler
 from ..sampler.claude_sampler import ClaudeCompletionSampler, CLAUDE_SYSTEM_MESSAGE_LMSYS
 from ..sampler.hfmodel_sampler import HFChatCompletionSampler
 
-from google.auth import default
-from google.auth.transport.requests import Request
-
 def get_model_dict(model_name: str):
     """
     Get the model dict from the model name.
@@ -318,6 +315,8 @@ def get_model_dict(model_name: str):
     # --------------------------------------------------------------
 
     # ----------- Google LLMs -----------
+    # from google.auth import default
+    # from google.auth.transport.requests import Request
     # credentials, _ = default()
     # auth_request = Request()
     # credentials.refresh(auth_request)
