@@ -15,6 +15,39 @@ def get_model_dict(model_name: str):
     """
     Get the model dict from the model name.
     """
+
+    hf_models = [
+        "meta-llama/Llama-3.2-3B-Instruct",
+        "Qwen/Qwen2.5-3B-Instruct",
+        "Qwen/Qwen2.5-7B-Instruct",
+        "Qwen/Qwen2.5-32B-Instruct",
+        "Qwen/Qwen2.5-72B-Instruct",
+        "meta-llama/Llama-3.1-405B-Instruct",
+        "meta-llama/Llama-3.3-70B-Instruct",
+        "meta-llama/Llama-3.1-8B-Instruct",
+        "deepseek-ai/DeepSeek-R1",
+        "Qwen/Qwen3-0.6B",
+        "Qwen/Qwen3-0.6B-FP8",
+        "Qwen/Qwen3-0.6B-Base",
+        "Qwen/Qwen3-1.7B-FP8",
+        "Qwen/Qwen3-1.7B",
+        "Qwen/Qwen3-1.7B-Base",
+        "Qwen/Qwen3-4B-FP8",
+        "Qwen/Qwen3-4B",
+        "Qwen/Qwen3-4B-Base",
+        "Qwen/Qwen3-8B-FP8",
+        "Qwen/Qwen3-8B",
+        "Qwen/Qwen3-8B-Base",
+        "Qwen/Qwen3-14B-FP8",
+        "Qwen/Qwen3-14B-Base",
+        "Qwen/Qwen3-14B",
+        "Qwen/Qwen3-32B-FP8",
+        "Qwen/Qwen3-32B",
+        "Qwen/Qwen3-30B-A3B-Base",
+        "Qwen/Qwen3-30B-A3B-FP8"
+    ]
+
+
     models = {}
     if model_name == "gpt-4.1-mini":
         models["gpt-4.1-mini"] = ChatCompletionSampler(
@@ -120,191 +153,16 @@ def get_model_dict(model_name: str):
             model="claude-3-opus-20240229",
             system_message=CLAUDE_SYSTEM_MESSAGE_LMSYS,
         )
-    elif model_name == "Llama-3.2-3B-Instruct":
-        models["Llama-3.2-3B-Instruct"] = HFChatCompletionSampler(
-                model="meta-llama/Llama-3.2-3B-Instruct",
+
+    
+    elif model_name in hf_models:
+        models[model_name] = HFChatCompletionSampler(
+                model=model_name,
                 API_TOKEN=os.environ.get("HF_TOKEN", None),
-                system_message=None,
-                max_tokens=2048,
-                temperature=0,
-            )
-    elif model_name == "Qwen2.5-3B-Instruct":
-        models["Qwen2.5-3B-Instruct"] = HFChatCompletionSampler(
-                model="Qwen/Qwen2.5-3B-Instruct",
-                API_TOKEN=os.environ.get("HF_TOKEN", None),
-                system_message=None,
-                max_tokens=2048,
-                temperature=0,
-            )
-    elif model_name == "Qwen2.5-7B-Instruct":
-        models["Qwen2.5-7B-Instruct"] = HFChatCompletionSampler(
-                model="Qwen/Qwen2.5-7B-Instruct",
-                API_TOKEN=os.environ.get("HF_TOKEN", None),
-                system_message=None,
-                max_tokens=2048,
-                temperature=0,
-            )
-    elif model_name == "Qwen2.5-13B-Instruct":
-        models["Qwen2.5-13B-Instruct"] = HFChatCompletionSampler(
-                model="Qwen/Qwen2.5-32B-Instruct",
-                API_TOKEN=os.environ.get("HF_TOKEN", None),
-                system_message=None,
-                max_tokens=2048,
-                temperature=0,
-            )
-    elif model_name == "Qwen2.5-32B-Instruct":
-        models["Qwen2.5-32B-Instruct"] = HFChatCompletionSampler(
-                model="Qwen/Qwen2.5-72B-Instruct",
-                API_TOKEN=os.environ.get("HF_TOKEN", None),
-                system_message=None,
-                max_tokens=2048,
-                temperature=0,
-            )
-    elif model_name == "Llama-3.1-405B-Instruct":
-        models["Llama-3.1-405B-Instruct"] = HFChatCompletionSampler(
-                model="meta-llama/Llama-3.1-405B-Instruct",
-                API_TOKEN=os.environ.get("HF_TOKEN", None),
-                system_message=None,
-                max_tokens=2048,
-                temperature=0,
-            )
-    elif model_name == "Llama-3.3-70B-Instruct": 
-        models["Llama-3.3-70B-Instruct"] = HFChatCompletionSampler(
-                model="meta-llama/Llama-3.3-70B-Instruct",
-                API_TOKEN=os.environ.get("HF_TOKEN", None),
-                system_message=None,
-                max_tokens=2048,
-                temperature=0,
-            )
-    elif model_name == "Llama-3.1-8B-Instruct": 
-        models["Llama-3.1-8B-Instruct"] = HFChatCompletionSampler(
-                model="meta-llama/Llama-3.1-8B-Instruct",
-                API_TOKEN=os.environ.get("HF_TOKEN", None),
-                system_message=None,
-                max_tokens=2048,
-                temperature=0,
-            )
-    elif model_name == "Qwen3-0.6B":
-        models["Qwen3-0.6B"] = HFChatCompletionSampler(
-                model="Qwen/Qwen3-0.6B",
-                API_TOKEN=os.environ.get("HF_TOKEN", None),
-                system_message=None,
-                max_tokens=2048,
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                max_new_tokens=2048,
                 temperature=1e-6,
             )
-
-    elif model_name == "Qwen3-0.6B-HF":
-        models["Qwen3-0.6B-HF"] = HFChatCompletionSampler(
-                model="Qwen/Qwen3-0.6B",
-                API_TOKEN=os.environ.get("HF_TOKEN", None),
-                system_message=None,
-                max_tokens=2048,
-                temperature=0.000001,
-            )
-        
-    # ----------- Google LLMs -----------
-    # credentials, _ = default()
-    # auth_request = Request()
-    # credentials.refresh(auth_request)
-    # base_url = "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi"
-    
-    # models["google-llama-3.1-405b-instruct-maas"] = ChatCompletionSampler(
-    #     model="meta/llama-3.1-405b-instruct-maas",
-    #     system_message=OPENAI_SYSTEM_MESSAGE_API,
-    #     max_tokens=2048,
-    #     base_url=base_url,
-    #     api_key=credentials.token
-    # )
-    # models["google-llama-3.1-70b-instruct-maas"] = ChatCompletionSampler(
-    #         model="meta/llama-3.1-70b-instruct-maas",
-    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
-    #         max_tokens=2048,
-    #         base_url=base_url,
-    #         api_key=credentials.token
-    #     )
-    # models["google-llama-3.1-8b-instruct-maas"] = ChatCompletionSampler(
-    #         model="meta/llama-3.1-8b-instruct-maas",
-    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
-    #         max_tokens=2048,
-    #         base_url=f"https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
-    #         api_key=credentials.token
-    #     )
-    # models["google-llama-3.3-70b-instruct-maas"] = ChatCompletionSampler(
-    #         model="meta/llama-3.3-70b-instruct-maas",
-    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
-    #         max_tokens=2048,
-    #         base_url=f"https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
-    #         api_key=credentials.token
-    #     )
-    # models["google-llama-3.1-8b-instruct-maas"] = ChatCompletionSampler(
-    #         model="meta/llama-3.1-8b-instruct-maas",
-    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
-    #         max_tokens=2048,
-    #         base_url=f"https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
-    #         api_key=credentials.token
-    #     )
-    
-    # google_models = [
-    #     "gemini-2.5-flash-preview-04-17",
-    #     "gemini-2.5-pro-exp-03-25",
-    #     "gemini-2.0-flash",
-    #     "gemini-2.0-flash-lite",
-    #     "gemini-1.5-flash",
-    #     "gemini-1.5-flash-8b",
-    #     "gemini-1.5-pro",
-    # ]
-
-    # for gm in google_models:
-    #     models[gm] = GoogleAISampler(
-    #             model=gm,
-    #             api_key=os.environ["GOOGLE_AI_KEY"],
-    #             get_logprobs=True
-    #     )
-    
-
-    # # free during preview stage
-    # models["meta/llama-4-maverick-17b-128e-instruct-maas"] = ChatCompletionSampler(
-    #         model="meta/llama-4-maverick-17b-128e-instruct-maas",
-    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
-    #         max_tokens=2048,
-    #         base_url=f"https://{"us-east5-aiplatform.googleapis.com"}/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
-    #         api_key=credentials.token
-    #     )
-    # # free during preview stage
-    # models["meta/llama-4-scout-17b-16e-instruct-maas"] = ChatCompletionSampler(
-    #         model="meta/llama-4-scout-17b-16e-instruct-maas",
-    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
-    #         max_tokens=2048,
-    #         base_url=f"https://{"us-east5-aiplatform.googleapis.com"}/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
-    #         api_key=credentials.token
-    #     )
-    
-    # # free during preview stage
-    # models["meta/llama-3.2-90b-vision-instruct-maas"] = ChatCompletionSampler(
-    #         model="meta/llama-3.2-90b-vision-instruct-maas",
-    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
-    #         max_tokens=2048,
-    #         base_url=f"https://{"us-central1-aiplatform.googleapis.com"}/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
-    #         api_key=credentials.token
-    #     )
-    
-    # # free during preview stage
-    # models["meta/llama-3.2-1b-instruct"] = ChatCompletionSampler(
-    #         model="meta/llama-3.2-1b-instruct",
-    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
-    #         max_tokens=2048,
-    #         base_url=f"https://{"us-central1-aiplatform.googleapis.com"}/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
-    #         api_key=credentials.token
-    #     )
-    
-    # models["mistral/mistral-large-2402"] = ChatCompletionSampler(
-    #         model="mistral/mistral-large-2402",
-    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
-    #         max_tokens=2048,
-    #         base_url=f"https://{"us-central1-aiplatform.googleapis.com"}/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
-    #         api_key=credentials.token
-    #     )
-
 
 
     # ----------- Databrick LLMs -----------
@@ -438,135 +296,6 @@ def get_model_dict(model_name: str):
             get_logprobs=True
     )
 
-    models["gpt-4.1-mini"] = ChatCompletionSampler(
-        model="gpt-4.1-mini",
-        system_message=OPENAI_SYSTEM_MESSAGE_API,
-        max_tokens=2048,
-        get_logprobs=True
-    )
-
-    models["gpt-4.1-nano"] = ChatCompletionSampler(
-        model="gpt-4.1-nano",
-        system_message=OPENAI_SYSTEM_MESSAGE_API,
-        max_tokens=2048,
-        get_logprobs=True
-    )
-
-    
-
-
-    # VLLM
-    # --------------------------------------------------------------
-    # Lab 0
-    # --------------------------------------------------------------
-    models["Qwen/Qwen3-0.6B-Base"] = ChatCompletionSampler(
-        model="Qwen/Qwen3-0.6B-Base",
-        system_message=OPENAI_SYSTEM_MESSAGE_API,
-        max_tokens=2048,
-        api_key="ANY",
-        base_url="http://localhost:7000/v1",
-        get_logprobs=True
-    )
-
-    # models["Qwen/Qwen3-0.6B-FP8"] = ChatCompletionSampler(
-    #     model="Qwen/Qwen3-0.6B-FP8",
-    #     system_message=OPENAI_SYSTEM_MESSAGE_API,
-    #     max_tokens=2048,
-    #     api_key="ANY",
-    #     base_url="http://localhost:7001/v1",
-    #     get_logprobs=True
-    # )
-
-    models["Qwen/Qwen3-0.6B"] = ChatCompletionSampler(
-        model="Qwen/Qwen3-0.6B",
-        system_message=OPENAI_SYSTEM_MESSAGE_API,
-        max_tokens=2048,
-        api_key="ANY",
-        base_url="http://localhost:7002/v1",
-        get_logprobs=True
-    )
-    # --------------------------------------------------------------
-
-    # Lab 1
-    # --------------------------------------------------------------
-    models["Qwen/Qwen3-4B"] = ChatCompletionSampler(
-        model="Qwen/Qwen3-4B",
-        system_message=OPENAI_SYSTEM_MESSAGE_API,
-        max_tokens=2048,
-        api_key="ANY",
-        base_url="http://localhost:5001/v1",
-        get_logprobs=True
-    )
-
-    models["Qwen/Qwen3-4B-Base"] = ChatCompletionSampler(
-        model="Qwen/Qwen3-4B-Base",
-        system_message=OPENAI_SYSTEM_MESSAGE_API,
-        max_tokens=2048,
-        api_key="ANY",
-        base_url="http://localhost:5002/v1",
-        get_logprobs=True
-    )
-
-    models["Qwen/Qwen3-14B"] = ChatCompletionSampler(
-        model="Qwen/Qwen3-14B",
-        system_message=OPENAI_SYSTEM_MESSAGE_API,
-        max_tokens=2048,
-        api_key="ANY",
-        base_url="http://localhost:5005/v1",
-        get_logprobs=True
-    )
-
-    models["Qwen/Qwen3-1.7B-Base"] = ChatCompletionSampler(
-        model="Qwen/Qwen3-1.7B-Base",
-        system_message=OPENAI_SYSTEM_MESSAGE_API,
-        max_tokens=2048,
-        api_key="ANY",
-        base_url="http://localhost:5000/v1",
-        get_logprobs=True
-    )
-    # --------------------------------------------------------------
-
-    # Lab 2
-    # --------------------------------------------------------------
-    models["Qwen/Qwen3-1.7B"] = ChatCompletionSampler(
-        model="Qwen/Qwen3-1.7B",
-        system_message=OPENAI_SYSTEM_MESSAGE_API,
-        max_tokens=2048,
-        api_key="ANY",
-        base_url="http://localhost:7101/v1",
-        get_logprobs=True
-    )
-
-    models["Qwen/Qwen3-1.7B-FP8"] = ChatCompletionSampler(
-        model="Qwen/Qwen3-1.7B-FP8",
-        system_message=OPENAI_SYSTEM_MESSAGE_API,
-        max_tokens=2048,
-        api_key="ANY",
-        base_url="http://localhost:7100/v1",
-        get_logprobs=True
-    )
-
-    models["Qwen/Qwen3-8B-Base"] = ChatCompletionSampler(
-        model="Qwen/Qwen3-8B-Base",
-        system_message=OPENAI_SYSTEM_MESSAGE_API,
-        max_tokens=2048,
-        api_key="ANY",
-        base_url="http://localhost:7105/v1",
-        get_logprobs=True
-    )
-
-    models["Qwen/Qwen3-8B"] = ChatCompletionSampler(
-        model="Qwen/Qwen3-8B",
-        system_message=OPENAI_SYSTEM_MESSAGE_API,
-        max_tokens=2048,
-        api_key="ANY",
-        base_url="http://localhost:7104/v1",
-        get_logprobs=True
-    )
-
-    # --------------------------------------------------------------
-
-    
     # Deep Seek API
     # --------------------------------------------------------------
     models["deepseek-chat"] = ChatCompletionSampler(
@@ -586,7 +315,220 @@ def get_model_dict(model_name: str):
         base_url="https://api.deepseek.com",
         get_logprobs=True
     )
+    # --------------------------------------------------------------
+
+    # ----------- Google LLMs -----------
+    # credentials, _ = default()
+    # auth_request = Request()
+    # credentials.refresh(auth_request)
+    # base_url = "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi"
+    
+    # models["google-llama-3.1-405b-instruct-maas"] = ChatCompletionSampler(
+    #     model="meta/llama-3.1-405b-instruct-maas",
+    #     system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #     max_tokens=2048,
+    #     base_url=base_url,
+    #     api_key=credentials.token
+    # )
+    # models["google-llama-3.1-70b-instruct-maas"] = ChatCompletionSampler(
+    #         model="meta/llama-3.1-70b-instruct-maas",
+    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #         max_tokens=2048,
+    #         base_url=base_url,
+    #         api_key=credentials.token
+    #     )
+    # models["google-llama-3.1-8b-instruct-maas"] = ChatCompletionSampler(
+    #         model="meta/llama-3.1-8b-instruct-maas",
+    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #         max_tokens=2048,
+    #         base_url=f"https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
+    #         api_key=credentials.token
+    #     )
+    # models["google-llama-3.3-70b-instruct-maas"] = ChatCompletionSampler(
+    #         model="meta/llama-3.3-70b-instruct-maas",
+    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #         max_tokens=2048,
+    #         base_url=f"https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
+    #         api_key=credentials.token
+    #     )
+    # models["google-llama-3.1-8b-instruct-maas"] = ChatCompletionSampler(
+    #         model="meta/llama-3.1-8b-instruct-maas",
+    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #         max_tokens=2048,
+    #         base_url=f"https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
+    #         api_key=credentials.token
+    #     )
+    
+    # google_models = [
+    #     "gemini-2.5-flash-preview-04-17",
+    #     "gemini-2.5-pro-exp-03-25",
+    #     "gemini-2.0-flash",
+    #     "gemini-2.0-flash-lite",
+    #     "gemini-1.5-flash",
+    #     "gemini-1.5-flash-8b",
+    #     "gemini-1.5-pro",
+    # ]
+
+    # for gm in google_models:
+    #     models[gm] = GoogleAISampler(
+    #             model=gm,
+    #             api_key=os.environ["GOOGLE_AI_KEY"],
+    #             get_logprobs=True
+    #     )
+    
+
+    # # free during preview stage
+    # models["meta/llama-4-maverick-17b-128e-instruct-maas"] = ChatCompletionSampler(
+    #         model="meta/llama-4-maverick-17b-128e-instruct-maas",
+    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #         max_tokens=2048,
+    #         base_url=f"https://{"us-east5-aiplatform.googleapis.com"}/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
+    #         api_key=credentials.token
+    #     )
+    # # free during preview stage
+    # models["meta/llama-4-scout-17b-16e-instruct-maas"] = ChatCompletionSampler(
+    #         model="meta/llama-4-scout-17b-16e-instruct-maas",
+    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #         max_tokens=2048,
+    #         base_url=f"https://{"us-east5-aiplatform.googleapis.com"}/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
+    #         api_key=credentials.token
+    #     )
+    
+    # # free during preview stage
+    # models["meta/llama-3.2-90b-vision-instruct-maas"] = ChatCompletionSampler(
+    #         model="meta/llama-3.2-90b-vision-instruct-maas",
+    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #         max_tokens=2048,
+    #         base_url=f"https://{"us-central1-aiplatform.googleapis.com"}/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
+    #         api_key=credentials.token
+    #     )
+    
+    # # free during preview stage
+    # models["meta/llama-3.2-1b-instruct"] = ChatCompletionSampler(
+    #         model="meta/llama-3.2-1b-instruct",
+    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #         max_tokens=2048,
+    #         base_url=f"https://{"us-central1-aiplatform.googleapis.com"}/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
+    #         api_key=credentials.token
+    #     )
+    
+    # models["mistral/mistral-large-2402"] = ChatCompletionSampler(
+    #         model="mistral/mistral-large-2402",
+    #         system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #         max_tokens=2048,
+    #         base_url=f"https://{"us-central1-aiplatform.googleapis.com"}/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
+    #         api_key=credentials.token
+    #     )
 
 
 
+    # # Remote VLLM
+    # # --------------------------------------------------------------
+    # # Lab 0
+    # # --------------------------------------------------------------
+    # models["Qwen/Qwen3-0.6B-Base"] = ChatCompletionSampler(
+    #     model="Qwen/Qwen3-0.6B-Base",
+    #     system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #     max_tokens=2048,
+    #     api_key="ANY",
+    #     base_url="http://localhost:7000/v1",
+    #     get_logprobs=True
+    # )
+
+    # models["Qwen/Qwen3-0.6B-FP8"] = ChatCompletionSampler(
+    #     model="Qwen/Qwen3-0.6B-FP8",
+    #     system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #     max_tokens=2048,
+    #     api_key="ANY",
+    #     base_url="http://localhost:7001/v1",
+    #     get_logprobs=True
+    # )
+
+    # models["Qwen/Qwen3-0.6B"] = ChatCompletionSampler(
+    #     model="Qwen/Qwen3-0.6B",
+    #     system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #     max_tokens=2048,
+    #     api_key="ANY",
+    #     base_url="http://localhost:7002/v1",
+    #     get_logprobs=True
+    # )
+    # # --------------------------------------------------------------
+
+    # # Lab 1
+    # # --------------------------------------------------------------
+    # models["Qwen/Qwen3-4B"] = ChatCompletionSampler(
+    #     model="Qwen/Qwen3-4B",
+    #     system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #     max_tokens=2048,
+    #     api_key="ANY",
+    #     base_url="http://localhost:5001/v1",
+    #     get_logprobs=True
+    # )
+
+    # models["Qwen/Qwen3-4B-Base"] = ChatCompletionSampler(
+    #     model="Qwen/Qwen3-4B-Base",
+    #     system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #     max_tokens=2048,
+    #     api_key="ANY",
+    #     base_url="http://localhost:5002/v1",
+    #     get_logprobs=True
+    # )
+
+    # models["Qwen/Qwen3-14B"] = ChatCompletionSampler(
+    #     model="Qwen/Qwen3-14B",
+    #     system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #     max_tokens=2048,
+    #     api_key="ANY",
+    #     base_url="http://localhost:5005/v1",
+    #     get_logprobs=True
+    # )
+
+    # models["Qwen/Qwen3-1.7B-Base"] = ChatCompletionSampler(
+    #     model="Qwen/Qwen3-1.7B-Base",
+    #     system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #     max_tokens=2048,
+    #     api_key="ANY",
+    #     base_url="http://localhost:5000/v1",
+    #     get_logprobs=True
+    # )
+    # # --------------------------------------------------------------
+
+    # # Lab 2
+    # # --------------------------------------------------------------
+    # models["Qwen/Qwen3-1.7B"] = ChatCompletionSampler(
+    #     model="Qwen/Qwen3-1.7B",
+    #     system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #     max_tokens=2048,
+    #     api_key="ANY",
+    #     base_url="http://localhost:7101/v1",
+    #     get_logprobs=True
+    # )
+
+    # models["Qwen/Qwen3-1.7B-FP8"] = ChatCompletionSampler(
+    #     model="Qwen/Qwen3-1.7B-FP8",
+    #     system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #     max_tokens=2048,
+    #     api_key="ANY",
+    #     base_url="http://localhost:7100/v1",
+    #     get_logprobs=True
+    # )
+
+    # models["Qwen/Qwen3-8B-Base"] = ChatCompletionSampler(
+    #     model="Qwen/Qwen3-8B-Base",
+    #     system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #     max_tokens=2048,
+    #     api_key="ANY",
+    #     base_url="http://localhost:7105/v1",
+    #     get_logprobs=True
+    # )
+
+    # models["Qwen/Qwen3-8B"] = ChatCompletionSampler(
+    #     model="Qwen/Qwen3-8B",
+    #     system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #     max_tokens=2048,
+    #     api_key="ANY",
+    #     base_url="http://localhost:7104/v1",
+    #     get_logprobs=True
+    # )
+    # --------------------------------------------------------------
     return models

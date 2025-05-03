@@ -117,21 +117,22 @@ def main():
             result = eval_obj(sampler)
             # ^^^ how to use a sampler
             if "linguistic" in args.conf_mode:
-                file_stem = f"linguistic-judges/{eval_name}_{model_name.split("/")[-1]}_{args.conf_mode}_{args.examples}_{decisiveness_grader.model.split("/")[-1]}_dec_judge"
+                file_stem = f"""linguistic-judges/{eval_name}_{model_name.split("/")[-1]}_{args.conf_mode}_{args.examples}_{decisiveness_grader.model.split("/")[-1]}_dec_judge"""
             else:
-                file_stem = f"{eval_name}_{model_name.split("/")[-1]}_{args.conf_mode}_{args.examples}"
-            report_filename = f"LLM-Calibration-Study/results/{file_stem}{debug_suffix}.html"
-            os.makedirs(os.path.dirname(report_filename), exist_ok=True)
-            print(f"Writing report to {report_filename}")
+                file_stem = f"""{eval_name}_{model_name.split("/")[-1]}_{args.conf_mode}_{args.examples}"""
+            report_filename = f"""LLM-Calibration-Study/results/{file_stem}{debug_suffix}.html"""
+            if not os.path.exists("LLM-Calibration-Study/results"):
+                os.makedirs("LLM-Calibration-Study/results")
+            print(f"""Writing report to {report_filename}""")
             with open(report_filename, "w") as fh:
                 fh.write(common.make_report(result, model_name, args.conf_mode, eval_name))
             metrics = result.metrics | {"score": result.score}
             print(metrics)
-            result_filename = f"LLM-Calibration-Study/results/{file_stem}{debug_suffix}.json"
+            result_filename = f"""LLM-Calibration-Study/results/{file_stem}{debug_suffix}.json"""
             with open(result_filename, "w") as f:
                 f.write(json.dumps(metrics, indent=2))
-            print(f"Writing results to {result_filename}")
-            mergekey2resultpath[f"{file_stem}"] = result_filename
+            print(f"""Writing results to {result_filename}""")
+            mergekey2resultpath[f"""{file_stem}"""] = result_filename
     merge_metrics = []
     for eval_model_name, result_filename in mergekey2resultpath.items():
         try:

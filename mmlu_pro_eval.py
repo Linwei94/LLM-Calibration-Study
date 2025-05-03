@@ -22,6 +22,9 @@ import threading
 import asyncio
 import openai
 from openai import AsyncOpenAI
+from vllm import LLM, SamplingParams
+from tqdm import tqdm
+import transformers
 
 pickle_write_lock = threading.Lock()
 
@@ -210,10 +213,46 @@ class MMLUProEval(Eval):
             return SingleEvalResult(
                 html=html, score=score, metrics={category: score}, convo=convo, confidence=float(confidence)
             )
-
         
+        
+        # ---------------------------------- Local vLLM for sampling -----------------------------------
+        if sampler.base_url == "" and self.conf_mode == "sampling":
+            # set up vLLM mode 
+            llm = LLM(model=sampler.model, 
+                      max_model_len=4096,
+                      trust_remote_code=True)
+            sampling_params = SamplingParams(temperature=0, max_tokens=1024, logprobs=5, seed=42)
+            # tokenizer = transformers.AutoTokenizer.from_pretrained(sampler.model, trust_remote_code=True)
 
-        # ---------------------------------- AsyncOpenAI for sampling ----------------------------------
+            # prepare batch
+            inference_batch = []
+            for i in tqdm(range(len(self.examples)), desc="Prepare prompt batch"):
+                prompt = format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0)
+                inference_batch.append(prompt)
+
+            outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
+            for i, output in enumerate(outputs):
+                generated_text = output.outputs[0].text
+                self.examples[i]["prompt_messages"] = [sampler._pack_message(content=inference_batch[i], role="user")] # such formatting to fit later analysis pipeline
+                self.examples[i]["response"] = generated_text
+                prob_dict_list = output.outputs[0].logprobs
+                top_logprob_lst = []
+                logprobs = []
+                for d in prob_dict_list:
+                    top_logprob_lst.append({x.decoded_token: x.logprob for x in d.values()})
+                    logprobs += [x.logprob for x in d.values() if x.rank == 1]
+                self.examples[i]["logprobs"] = (logprobs)
+                self.examples[i]["top_logprobs"] = (top_logprob_lst)
+
+            regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+            with open(regen_stored_path, 'wb') as f:
+                pickle.dump(self.examples, f)
+                print(f"Shared sampling with vLLM completed and saved to: {regen_stored_path}")
+            sys.exit()
+        # ----------------------------------------------------------------------------------------------
+
+
+        # ---------------------------------- AsyncOpenAI for Sampling ----------------------------------
         if sampler.base_url and "local" in sampler.base_url and self.conf_mode == "sampling":
             self.regenerate = True
             progress_temp_path = shared_sampling_path(f"tmp_mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
@@ -318,11 +357,11 @@ class MMLUProEval(Eval):
         # ----------------------------------------------------------------------------------------------
 
 
-        # if self.conf_mode in ["sampling", "eval_all"] or "_shared_sampling" in self.conf_mode:
-        #     self.regenerate = True
-        #     regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
-        # else:
-        #     regen_stored_path = ind_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+        if self.conf_mode in ["sampling", "eval_all"] or "_shared_sampling" in self.conf_mode:
+            self.regenerate = True
+            regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+        else:
+            regen_stored_path = ind_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
 
         if self.regenerate:
             if "tmp" in self.conf_mode:

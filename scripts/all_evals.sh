@@ -80,5 +80,38 @@ python -m LLM-Calibration-Study.simple_evals --model gemini-1.5-flash-8b --bench
 conda activate llm-uncertainty
 python -m LLM-Calibration-Study.simple_evals --model gemini-1.5-pro --benchmark mmlu_pro --conf_mode sampling
 
-conda activate llm-uncertainty
-python -m LLM-Calibration-Study.simple_evals --model Qwen3-0.6B-Base-HF --benchmark mmlu_pro --conf_mode sampling --examples 3
+
+
+
+
+"Qwen/Qwen3-8B-Base",
+"Qwen/Qwen3-14B-FP8",
+"Qwen/Qwen3-14B-Base",
+"Qwen/Qwen3-32B-FP8",
+"Qwen/Qwen3-32B",
+"Qwen/Qwen3-30B-A3B-Base",
+"Qwen/Qwen3-30B-A3B-FP8"
+
+# Lab 1
+# CUDA_VISIBLE_DEVICES=0 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-0.6B-Base --benchmark mmlu_pro --conf_mode sampling
+CUDA_VISIBLE_DEVICES=0 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-8B-Base --benchmark mmlu_pro --conf_mode sampling
+CUDA_VISIBLE_DEVICES=1 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-0.6B --benchmark mmlu_pro --conf_mode sampling
+CUDA_VISIBLE_DEVICES=3 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-0.6B-FP8 --benchmark mmlu_pro --conf_mode sampling
+CUDA_VISIBLE_DEVICES=2 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-4B --benchmark mmlu_pro --conf_mode sampling
+
+
+# Lab 2
+CUDA_VISIBLE_DEVICES=0 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-1.7B-FP8 --benchmark mmlu_pro --conf_mode sampling
+CUDA_VISIBLE_DEVICES=1 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-1.7B --benchmark mmlu_pro --conf_mode sampling
+CUDA_VISIBLE_DEVICES=3 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-1.7B-Base --benchmark mmlu_pro --conf_mode sampling
+CUDA_VISIBLE_DEVICES=2 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-4B-FP8 --benchmark mmlu_pro --conf_mode sampling
+
+# Lab 0: device 3 is actually 0
+CUDA_VISIBLE_DEVICES=3 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-14B --benchmark mmlu_pro --conf_mode sampling
+CUDA_VISIBLE_DEVICES=0 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-8B-FP8 --benchmark mmlu_pro --conf_mode sampling
+CUDA_VISIBLE_DEVICES=1 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-4B-Base --benchmark mmlu_pro --conf_mode sampling
+CUDA_VISIBLE_DEVICES=2 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-8B --benchmark mmlu_pro --conf_mode sampling
+
+
+# Overseas
+CUDA_VISIBLE_DEVICES=1,2,3 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-32B --benchmark mmlu_pro --conf_mode sampling
