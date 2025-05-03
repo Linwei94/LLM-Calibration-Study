@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            .message {
+                padding: 8px 16px;
+                margin-bottom: 8px;
+                border-radius: 4px;
+            }
+            .message.user {
+                background-color: #B2DFDB;
+                color: #00695C;
+            }
+            .message.assistant {
+                background-color: #B39DDB;
+                color: #4527A0;
+            }
+            .message.system {
+                background-color: #EEEEEE;
+                color: #212121;
+            }
+            .role {
+                font-weight: bold;
+                margin-bottom: 4px;
+            }
+            .variant {
+                color: #795548;
+            }
+            table, th, td {
+                border: 1px solid black;
+            }
+            pre {
+                white-space: pre-wrap;
+            }
+        </style>
+    </head>
+    <body>
+    <h1>Benchmark Setup</h1>
+    <table>
+    <tr>
+        <td><b>Model</b></td>
+        <td>deepseek-chat</td>
+    </tr>
+    <tr>
+        <td><b>Confidence Mode</b></td>
+        <td>verbal_numerical_shared_sampling</td>
+    </tr>
+    <tr>
+        <td><b>Benchmark</b></td>
+        <td>mmlu_pro</td>
+    </tr>
+    </table>
+    
+    <h1>Metrics</h1>
+    <table>
+    <tr>
+        <th>Metric</th>
+        <th>Value</th>
+    </tr>
+    <tr>
+        <td><b>Score</b></td>
+        <td>1.0</td>
+    </tr>
+    
+    <tr>
+        <td>health</td>
+        <td>1.0</td>
+    </tr>
+    
+    <tr>
+        <td>health:std</td>
+        <td>0.0</td>
+    </tr>
+    
+    <tr>
+        <td>score:std</td>
+        <td>0.0</td>
+    </tr>
+    
+    <tr>
+        <td>economics</td>
+        <td>1.0</td>
+    </tr>
+    
+    <tr>
+        <td>economics:std</td>
+        <td>0.0</td>
+    </tr>
+    
+    <tr>
+        <td>business</td>
+        <td>1.0</td>
+    </tr>
+    
+    <tr>
+        <td>business:std</td>
+        <td>0.0</td>
+    </tr>
+    
+    <tr>
+        <td>ECE</td>
+        <td>0.033333342522382736</td>
+    </tr>
+    
+    </table>
+    
+    <h1>Examples</h1>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, analyze step by step, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+
+If you are uncertain about your answer to the question, convey this uncertainty linguistically by precisely hedging this answer.
+
+Use the following format to answer:
+
+```
+Explanation: [insert short step-by-step analysis here]
+
+Answer: [ONLY the option LETTER, where the LETTER is one of A,B,C,D,E,F,G,H,I,J]
+
+Confidence (0-100): [Your confidence level, please only include the numerical number in the range of 0-100]%
+```
+
+Only give me the reply according to this format, don&#39;t give me any other words.
+
+If both parents are affected with the same autosomal recessive disorder then the probability that each of their children will be affected equals ___.
+A) 3 in 4
+B) 1 in 3
+C) 2 in 3
+D) 2 in 4
+E) 1 in 10
+F) 1
+G) 3 in 3
+H) 4 in 4
+I) 1 in 4
+J) 1 in 2
+</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>```
+Explanation: 
+1. Both parents are affected with the same autosomal recessive disorder, meaning they are homozygous recessive (genotype aa).
+2. Each parent can only pass on the recessive allele (a) to their children.
+3. Therefore, all children will receive one recessive allele from each parent, resulting in the genotype aa.
+4. The probability that each child will be affected (aa) is 100%.
+
+Answer: F
+
+Confidence (0-100): 100
+```</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: F</p>
+<p>Extracted Answer: F</p>
+<p>Extracted Answer Confidence: 1.0</p>
+<p>Confidence Extraction Mode: verbal_numerical_shared_sampling</p>
+<p>Score: 1.0</p>
+<p>Subject: health</p>
+<details>
+<summary>Log Probability:</summary>
+<p>[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]</p>
+</details>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, analyze step by step, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+
+If you are uncertain about your answer to the question, convey this uncertainty linguistically by precisely hedging this answer.
+
+Use the following format to answer:
+
+```
+Explanation: [insert short step-by-step analysis here]
+
+Answer: [ONLY the option LETTER, where the LETTER is one of A,B,C,D,E,F,G,H,I,J]
+
+Confidence (0-100): [Your confidence level, please only include the numerical number in the range of 0-100]%
+```
+
+Only give me the reply according to this format, don&#39;t give me any other words.
+
+Which of the following is likely to have a demand curve that is the least elastic?
+A) Demand for a good with many close substitutes
+B) Demand for the oligopoly firm&#39;s output with a differentiated product
+C) Demand for the monopolistic competition firm&#39;s output
+D) Demand for the perfectly competitive firm&#39;s output
+E) Demand for a luxury good
+F) Demand for a necessity good
+G) Demand for a highly substitutable good
+H) Demand for a good with no close substitutes
+I) Demand for the monopoly firm&#39;s output
+J) Demand for the oligopoly firm&#39;s output with a homogenous product
+</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>```
+Explanation: 
+1. Elasticity of demand measures how much the quantity demanded responds to a change in price.
+2. Demand is least elastic (most inelastic) when there are few or no close substitutes, as consumers have fewer alternatives and are less sensitive to price changes.
+3. A monopoly firm&#39;s output (I) has no close substitutes by definition, making its demand curve the least elastic.
+4. Other options involve goods with substitutes (A, G), differentiated products (B, C), or competitive markets (D, J), which tend to have more elastic demand.
+5. Necessity goods (F) can have inelastic demand, but they are not necessarily the least elastic compared to a monopoly&#39;s output.
+
+Answer: I
+
+Confidence (0-100): 90
+```</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: I</p>
+<p>Extracted Answer: I</p>
+<p>Extracted Answer Confidence: 0.9</p>
+<p>Confidence Extraction Mode: verbal_numerical_shared_sampling</p>
+<p>Score: 1.0</p>
+<p>Subject: economics</p>
+<details>
+<summary>Log Probability:</summary>
+<p>[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]</p>
+</details>
+    <hr>
+    
+    
+<h3>Prompt conversation</h3>
+
+
+<div class="message user">
+    <div class="role">
+    user
+    
+    </div>
+    <div class="content">
+    <pre>Read the question, analyze step by step, provide your answer and your confidence in this answer. Note: The confidence indicates how likely you think your answer is true.
+
+If you are uncertain about your answer to the question, convey this uncertainty linguistically by precisely hedging this answer.
+
+Use the following format to answer:
+
+```
+Explanation: [insert short step-by-step analysis here]
+
+Answer: [ONLY the option LETTER, where the LETTER is one of A,B,C,D,E,F,G,H,I,J]
+
+Confidence (0-100): [Your confidence level, please only include the numerical number in the range of 0-100]%
+```
+
+Only give me the reply according to this format, don&#39;t give me any other words.
+
+The Colonial Cookie Company pays on a piece-rate basis at the rate of 80 centsa piece. Mrs. Batter completed the following number of acceptable pieces last week: Monday 45, Tuesday 41, Wednesday 49, Thursday 47, and Friday 43. What were her total earnings for the week?
+A) $160
+B) $195
+C) $220
+D) $185
+E) $175
+F) $200
+G) $225
+H) $210
+I) $165
+J) $180
+</pre>
+    </div>
+</div>
+
+<h3>Sampled message</h3>
+
+<div class="message assistant">
+    <div class="role">
+    assistant
+    
+    </div>
+    <div class="content">
+    <pre>```
+Explanation: 
+1. Calculate the total number of pieces completed by Mrs. Batter for the week: 45 (Monday) + 41 (Tuesday) + 49 (Wednesday) + 47 (Thursday) + 43 (Friday) = 225 pieces.
+2. Multiply the total number of pieces by the piece-rate pay (80 cents per piece): 225 pieces * 0.80/piece = 180.
+
+Answer: J
+
+Confidence (0-100): 100
+```</pre>
+    </div>
+</div>
+<h3>Results</h3>
+<p>Correct Answer: J</p>
+<p>Extracted Answer: J</p>
+<p>Extracted Answer Confidence: 1.0</p>
+<p>Confidence Extraction Mode: verbal_numerical_shared_sampling</p>
+<p>Score: 1.0</p>
+<p>Subject: business</p>
+<details>
+<summary>Log Probability:</summary>
+<p>[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]</p>
+</details>
+    <hr>
+    
+    </body>
+</html>
