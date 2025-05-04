@@ -40,6 +40,7 @@ def get_model_dict(model_name: str):
         "Qwen/Qwen3-14B",
         "Qwen/Qwen3-32B-FP8",
         "Qwen/Qwen3-32B",
+        "Qwen/Qwen3-30B-A3B",
         "Qwen/Qwen3-30B-A3B-Base",
         "Qwen/Qwen3-30B-A3B-FP8"
     ]
