@@ -217,10 +217,22 @@ class MMLUProEval(Eval):
         
         # ---------------------------------- Local vLLM for sampling -----------------------------------
         if sampler.base_url == "" and self.conf_mode == "sampling":
+            # --------------- extract confidence without resampling -------------------
+            regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+            print(regen_stored_path)
+            if os.path.exists(regen_stored_path):
+                print("Fetching from cache")
+                with open(regen_stored_path, 'rb') as f:
+                    self.examples = pickle.load(f)
+                self.cache_found = True
+                results = common.map_with_progress(fn, self.examples)
+                return common.aggregate_results(results)
+            # --------------- extract confidence without resampling -------------------
             # set up vLLM mode 
             llm = LLM(model=sampler.model, 
                       max_model_len=4096,
-                      trust_remote_code=True)
+                      trust_remote_code=True,
+                      tensor_parallel_size=2)
             sampling_params = SamplingParams(temperature=0, max_tokens=1024, logprobs=5, seed=42)
             # tokenizer = transformers.AutoTokenizer.from_pretrained(sampler.model, trust_remote_code=True)
 
@@ -245,6 +257,7 @@ class MMLUProEval(Eval):
                 self.examples[i]["top_logprobs"] = (top_logprob_lst)
 
             regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+            os.makedirs(os.path.dirname(regen_stored_path), exist_ok=True)
             with open(regen_stored_path, 'wb') as f:
                 pickle.dump(self.examples, f)
                 print(f"Shared sampling with vLLM completed and saved to: {regen_stored_path}")
