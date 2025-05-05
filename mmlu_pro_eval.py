@@ -24,7 +24,9 @@ import openai
 from openai import AsyncOpenAI
 from vllm import LLM, SamplingParams
 from tqdm import tqdm
-import transformers
+from transformers import AutoTokenizer, AutoModelForCausalLM
+from torch.nn import DataParallel
+
 
 pickle_write_lock = threading.Lock()
 
@@ -214,25 +216,27 @@ class MMLUProEval(Eval):
                 html=html, score=score, metrics={category: score}, convo=convo, confidence=float(confidence)
             )
         
-        
         # ---------------------------------- Local vLLM for sampling -----------------------------------
         if sampler.base_url == "" and self.conf_mode == "sampling":
             # set up vLLM mode 
+            tokenizer = sampler.tokenizer
             llm = LLM(model=sampler.model, 
-                      max_model_len=4096,
-                      trust_remote_code=True)
-            sampling_params = SamplingParams(temperature=0, max_tokens=1024, logprobs=5, seed=42)
-            # tokenizer = transformers.AutoTokenizer.from_pretrained(sampler.model, trust_remote_code=True)
+                      max_model_len=None,
+                      trust_remote_code=True,
+                      tokenizer_mode="auto")
+            sampling_params = SamplingParams(temperature=0, max_tokens=None, logprobs=5, seed=42, stop=[tokenizer.eos_token])
 
             # prepare batch
             inference_batch = []
             for i in tqdm(range(len(self.examples)), desc="Prepare prompt batch"):
-                prompt = format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0)
-                inference_batch.append(prompt)
-
+                # prompt = format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0)
+                prompt = [sampler._pack_message("system", sampler.system_message), 
+                          sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")]
+                inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True, enable_thinking=True))
             outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
             for i, output in enumerate(outputs):
                 generated_text = output.outputs[0].text
+                print(generated_text)
                 self.examples[i]["prompt_messages"] = [sampler._pack_message(content=inference_batch[i], role="user")] # such formatting to fit later analysis pipeline
                 self.examples[i]["response"] = generated_text
                 prob_dict_list = output.outputs[0].logprobs
