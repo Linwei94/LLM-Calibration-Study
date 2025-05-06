@@ -22,7 +22,7 @@ def get_model_dict(model_name: str):
         "Qwen/Qwen2.5-72B-Instruct",
         "meta-llama/Llama-3.1-405B-Instruct",
         "meta-llama/Llama-3.3-70B-Instruct",
-        "meta-llama/Llama-3.1-8B-Instruct"
+        "meta-llama/Llama-3.1-8B-Instruct",
         "meta-llama/Llama-3.2-1B-Instruct",
         "deepseek-ai/DeepSeek-R1",
         "Qwen/Qwen3-0.6B",
