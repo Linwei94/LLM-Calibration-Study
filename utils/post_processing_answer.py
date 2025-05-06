@@ -432,6 +432,7 @@ def extract_answer_and_confidence(response_text: str, options) -> tuple[str | No
 
 
 def consolidated_answer_extraction(benchmark: str, response_text: str, row: dict | None = None, choices_dict: dict | None = None , with_verbal_confidence: bool = False) -> tuple[str, float] | str:
+    
     """a single function that handles answer extraction for different benchmarks
 
     Args:
@@ -471,5 +472,64 @@ def consolidated_answer_extraction(benchmark: str, response_text: str, row: dict
             extracted_answer, _ = extract_answer_and_confidence(response_text, options=options)
         if extracted_answer is None or extracted_answer not in option_letters:
             extracted_answer = extract_mcq_answer("\n".join(response_text.splitlines()[-10:]), benchmark)
-
         return extracted_answer
+    
+
+def extract_answer(response_text: str):
+    response_text = normalize_response(response_text)
+    answer_patterns = [
+        r"[Aa]nswer:\s*\n*^.{0,5}$([A-J])",                 # e.g., Answer: H
+        r"[Aa]nswer:\s*\n*^.{0,5}$\(?([A-J])\)?",             # e.g., Answer: (H)
+        r"[Aa]nswer:\s*\n*^.{0,5}$\[?([A-J])\]?",             # e.g., Answer: [H]
+        r"[Aa]nswer:\s*\n*^.{0,5}$([A-J])[,)]",             # e.g., Answer: H,
+        r"[Aa]nswer:\s*\n*^.{0,5}$([A-J])\s*,?.*",           # e.g., Answer: H, apple
+        r"correct answer is\s*^.{0,5}$\[?\(?([A-J])\]?\)?",   
+        r"correct answer should be\s*^.{0,5}$\[?\(?([A-J])\]?\)?",   
+    ]
+    max_search_scope = 15
+    for end in range(3, max_search_scope):
+        search_scope =  "\n".join(response_text.splitlines()[::-1][:end])
+        extracted_answer = None
+        # Default answer extracrion from Simple Evals
+        for answer_regex in MULTILINGUAL_ANSWER_REGEXES:
+            regex = MULTILINGUAL_ANSWER_PATTERN_TEMPLATE.format(answer_regex)
+            match = re.search(regex, search_scope)
+            if match:
+                extracted_answer = normalize_extracted_answer(match.group(1))
+                if extracted_answer in "ABCDEFGHIJ":
+                    return extracted_answer
+        # More complex extraction regex
+        for pattern in answer_patterns:
+            match = re.search(pattern, search_scope, re.IGNORECASE)
+            if match:
+                extracted_answer = normalize_extracted_answer(match.group(1))
+                if extracted_answer in "ABCDEFGHIJ":
+                    return extracted_answer
+    return None
+
+
+def extract_verbal_numerical_confidence(response_text: str):
+    response_text = normalize_response(response_text)
+    confidence_patterns = [
+        r"[Cc]onfidence\s*\(0-100\):\s*(\d+)%?",  # e.g., Confidence (0-100): 90%
+        r"[Cc]onfidence[:]?\s*(\d+)%?",             # e.g., Confidence: 90%
+        r"[Cc]onfidence [\(0-100\)]?:\s*\[(\d+)%?\]"
+        r"[Cc]onfidence [Ll]evel\s*\(0-100\):\s*(\d+)%?",  # e.g., Confidence (0-100): 90%
+        r"[Cc]onfidence [Ll]evel[:]?\s*(\d+)%?",             # e.g., Confidence: 90%
+        r"[Cc]onfidence [Ll]evel[\(0-100\)]?:\s*\[(\d+)%?\]",
+        r"[Cc]onfidence (100):\s*\w*,\s*(\d+)%?",
+    ]
+    confidence = None
+    max_search_scope = 15
+    for end in range(3, max_search_scope):
+        search_scope =  "\n".join(response_text.splitlines()[::-1][:end])
+        for pat in confidence_patterns:
+            match = re.search(pat, search_scope, re.IGNORECASE)
+            if match:
+                try:
+                    confidence = int(match.group(1))
+                    if confidence > 10:
+                        return confidence / 100
+                except:
+                    continue
+    return confidence

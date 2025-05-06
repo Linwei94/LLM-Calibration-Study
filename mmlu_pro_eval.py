@@ -67,6 +67,7 @@ class MMLUProEval(Eval):
             extracted_answer = None
             confidence = 0
             judge_response = ""
+            logprobs = None 
 
             match self.conf_mode:
                 
@@ -160,6 +161,27 @@ class MMLUProEval(Eval):
                     logprobs = row["logprobs"]
                     confidence = token_sar_confidence(top_logprobs)
 
+
+                case "eval_all":
+                    if not self.cache_found:
+                        print("Please sample responses before evaluating.")
+                        sys.exit()
+                    response = row["response"] 
+                    prompt_messages = row["prompt_messages"] 
+                    logprobs = row["logprobs"]
+                    top_logprobs = row["top_logprobs"]
+
+                    # extract answer 
+                    response_text = normalize_response(response)
+                    extracted_answer = extract_answer(response_text=response_text)
+                    verbal_numerical_confidence = extract_verbal_numerical_confidence(response_text=response_text)
+                    if logprobs is not None:
+                        logit_perplexity_confidence = calculate_logit_perplexity(logprobs)
+                    else:
+                        logit_perplexity_confidence = None 
+                    
+                    confidence = verbal_numerical_confidence
+
                 case "sampling":
                     if sampler.get_logprobs == False:
                         print("Sampling without logprobs.")
@@ -175,6 +197,10 @@ class MMLUProEval(Eval):
                     row["response"] = response
                     row["logprobs"] = sampler.logprobs
                     row["top_logprobs"] = sampler.top_logprobs
+                    if sampler.logprobs is None:
+                        print("Token log probs not available.")
+                    if sampler.top_logprobs is None:
+                        print("Top log probs not available.")
 
 
                     # save current progress
@@ -244,7 +270,7 @@ class MMLUProEval(Eval):
             for i, output in enumerate(outputs):
                 generated_text = output.outputs[0].text
                 print(generated_text)
-                self.examples[i]["prompt_messages"] = [sampler._pack_message(content=inference_batch[i], role="user")] # such formatting to fit later analysis pipeline
+                self.examples[i]["prompt_messages"] = [sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")] # such formatting to fit later analysis pipeline
                 self.examples[i]["response"] = generated_text
                 prob_dict_list = output.outputs[0].logprobs
                 top_logprob_lst = []
