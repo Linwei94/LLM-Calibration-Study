@@ -318,6 +318,42 @@ def get_model_dict(model_name: str):
     )
     # --------------------------------------------------------------
 
+    models["claude-3-7-sonnet-20250219"] = ChatCompletionSampler(
+        model="claude-3-7-sonnet-20250219",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=2048,
+        api_key=os.getenv("ANTHROPIC_API_KEY"),
+        base_url="https://api.anthropic.com/v1/",
+        get_logprobs=False # Not supported
+    )
+
+    models["grok-3-beta"] = ChatCompletionSampler(
+        model="grok-3-beta",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=2048,
+        api_key=os.getenv("XAI_API_KEY"),
+        base_url="https://api.x.ai/v1",
+        get_logprobs=True
+    )
+
+    models["grok-3-mini-beta"] = ChatCompletionSampler(
+        model="grok-3-mini-beta",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=2048,
+        api_key=os.getenv("XAI_API_KEY"),
+        base_url="https://api.x.ai/v1",
+        get_logprobs=True
+    )
+
+    models["grok-2-1212"] = ChatCompletionSampler(
+        model="grok-2-1212",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=2048,
+        api_key=os.getenv("XAI_API_KEY"),
+        base_url="https://api.x.ai/v1",
+        get_logprobs=True
+    )
+
     # ----------- Google LLMs -----------
     # credentials, _ = default()
     # auth_request = Request()

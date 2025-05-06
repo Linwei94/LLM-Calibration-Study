@@ -88,7 +88,9 @@ class MMLUProEval(Eval):
                         row["top_logprobs"] = sampler.top_logprobs
                     logprobs = row["logprobs"]
                     response_text = normalize_response(response)
-                    extracted_answer, confidence = consolidated_answer_extraction(benchmark="mmlu_pro", response_text=response_text, row=row, with_verbal_confidence=True)
+                    # extracted_answer, confidence = consolidated_answer_extraction(benchmark="mmlu_pro", response_text=response_text, row=row, with_verbal_confidence=True)
+                    extracted_answer = extract_answer(response_text=response)
+                    confidence = extract_verbal_numerical_confidence(response_text=response_text)
 
                 
                 case "verbal_linguistic" | "verbal_linguistic_shared_sampling" | "tmp_verbal_linguistic_shared_sampling":
@@ -109,7 +111,8 @@ class MMLUProEval(Eval):
                         
                     logprobs = row["logprobs"]
                     response_text = remove_verbal_confidence(normalize_response(response)) # remove verbal confidence to avoid judgement biases
-                    extracted_answer = consolidated_answer_extraction(benchmark="mmlu_pro", response_text=response_text, row=row, with_verbal_confidence=False)
+                    # extracted_answer = consolidated_answer_extraction(benchmark="mmlu_pro", response_text=response_text, row=row, with_verbal_confidence=False)
+                    extracted_answer = extract_answer(response_text=response)
                     confidence, judge_response = linguistic_confidence_score(self.decisiveness_grader, format_multichoice_question(row, conf_mode="decisiveness_grading", choices=0), response_text)
 
 
@@ -132,7 +135,8 @@ class MMLUProEval(Eval):
                         row["top_logprobs"] = sampler.top_logprobs
 
                     response_text = normalize_response(response)
-                    extracted_answer = consolidated_answer_extraction(benchmark="mmlu_pro", response_text=response_text, row=row, with_verbal_confidence=False)
+                    # extracted_answer = consolidated_answer_extraction(benchmark="mmlu_pro", response_text=response_text, row=row, with_verbal_confidence=False)
+                    extracted_answer = extract_answer(response_text=response)
                     logprobs = row["logprobs"]
                     confidence = calculate_logit_perplexity(logprobs)
 
@@ -157,7 +161,7 @@ class MMLUProEval(Eval):
                         row["top_logprobs"] = sampler.top_logprobs
 
                     response_text = normalize_response(response)
-                    extracted_answer = consolidated_answer_extraction(benchmark="mmlu_pro", response_text=response_text, row=row, with_verbal_confidence=False)
+                    extracted_answer = extract_answer(response_text=response)
                     logprobs = row["logprobs"]
                     confidence = token_sar_confidence(top_logprobs)
 
@@ -239,11 +243,14 @@ class MMLUProEval(Eval):
             )
             convo = prompt_messages + [dict(content=response_text, role="assistant")]
             return SingleEvalResult(
-                html=html, score=score, metrics={category: score}, convo=convo, confidence=float(confidence)
+                html=html, score=score, metrics={category: score}, convo=convo, confidence=(confidence), 
+                category=category, correct_answer=row["answer"], extracted_answer=extracted_answer,
+                verbal_numerical_confidence=verbal_numerical_confidence, logit_perplexity_confidence=logit_perplexity_confidence
             )
         
         # ---------------------------------- Local vLLM for sampling -----------------------------------
         if sampler.base_url == "" and self.conf_mode == "sampling":
+            print("vllm")
             # set up vLLM mode 
             tokenizer = sampler.tokenizer
             llm = LLM(model=sampler.model, 
@@ -282,109 +289,109 @@ class MMLUProEval(Eval):
         # ----------------------------------------------------------------------------------------------
 
 
-        # ---------------------------------- AsyncOpenAI for Sampling ----------------------------------
-        if sampler.base_url and "local" in sampler.base_url and self.conf_mode == "sampling":
-            self.regenerate = True
-            progress_temp_path = shared_sampling_path(f"tmp_mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
-            _inproc_lock = asyncio.Lock()
-            async def stream_prompt(sampler, client: AsyncOpenAI, row: str):
+        # # ---------------------------------- AsyncOpenAI for Sampling ----------------------------------
+        # if sampler.base_url and "local" in sampler.base_url and self.conf_mode == "sampling":
+        #     self.regenerate = True
+        #     progress_temp_path = shared_sampling_path(f"tmp_mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+        #     _inproc_lock = asyncio.Lock()
+        #     async def stream_prompt(sampler, client: AsyncOpenAI, row: str):
                 
-                prompt_messages = [
-                    sampler._pack_message(
-                        content=format_multichoice_question(row, conf_mode="sampling", choices=0), role="user"
-                    )
-                ]
-                # resume sampling if cache exists
-                if os.path.exists(progress_temp_path):
-                    with open(progress_temp_path, 'rb') as f:
-                        saved_progress: list[dict] = pickle.load(f)
-                        answered_questions = [eg["prompt_messages"] for eg in saved_progress]
-                        if prompt_messages in answered_questions:
-                            question_idx = answered_questions.index(prompt_messages)
-                            row = saved_progress[question_idx]
-                            print("Question found in cache, skiping to the next one")
-                            return 
-                if sampler.system_message:
-                    message_list = [sampler._pack_message("system", sampler.system_message)] + prompt_messages 
-                else:
-                    message_list = prompt_messages
+        #         prompt_messages = [
+        #             sampler._pack_message(
+        #                 content=format_multichoice_question(row, conf_mode="sampling", choices=0), role="user"
+        #             )
+        #         ]
+        #         # resume sampling if cache exists
+        #         if os.path.exists(progress_temp_path):
+        #             with open(progress_temp_path, 'rb') as f:
+        #                 saved_progress: list[dict] = pickle.load(f)
+        #                 answered_questions = [eg["prompt_messages"] for eg in saved_progress]
+        #                 if prompt_messages in answered_questions:
+        #                     question_idx = answered_questions.index(prompt_messages)
+        #                     row = saved_progress[question_idx]
+        #                     print("Question found in cache, skiping to the next one")
+        #                     return 
+        #         if sampler.system_message:
+        #             message_list = [sampler._pack_message("system", sampler.system_message)] + prompt_messages 
+        #         else:
+        #             message_list = prompt_messages
 
-                print("Sampling with vLLM:", sampler.model)
-                response = await client.chat.completions.create(
-                    model=sampler.model,
-                    messages=message_list,
-                    temperature=sampler.temperature,
-                    logprobs=True,
-                    top_logprobs=10,
-                    seed=42,
-                )
-                response_text = response.choices[0].message.content
-                top_logprob_lst = []
-                for top_list in [t.top_logprobs for t in response.choices[0].logprobs.content]: 
-                    top_logprob_lst.append({t.token: t. logprob for t in top_list})
-                logprobs = [t.logprob for t in response.choices[0].logprobs.content]
+        #         print("Sampling with vLLM:", sampler.model)
+        #         response = await client.chat.completions.create(
+        #             model=sampler.model,
+        #             messages=message_list,
+        #             temperature=sampler.temperature,
+        #             logprobs=True,
+        #             top_logprobs=10,
+        #             seed=42,
+        #         )
+        #         response_text = response.choices[0].message.content
+        #         top_logprob_lst = []
+        #         for top_list in [t.top_logprobs for t in response.choices[0].logprobs.content]: 
+        #             top_logprob_lst.append({t.token: t. logprob for t in top_list})
+        #         logprobs = [t.logprob for t in response.choices[0].logprobs.content]
 
-                row["prompt_messages"] = prompt_messages
-                row["response"] = response_text
-                row["logprobs"] = logprobs
-                row["top_logprobs"] = top_logprob_lst
+        #         row["prompt_messages"] = prompt_messages
+        #         row["response"] = response_text
+        #         row["logprobs"] = logprobs
+        #         row["top_logprobs"] = top_logprob_lst
                 
-                current_progress = [eg for eg in self.examples.copy() if "logprobs" in eg.keys()]
+        #         current_progress = [eg for eg in self.examples.copy() if "logprobs" in eg.keys()]
                 
-                    # ensure directory exists
-                os.makedirs(os.path.dirname(progress_temp_path), exist_ok=True)
+        #             # ensure directory exists
+        #         os.makedirs(os.path.dirname(progress_temp_path), exist_ok=True)
 
-                # filelock on progress_temp_path+".lock"
-                lock = FileLock(progress_temp_path + ".lock", timeout=30)
+        #         # filelock on progress_temp_path+".lock"
+        #         lock = FileLock(progress_temp_path + ".lock", timeout=30)
 
-                # first grab the in-proc lock, then the file-lock
-                async with _inproc_lock:
-                    with lock:  
-                        # write to a temp file and atomically rename
-                        tmp = progress_temp_path + ".tmp"
-                        with open(tmp, "wb") as f:
-                            pickle.dump(current_progress, f)
-                        os.replace(tmp, progress_temp_path)
-                print("Progress saved")
-            async def run_all_with_progress(sampler: SamplerBase, examples: list[dict], max_concurrent: int = 20):
-                client = AsyncOpenAI(
-                    base_url=sampler.base_url,  # Replace with your actual vLLM endpoint
-                    api_key="EMPTY"
-                )
-                sem = asyncio.Semaphore(max_concurrent)
-                async def limited(row):
-                    retry = 0
-                    backoff = 1
-                    while True:
-                        try:
-                            async with sem:
-                                return await stream_prompt(sampler, client, row)
-                        except openai.APITimeoutError as e:
-                            retry += 1
-                            backoff += 1
-                            backoff = min(backoff, 60)
-                            time.sleep(backoff)
-                            print("Retry", retry, e)
-                            continue
-                        except Exception as e:
-                            print("Retry", retry, e)
-                            retry += 1
-                            continue
-                # create all tasks
-                tasks = [asyncio.create_task(limited(row)) for row in examples]
-                results = []
-                # wrap tasks in as_completed so we can update tqdm as each one finishes
-                for coro in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="mmlu_pro"):
-                    res = await coro
-                    results.append(res)
-                return results
-            asyncio.run(run_all_with_progress(sampler, self.examples))
-            regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
-            with open(regen_stored_path, 'wb') as f:
-                pickle.dump(self.examples, f)
-                print(f"Shared sampling with vLLM completed and saved to: {regen_stored_path}")
-            sys.exit()
-        # ----------------------------------------------------------------------------------------------
+        #         # first grab the in-proc lock, then the file-lock
+        #         async with _inproc_lock:
+        #             with lock:  
+        #                 # write to a temp file and atomically rename
+        #                 tmp = progress_temp_path + ".tmp"
+        #                 with open(tmp, "wb") as f:
+        #                     pickle.dump(current_progress, f)
+        #                 os.replace(tmp, progress_temp_path)
+        #         print("Progress saved")
+        #     async def run_all_with_progress(sampler: SamplerBase, examples: list[dict], max_concurrent: int = 20):
+        #         client = AsyncOpenAI(
+        #             base_url=sampler.base_url,  # Replace with your actual vLLM endpoint
+        #             api_key="EMPTY"
+        #         )
+        #         sem = asyncio.Semaphore(max_concurrent)
+        #         async def limited(row):
+        #             retry = 0
+        #             backoff = 1
+        #             while True:
+        #                 try:
+        #                     async with sem:
+        #                         return await stream_prompt(sampler, client, row)
+        #                 except openai.APITimeoutError as e:
+        #                     retry += 1
+        #                     backoff += 1
+        #                     backoff = min(backoff, 60)
+        #                     time.sleep(backoff)
+        #                     print("Retry", retry, e)
+        #                     continue
+        #                 except Exception as e:
+        #                     print("Retry", retry, e)
+        #                     retry += 1
+        #                     continue
+        #         # create all tasks
+        #         tasks = [asyncio.create_task(limited(row)) for row in examples]
+        #         results = []
+        #         # wrap tasks in as_completed so we can update tqdm as each one finishes
+        #         for coro in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="mmlu_pro"):
+        #             res = await coro
+        #             results.append(res)
+        #         return results
+        #     asyncio.run(run_all_with_progress(sampler, self.examples))
+        #     regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+        #     with open(regen_stored_path, 'wb') as f:
+        #         pickle.dump(self.examples, f)
+        #         print(f"Shared sampling with vLLM completed and saved to: {regen_stored_path}")
+        #     sys.exit()
+        # # ----------------------------------------------------------------------------------------------
 
 
         if self.conf_mode in ["sampling", "eval_all"] or "_shared_sampling" in self.conf_mode:
@@ -410,6 +417,7 @@ class MMLUProEval(Eval):
                 print("Fetching from cache")
                 with open(regen_stored_path, 'rb') as f:
                     self.examples = pickle.load(f)
+                    # self.examples = random.Random(0).sample(self.examples, 100)
                 self.cache_found = True
                 results = common.map_with_progress(fn, self.examples)
             else:
@@ -426,5 +434,22 @@ class MMLUProEval(Eval):
                 pickle.dump(self.examples, f)
             print(f"Shared sampling completed and saved to: {regen_stored_path}")
             sys.exit()
+        
+        if self.conf_mode == "eval_all":
+            results_df = pd.DataFrame()
+            for result in results:
+                pass
+                new_row = pd.DataFrame({
+                    "category":[result.category],
+                    "correct_answer": [result.correct_answer],
+                    "extracted_answer": [result.extracted_answer],
+                    "verbal_numerical_confidence": [result.verbal_numerical_confidence],
+                    "logit_perplexity_confidence": [result.logit_perplexity_confidence],
+                    "verbal_linguistic_confidence": [result.verbal_linguistic_confidence]
+                })
+                results_df = pd.concat([results_df, new_row], ignore_index=True)
+            file_stem = f"""mmlu_pro_{sampler.model.split("/")[-1]}_{self.conf_mode}_{self.num_examples}"""
+            csv_filename = f"""LLM-Calibration-Study/results/{file_stem}.csv"""
+            results_df.to_csv(csv_filename)
 
         return common.aggregate_results(results)

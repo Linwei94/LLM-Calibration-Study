@@ -136,3 +136,4 @@ run.sh
 test_vertexai.py
 test_vertexai.sh
 hf_models/
+results/
