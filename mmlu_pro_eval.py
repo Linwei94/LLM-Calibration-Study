@@ -218,24 +218,20 @@ class MMLUProEval(Eval):
         
         # ---------------------------------- Local vLLM for sampling -----------------------------------
         if sampler.base_url == "" and self.conf_mode == "sampling":
-            # --------------- extract confidence without resampling -------------------
-            regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
-            print(regen_stored_path)
-            if os.path.exists(regen_stored_path):
-                print("Fetching from cache")
-                with open(regen_stored_path, 'rb') as f:
-                    self.examples = pickle.load(f)
-                self.cache_found = True
-                results = common.map_with_progress(fn, self.examples)
-                return common.aggregate_results(results)
-            # --------------- extract confidence without resampling -------------------
             # set up vLLM mode 
             tokenizer = sampler.tokenizer
+
+            visible_gpus = os.environ.get("CUDA_VISIBLE_DEVICES", "")
+            if visible_gpus:
+                num_gpus = len(visible_gpus.split(','))
+            else:
+                num_gpus = torch.cuda.device_count()  # fallback
+            print(f"vllm run on {num_gpus} GPUs")
             llm = LLM(model=sampler.model, 
                       max_model_len=None,
                       trust_remote_code=True,
                       tokenizer_mode="auto",
-                      tensor_parallel_size=2)
+                      tensor_parallel_size=num_gpus)
             sampling_params = SamplingParams(temperature=0, max_tokens=None, logprobs=5, seed=42, stop=[tokenizer.eos_token])
 
             # prepare batch

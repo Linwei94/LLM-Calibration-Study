@@ -17,6 +17,7 @@ def get_model_dict(model_name: str):
         "meta-llama/Llama-3.2-3B-Instruct",
         "Qwen/Qwen2.5-3B-Instruct",
         "Qwen/Qwen2.5-7B-Instruct",
+        "Qwen/Qwen2.5-14B-Instruct",
         "Qwen/Qwen2.5-32B-Instruct",
         "Qwen/Qwen2.5-72B-Instruct",
         "meta-llama/Llama-3.1-405B-Instruct",
