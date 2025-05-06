@@ -45,7 +45,8 @@ def get_model_dict(model_name: str):
         "Qwen/Qwen3-30B-A3B",
         "Qwen/Qwen3-30B-A3B-Base",
         "Qwen/Qwen3-30B-A3B-FP8",
-        "google/gemma-3-27b-it"
+        "google/gemma-3-27b-it",
+        "google/gemma-3-1b-it",
     ]
 
 
