@@ -7,6 +7,10 @@ from ..sampler.chat_completion_sampler import (
 from ..sampler.o_chat_completion_sampler import OChatCompletionSampler
 from ..sampler.claude_sampler import ClaudeCompletionSampler, CLAUDE_SYSTEM_MESSAGE_LMSYS
 from ..sampler.hfmodel_sampler import HFChatCompletionSampler
+from ..sampler.google_ai_sampler import GoogleAISampler
+
+from google.auth import default
+from google.auth.transport.requests import Request
 
 def get_model_dict(model_name: str):
     """
@@ -17,13 +21,11 @@ def get_model_dict(model_name: str):
         "meta-llama/Llama-3.2-3B-Instruct",
         "Qwen/Qwen2.5-3B-Instruct",
         "Qwen/Qwen2.5-7B-Instruct",
-        "Qwen/Qwen2.5-14B-Instruct",
         "Qwen/Qwen2.5-32B-Instruct",
         "Qwen/Qwen2.5-72B-Instruct",
         "meta-llama/Llama-3.1-405B-Instruct",
         "meta-llama/Llama-3.3-70B-Instruct",
         "meta-llama/Llama-3.1-8B-Instruct",
-        "meta-llama/Llama-3.2-1B-Instruct",
         "deepseek-ai/DeepSeek-R1",
         "Qwen/Qwen3-0.6B",
         "Qwen/Qwen3-0.6B-FP8",
@@ -42,11 +44,8 @@ def get_model_dict(model_name: str):
         "Qwen/Qwen3-14B",
         "Qwen/Qwen3-32B-FP8",
         "Qwen/Qwen3-32B",
-        "Qwen/Qwen3-30B-A3B",
         "Qwen/Qwen3-30B-A3B-Base",
-        "Qwen/Qwen3-30B-A3B-FP8",
-        "google/gemma-3-27b-it",
-        "google/gemma-3-1b-it",
+        "Qwen/Qwen3-30B-A3B-FP8"
     ]
 
 
@@ -164,7 +163,6 @@ def get_model_dict(model_name: str):
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 max_new_tokens=2048,
                 temperature=1e-6,
-                use_vllm=True
             )
 
 
@@ -321,8 +319,6 @@ def get_model_dict(model_name: str):
     # --------------------------------------------------------------
 
     # ----------- Google LLMs -----------
-    # from google.auth import default
-    # from google.auth.transport.requests import Request
     # credentials, _ = default()
     # auth_request = Request()
     # credentials.refresh(auth_request)

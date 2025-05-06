@@ -246,26 +246,19 @@ class MMLUProEval(Eval):
         if sampler.base_url == "" and self.conf_mode == "sampling":
             # set up vLLM mode 
             tokenizer = sampler.tokenizer
-
-            visible_gpus = os.environ.get("CUDA_VISIBLE_DEVICES", "")
-            if visible_gpus:
-                num_gpus = len(visible_gpus.split(','))
-            else:
-                num_gpus = torch.cuda.device_count()  # fallback
-            print(f"vllm run on {num_gpus} GPUs")
             llm = LLM(model=sampler.model, 
                       max_model_len=None,
                       trust_remote_code=True,
-                      tokenizer_mode="auto",
-                      tensor_parallel_size=num_gpus)
+                      tokenizer_mode="auto")
             sampling_params = SamplingParams(temperature=0, max_tokens=None, logprobs=5, seed=42, stop=[tokenizer.eos_token])
 
             # prepare batch
             inference_batch = []
             for i in tqdm(range(len(self.examples)), desc="Prepare prompt batch"):
-                prompt = format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0)
-                inference_batch.append(prompt)
-
+                # prompt = format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0)
+                prompt = [sampler._pack_message("system", sampler.system_message), 
+                          sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")]
+                inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True, enable_thinking=True))
             outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
             for i, output in enumerate(outputs):
                 generated_text = output.outputs[0].text
@@ -282,7 +275,6 @@ class MMLUProEval(Eval):
                 self.examples[i]["top_logprobs"] = (top_logprob_lst)
 
             regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
-            os.makedirs(os.path.dirname(regen_stored_path), exist_ok=True)
             with open(regen_stored_path, 'wb') as f:
                 pickle.dump(self.examples, f)
                 print(f"Shared sampling with vLLM completed and saved to: {regen_stored_path}")
