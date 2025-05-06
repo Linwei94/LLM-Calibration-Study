@@ -7,10 +7,10 @@ from ..sampler.chat_completion_sampler import (
 from ..sampler.o_chat_completion_sampler import OChatCompletionSampler
 from ..sampler.claude_sampler import ClaudeCompletionSampler, CLAUDE_SYSTEM_MESSAGE_LMSYS
 from ..sampler.hfmodel_sampler import HFChatCompletionSampler
-from ..sampler.google_ai_sampler import GoogleAISampler
+# from ..sampler.google_ai_sampler import GoogleAISampler
 
-from google.auth import default
-from google.auth.transport.requests import Request
+# from google.auth import default
+# from google.auth.transport.requests import Request
 
 def get_model_dict(model_name: str):
     """
@@ -45,7 +45,8 @@ def get_model_dict(model_name: str):
         "Qwen/Qwen3-32B-FP8",
         "Qwen/Qwen3-32B",
         "Qwen/Qwen3-30B-A3B-Base",
-        "Qwen/Qwen3-30B-A3B-FP8"
+        "Qwen/Qwen3-30B-A3B-FP8",
+        "google/gemma-3-1b-it",
     ]
 
 

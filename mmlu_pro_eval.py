@@ -246,10 +246,19 @@ class MMLUProEval(Eval):
         if sampler.base_url == "" and self.conf_mode == "sampling":
             # set up vLLM mode 
             tokenizer = sampler.tokenizer
-            llm = LLM(model=sampler.model, 
-                      max_model_len=None,
-                      trust_remote_code=True,
-                      tokenizer_mode="auto")
+            visible_gpus = os.environ.get("CUDA_VISIBLE_DEVICES", "")
+            if visible_gpus:
+                num_gpus = len(visible_gpus.split(','))
+            else:
+                num_gpus = torch.cuda.device_count()  # fallback
+
+            llm = LLM(
+                model=sampler.model,
+                max_model_len=None,
+                trust_remote_code=True,
+                tokenizer_mode="auto",
+                tensor_parallel_size=num_gpus
+            )
             sampling_params = SamplingParams(temperature=0, max_tokens=None, logprobs=5, seed=42, stop=[tokenizer.eos_token])
 
             # prepare batch
@@ -258,7 +267,7 @@ class MMLUProEval(Eval):
                 # prompt = format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0)
                 prompt = [sampler._pack_message("system", sampler.system_message), 
                           sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")]
-                inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True, enable_thinking=True))
+                inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True, enable_thinking=False))
             outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
             for i, output in enumerate(outputs):
                 generated_text = output.outputs[0].text
