@@ -108,8 +108,8 @@ def main():
     evals = {
         eval_name: get_evals(eval_name, args.debug, args.conf_mode, args.regenerate) for eval_name in args.benchmark.split(",")
     }
-    os.mkdir("LLM-Calibration-Study/cache", exist_ok=True)
-    os.mkdir("LLM-Calibration-Study/results", exist_ok=True)
+    os.makedirs("LLM-Calibration-Study/cache", exist_ok=True)
+    os.makedirs("LLM-Calibration-Study/results", exist_ok=True)
     print(evals)
     debug_suffix = "_DEBUG" if args.debug else ""
     print(debug_suffix)
