@@ -14,13 +14,14 @@ class HFChatCompletionSampler(SamplerBase):
         system_message: Union[str, None] = None,
         max_new_tokens: int = 1024,
         temperature: float = 0.1,
-        device: str = "cuda" if torch.cuda.is_available() else "cpu"
+        device: str = "cuda" if torch.cuda.is_available() else "cpu",
+        use_vllm = False
     ):
         if model_dir:
-            self.tokenizer = AutoTokenizer.from_pretrained(model_dir)
-            self.client: AutoModelForCausalLM = AutoModelForCausalLM.from_pretrained(model_dir, device_map="auto", torch_dtype=torch.bfloat16)
+            self.tokenizer = AutoTokenizer.from_pretrained(model_dir, trust_remote_code=True)
         else:
-            self.tokenizer = AutoTokenizer.from_pretrained(model)
+            self.tokenizer = AutoTokenizer.from_pretrained(model, trust_remote_code=True)
+        if not use_vllm:
             self.client: AutoModelForCausalLM = AutoModelForCausalLM.from_pretrained(model, device_map="auto", torch_dtype=torch.bfloat16)
         self.model = model
         self.system_message = system_message
