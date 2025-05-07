@@ -267,7 +267,7 @@ class MMLUProEval(Eval):
                 # prompt = format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0)
                 prompt = [sampler._pack_message("system", sampler.system_message), 
                           sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")]
-                inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True, enable_thinking=False))
+                inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True, enable_thinking=True))
             outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
             for i, output in enumerate(outputs):
                 generated_text = output.outputs[0].text

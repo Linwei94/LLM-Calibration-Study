@@ -44,6 +44,7 @@ def get_model_dict(model_name: str):
         "Qwen/Qwen3-14B",
         "Qwen/Qwen3-32B-FP8",
         "Qwen/Qwen3-32B",
+        "Qwen/Qwen3-30B-A3B",
         "Qwen/Qwen3-30B-A3B-Base",
         "Qwen/Qwen3-30B-A3B-FP8",
         "google/gemma-3-1b-it",
@@ -164,6 +165,7 @@ def get_model_dict(model_name: str):
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 max_new_tokens=2048,
                 temperature=1e-6,
+                use_vllm=True
             )
 
 
