@@ -68,6 +68,8 @@ class MMLUProEval(Eval):
             confidence = 0
             judge_response = ""
             logprobs = None 
+            verbal_numerical_confidence = 0
+            logit_perplexity_confidence = None
 
             match self.conf_mode:
                 
@@ -108,7 +110,6 @@ class MMLUProEval(Eval):
                         row["response"] = response
                         row["logprobs"] = sampler.logprobs
                         row["top_logprobs"] = sampler.top_logprobs
-                        
                     logprobs = row["logprobs"]
                     response_text = remove_verbal_confidence(normalize_response(response)) # remove verbal confidence to avoid judgement biases
                     # extracted_answer = consolidated_answer_extraction(benchmark="mmlu_pro", response_text=response_text, row=row, with_verbal_confidence=False)
@@ -213,9 +214,10 @@ class MMLUProEval(Eval):
 
                     if self.conf_mode in ["sampling", "eval_all"] or "_shared_sampling" in self.conf_mode:
                         self.regenerate = True
-                        progress_temp_path = shared_sampling_path(f"tmp_mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+                        model_name = sampler.model + ("-think" if hasattr(sampler, "think") and sampler.think else "")
+                        progress_temp_path = shared_sampling_path(f"tmp_mmlu_pro", model_name, self.conf_mode, self.num_examples, None)
                     else:
-                        progress_temp_path = ind_sampling_path(f"tmp_mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+                        progress_temp_path = ind_sampling_path(f"tmp_mmlu_pro", model_name, self.conf_mode, self.num_examples, None)
                         
                     with pickle_write_lock:
                         with open(progress_temp_path, 'wb') as f:
@@ -226,7 +228,7 @@ class MMLUProEval(Eval):
                 case _:
                     raise Exception(f"Unrecognized confidence type: {self.conf_mode}")
 
-            print(f"extracted_answer: {extracted_answer}, confidence: {confidence}")
+            # print(f"extracted_answer: {extracted_answer}, confidence: {confidence}")
             score = 1.0 if extracted_answer == row["answer"] else 0.0
 
             category = row["category"]
@@ -281,7 +283,8 @@ class MMLUProEval(Eval):
                 self.examples[i]["logprobs"] = (logprobs)
                 self.examples[i]["top_logprobs"] = (top_logprob_lst)
 
-            regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+            model_name = sampler.model + ("-think" if hasattr(sampler, "think") and sampler.think else "")
+            regen_stored_path = shared_sampling_path("mmlu_pro", model_name, self.conf_mode, self.num_examples, None)
             with open(regen_stored_path, 'wb') as f:
                 pickle.dump(self.examples, f)
                 print(f"Shared sampling with vLLM completed and saved to: {regen_stored_path}")
@@ -393,16 +396,16 @@ class MMLUProEval(Eval):
         #     sys.exit()
         # # ----------------------------------------------------------------------------------------------
 
-
+        model_name = sampler.model + ("-think" if hasattr(sampler, "think") and sampler.think else "")
         if self.conf_mode in ["sampling", "eval_all"] or "_shared_sampling" in self.conf_mode:
             self.regenerate = True
-            regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+            regen_stored_path = shared_sampling_path("mmlu_pro", model_name, self.conf_mode, self.num_examples, None)
         else:
-            regen_stored_path = ind_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+            regen_stored_path = ind_sampling_path("mmlu_pro", model_name, self.conf_mode, self.num_examples, None)
 
         if self.regenerate:
             if "tmp" in self.conf_mode:
-                regen_stored_path = shared_sampling_path(f"tmp_mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+                regen_stored_path = shared_sampling_path(f"tmp_mmlu_pro", model_name, self.conf_mode, self.num_examples, None)
                 if os.path.exists(regen_stored_path):
                     self.cache_found = True
                     print("Fetching from cache (partial dataset)")
@@ -448,7 +451,7 @@ class MMLUProEval(Eval):
                     "verbal_linguistic_confidence": [result.verbal_linguistic_confidence]
                 })
                 results_df = pd.concat([results_df, new_row], ignore_index=True)
-            file_stem = f"""mmlu_pro_{sampler.model.split("/")[-1]}_{self.conf_mode}_{self.num_examples}"""
+            file_stem = f"""mmlu_pro_{model_name.split("/")[-1]}_{self.conf_mode}_{self.num_examples}"""
             csv_filename = f"""LLM-Calibration-Study/results/{file_stem}.csv"""
             results_df.to_csv(csv_filename)
 

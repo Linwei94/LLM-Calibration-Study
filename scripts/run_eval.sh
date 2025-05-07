@@ -11,9 +11,23 @@ models=(
     "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
     "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo"
     "meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo"
-    "Qwen/Qwen3-235B-A22B-fp8"
+    "Qwen/Qwen3-235B-A22B-fp8-tput-think"
+    "Qwen/Qwen3-235B-A22B-fp8-tput"
+    "gemini-2.5-pro-exp-03-25"
+    "gemini-2.0-flash"
+    "gemini-2.0-flash-lite"
+    "gemini-1.5-flash"
+    "gemini-1.5-flash-8b"
+    "gemini-1.5-pro"
+    "grok-3-beta"
+    "grok-3-mini-beta"
+    "grok-2-1212"
+    "claude-3-7-sonnet-20250219"
+    "claude-3-5-haiku-20241022"
+    "claude-3-haiku-20240307"
 )
 
 for model in "${models[@]}"; do
-     python -m LLM-Calibration-Study.simple_evals --model $model --benchmark mmlu_pro --conf_mode eval_all &
+    echo $model
+    python -m LLM-Calibration-Study.simple_evals --model $model --benchmark mmlu_pro --conf_mode eval_all &
 done
