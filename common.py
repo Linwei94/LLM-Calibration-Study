@@ -20,7 +20,7 @@ def url_to_fileobj(url: str, binary=False) -> Any:
     response.raise_for_status()
     return io.BytesIO(response.content) if binary else io.StringIO(response.text)
 
-def map_with_progress(f: callable, xs: list[Any], num_threads: int = 75):
+def map_with_progress(f: callable, xs: list[Any], num_threads: int = 30):
     """
     Apply f to each element of xs, using a ThreadPool, and show progress.
     """

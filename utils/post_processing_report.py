@@ -5,6 +5,7 @@ import numpy as np
 import regex as re
 from ..custom_types import EvalResult, Message, SingleEvalResult
 from .metrics import calculate_ece
+import pandas as pd
 
 
 

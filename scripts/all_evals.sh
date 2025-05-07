@@ -117,3 +117,21 @@ CUDA_VISIBLE_DEVICES=2 python -m LLM-Calibration-Study.simple_evals --model Qwen
 
 # Overseas
 CUDA_VISIBLE_DEVICES=1,2,3 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-32B --benchmark mmlu_pro --conf_mode sampling
+
+
+conda activate llm-uncertainty
+python -m LLM-Calibration-Study.simple_evals --model grok-3-beta --benchmark mmlu_pro --conf_mode sampling
+python -m LLM-Calibration-Study.simple_evals --model grok-3-mini-beta --benchmark mmlu_pro --conf_mode sampling
+python -m LLM-Calibration-Study.simple_evals --model grok-2-1212 --benchmark mmlu_pro --conf_mode sampling
+
+
+python -m LLM-Calibration-Study.simple_evals --model claude-3-7-sonnet-20250219 --benchmark mmlu_pro --conf_mode sampling
+python -m LLM-Calibration-Study.simple_evals --model claude-3-5-haiku-20241022 --benchmark mmlu_pro --conf_mode sampling
+python -m LLM-Calibration-Study.simple_evals --model claude-3-5-sonnet-20241022 --benchmark mmlu_pro --conf_mode sampling
+python -m LLM-Calibration-Study.simple_evals --model claude-3-5-sonnet-20240620 --benchmark mmlu_pro --conf_mode sampling
+python -m LLM-Calibration-Study.simple_evals --model claude-3-haiku-20240307 --benchmark mmlu_pro --conf_mode sampling
+
+
+
+# Need organisation verification!!!
+python -m LLM-Calibration-Study.simple_evals --model o3 --benchmark mmlu_pro --conf_mode sampling --examples 100 

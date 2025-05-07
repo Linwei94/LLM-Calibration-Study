@@ -15,7 +15,8 @@ class HFChatCompletionSampler(SamplerBase):
         max_new_tokens: int = 1024,
         temperature: float = 0.1,
         device: str = "cuda" if torch.cuda.is_available() else "cpu",
-        use_vllm = False
+        use_vllm = False,
+        think = False 
     ):
         if model_dir:
             self.tokenizer = AutoTokenizer.from_pretrained(model_dir, trust_remote_code=True)
@@ -31,6 +32,7 @@ class HFChatCompletionSampler(SamplerBase):
         self.top_logprobs = None
         self.base_url = ""
         self.get_logprobs = True
+        self.think = think
 
     def _pack_message(self, role: str, content: Any) -> Dict:
         return {"role": str(role), "content": str(content)}
@@ -50,6 +52,10 @@ class HFChatCompletionSampler(SamplerBase):
     def __call__(self, message_list: MessageList) -> str:
         retry = 0
         # Format messages into prompt
+        for i in range(len(message_list)):
+            if not self.think and "qwen" in self.model.lower():
+                message_list[i]["content"] = "/no_think " + message_list[i]["content"]
+
         while True:
             if self.system_message:
                 message_list = [self._pack_message("system", self.system_message)] + message_list

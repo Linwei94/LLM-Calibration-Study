@@ -42,6 +42,14 @@ class SingleEvalResult:
     html: str | None = None
     convo: MessageList | None = None  # sampled conversation
     confidence: float | None = None
+    category: str | None = None
+    correct_answer: str | None = None
+    extracted_answer: str | None = None
+    response_token_length: int | None = 0
+    verbal_numerical_confidence: float | None = 0
+    logit_perplexity_confidence: float | None = 0
+    verbal_linguistic_confidence: float | None = 0
+    
 
 
 class Eval:

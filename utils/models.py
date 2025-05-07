@@ -46,8 +46,27 @@ def get_model_dict(model_name: str):
         "Qwen/Qwen3-32B",
         "Qwen/Qwen3-30B-A3B",
         "Qwen/Qwen3-30B-A3B-Base",
-        "Qwen/Qwen3-30B-A3B-FP8",
-        "google/gemma-3-1b-it",
+        "Qwen/Qwen3-30B-A3B-FP8"
+        "Qwen/Qwen3-0.6B-think",
+        "Qwen/Qwen3-0.6B-FP8-think",
+        "Qwen/Qwen3-0.6B-Base-think",
+        "Qwen/Qwen3-1.7B-FP8-think",
+        "Qwen/Qwen3-1.7B-think",
+        "Qwen/Qwen3-1.7B-Base-think",
+        "Qwen/Qwen3-4B-FP8-think",
+        "Qwen/Qwen3-4B-think",
+        "Qwen/Qwen3-4B-Base-think",
+        "Qwen/Qwen3-8B-FP8-think",
+        "Qwen/Qwen3-8B-think",
+        "Qwen/Qwen3-8B-Base-think",
+        "Qwen/Qwen3-14B-FP8-think",
+        "Qwen/Qwen3-14B-Base-think",
+        "Qwen/Qwen3-14B-think",
+        "Qwen/Qwen3-32B-FP8-think",
+        "Qwen/Qwen3-32B-think",
+        "Qwen/Qwen3-30B-A3B-think",
+        "Qwen/Qwen3-30B-A3B-Base-think",
+        "Qwen/Qwen3-30B-A3B-FP8-think"
     ]
 
 
@@ -69,6 +88,13 @@ def get_model_dict(model_name: str):
     elif model_name == "gpt-4.1":
         models["gpt-4.1"] = ChatCompletionSampler(
             model="gpt-4.1",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=2048,
+            get_logprobs=True
+        )
+    elif model_name == "o3-2025-04-16":
+        models["o3-2025-04-16"] = ChatCompletionSampler(
+            model="o3-2025-04-16",
             system_message=OPENAI_SYSTEM_MESSAGE_API,
             max_tokens=2048,
             get_logprobs=True
@@ -160,12 +186,13 @@ def get_model_dict(model_name: str):
     
     elif model_name in hf_models:
         models[model_name] = HFChatCompletionSampler(
-                model=model_name,
+                model=model_name.replace("-think", ""),
                 API_TOKEN=os.environ.get("HF_TOKEN", None),
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 max_new_tokens=2048,
                 temperature=1e-6,
-                use_vllm=True
+                use_vllm=True,
+                think=("think" in model_name)
             )
 
 
@@ -271,13 +298,24 @@ def get_model_dict(model_name: str):
     )
 
 
-    models["Qwen/Qwen3-235B-A22B-fp8"] = ChatCompletionSampler(
+    models["Qwen/Qwen3-235B-A22B-fp8-tput-think"] = ChatCompletionSampler(
             base_url = "https://api.together.xyz/v1",
             api_key = os.environ['TOGETHER_API_KEY'],
-            model="Qwen/Qwen3-235B-A22B-fp8",
+            model="Qwen/Qwen3-235B-A22B-fp8-tput",
             system_message=OPENAI_SYSTEM_MESSAGE_API,
             max_tokens=2048,
-            get_logprobs=True
+            get_logprobs=True,
+            think=True
+    )
+
+    models["Qwen/Qwen3-235B-A22B-fp8-tput"] = ChatCompletionSampler(
+            base_url = "https://api.together.xyz/v1",
+            api_key = os.environ['TOGETHER_API_KEY'],
+            model="Qwen/Qwen3-235B-A22B-fp8-tput",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=2048,
+            get_logprobs=True,
+            think=False
     )
 
     # free
@@ -321,6 +359,89 @@ def get_model_dict(model_name: str):
     )
     # --------------------------------------------------------------
 
+    # Claude
+    # --------------------------------------------------------------
+    # Claude 3.7 Sonnet
+    models["claude-3-7-sonnet-20250219"] = ChatCompletionSampler(
+        model="claude-3-7-sonnet-20250219",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=2048,
+        api_key=os.getenv("ANTHROPIC_API_KEY"),
+        base_url="https://api.anthropic.com/v1/",
+        get_logprobs=False # Not supported
+    )
+    # Claude 3.5 Haiku
+    models["claude-3-5-haiku-20241022"] = ChatCompletionSampler(
+        model="claude-3-5-haiku-20241022",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=2048,
+        api_key=os.getenv("ANTHROPIC_API_KEY"),
+        base_url="https://api.anthropic.com/v1/",
+        get_logprobs=False # Not supported
+    )
+    # Claude 3 Haiku
+    models["claude-3-haiku-20240307"] = ChatCompletionSampler(
+        model="claude-3-haiku-20240307",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=2048,
+        api_key=os.getenv("ANTHROPIC_API_KEY"),
+        base_url="https://api.anthropic.com/v1/",
+        get_logprobs=False # Not supported
+    )
+    # --------------------------------------------------------------
+
+
+    # Grok
+    # --------------------------------------------------------------
+    models["grok-3-beta"] = ChatCompletionSampler(
+        model="grok-3-beta",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=2048,
+        api_key=os.getenv("XAI_API_KEY"),
+        base_url="https://api.x.ai/v1",
+        get_logprobs=True
+    )
+
+    models["grok-3-mini-beta"] = ChatCompletionSampler(
+        model="grok-3-mini-beta",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=2048,
+        api_key=os.getenv("XAI_API_KEY"),
+        base_url="https://api.x.ai/v1",
+        get_logprobs=True
+    )
+
+    models["grok-2-1212"] = ChatCompletionSampler(
+        model="grok-2-1212",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=2048,
+        api_key=os.getenv("XAI_API_KEY"),
+        base_url="https://api.x.ai/v1",
+        get_logprobs=True
+    )
+    # --------------------------------------------------------------
+
+
+    # Google AI Studio
+    # --------------------------------------------------------------
+    # google_models = [
+    #     "gemini-2.5-flash-preview-04-17",
+    #     "gemini-2.5-pro-preview-05-06",
+    #     "gemini-2.0-flash",
+    #     "gemini-2.0-flash-lite",
+    #     "gemini-1.5-flash",
+    #     "gemini-1.5-flash-8b",
+    #     "gemini-1.5-pro",
+    # ]
+
+    # for gm in google_models:
+    #     models[gm] = GoogleAISampler(
+    #             model=gm,
+    #             api_key=os.environ["GOOGLE_AI_KEY"],
+    #             get_logprobs=True
+    #     )
+    # --------------------------------------------------------------
+
     # ----------- Google LLMs -----------
     # credentials, _ = default()
     # auth_request = Request()
@@ -362,25 +483,6 @@ def get_model_dict(model_name: str):
     #         base_url=f"https://us-central1-aiplatform.googleapis.com/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
     #         api_key=credentials.token
     #     )
-    
-    # google_models = [
-    #     "gemini-2.5-flash-preview-04-17",
-    #     "gemini-2.5-pro-exp-03-25",
-    #     "gemini-2.0-flash",
-    #     "gemini-2.0-flash-lite",
-    #     "gemini-1.5-flash",
-    #     "gemini-1.5-flash-8b",
-    #     "gemini-1.5-pro",
-    # ]
-
-    # for gm in google_models:
-    #     models[gm] = GoogleAISampler(
-    #             model=gm,
-    #             api_key=os.environ["GOOGLE_AI_KEY"],
-    #             get_logprobs=True
-    #     )
-    
-
     # # free during preview stage
     # models["meta/llama-4-maverick-17b-128e-instruct-maas"] = ChatCompletionSampler(
     #         model="meta/llama-4-maverick-17b-128e-instruct-maas",
@@ -397,7 +499,6 @@ def get_model_dict(model_name: str):
     #         base_url=f"https://{"us-east5-aiplatform.googleapis.com"}/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
     #         api_key=credentials.token
     #     )
-    
     # # free during preview stage
     # models["meta/llama-3.2-90b-vision-instruct-maas"] = ChatCompletionSampler(
     #         model="meta/llama-3.2-90b-vision-instruct-maas",
@@ -406,7 +507,6 @@ def get_model_dict(model_name: str):
     #         base_url=f"https://{"us-central1-aiplatform.googleapis.com"}/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
     #         api_key=credentials.token
     #     )
-    
     # # free during preview stage
     # models["meta/llama-3.2-1b-instruct"] = ChatCompletionSampler(
     #         model="meta/llama-3.2-1b-instruct",
@@ -415,7 +515,6 @@ def get_model_dict(model_name: str):
     #         base_url=f"https://{"us-central1-aiplatform.googleapis.com"}/v1beta1/projects/storied-channel-368910/locations/us-central1/endpoints/openapi",
     #         api_key=credentials.token
     #     )
-    
     # models["mistral/mistral-large-2402"] = ChatCompletionSampler(
     #         model="mistral/mistral-large-2402",
     #         system_message=OPENAI_SYSTEM_MESSAGE_API,
