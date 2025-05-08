@@ -250,6 +250,63 @@ class MMLUProEval(Eval):
                 verbal_numerical_confidence=verbal_numerical_confidence, logit_perplexity_confidence=logit_perplexity_confidence
             )
         
+        
+        if self.conf_mode == "batch_eval_verbal_linguistic_shared_sampling":
+            # load cache
+            regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+            if os.path.exists(regen_stored_path):
+                print("Fetching from cache")
+                with open(regen_stored_path, 'rb') as f:
+                    self.examples = pickle.load(f)
+            else:
+                # exit with error
+                print("No cache found. Please sample first.")
+                sys.exit()
+
+
+            # load vllm model for evaluation
+            print("vllm batch eval")
+            # set up vLLM mode 
+            tokenizer = self.decisiveness_grader.tokenizer
+            visible_gpus = os.environ.get("CUDA_VISIBLE_DEVICES", "")
+            if visible_gpus:
+                num_gpus = len(visible_gpus.split(','))
+            else:
+                num_gpus = torch.cuda.device_count()  # fallback
+
+            llm = LLM(
+                model=self.decisiveness_grader.model,
+                max_model_len=None,
+                trust_remote_code=True,
+                tokenizer_mode="auto",
+                tensor_parallel_size=num_gpus
+            )
+            sampling_params = SamplingParams(temperature=0, max_tokens=None, logprobs=5, seed=42, stop=[tokenizer.eos_token])
+
+            # prepare batch
+            inference_batch = []
+            for i in tqdm(range(len(self.examples)), desc="Prepare prompt batch"):
+                response = self.examples[i]["response"]
+                response_text = remove_verbal_confidence(normalize_response(response)) # remove verbal confidence to avoid judgement biases
+                extracted_answer = extract_answer(response_text=response)
+                question = format_multichoice_question(self.examples[i], conf_mode="decisiveness_grading", choices=0)
+                
+                prompt = [sampler._pack_message("system", sampler.system_message), 
+                          sampler._pack_message(content=LINGUISTIC_CONFIDENCE_GRADER_PROMPT.format(Question=question, Response=response_text), role="user")]
+                inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True, enable_thinking=True))
+            outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
+            conf_list = []
+            for i, output in enumerate(outputs):
+                generated_text = output.outputs[0].text
+                # print(generated_text)
+                score_pattern = r"[Cc]onfidence [Ss]core:\s*([0-9]*\.?[0-9]+)"
+                scores = re.findall(score_pattern, generated_text)
+                print(f"deceiveness score: {np.mean([float(score) for score in scores])}")
+                conf_list.append(np.mean([float(score) for score in scores]))
+            # save conf_list
+            torch.save(conf_list, "mmlu_pro_conf_list.pt")
+            sys.exit()
+        
         # ---------------------------------- Local vLLM for sampling -----------------------------------
         if sampler.base_url == "" and self.conf_mode == "sampling":
             print("vllm")

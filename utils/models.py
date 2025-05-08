@@ -194,6 +194,16 @@ def get_model_dict(model_name: str):
                 use_vllm=True,
                 think=("think" in model_name)
             )
+    
+    models['Qwen/Qwen3-30B-A3B'] = HFChatCompletionSampler(
+        model='Qwen/Qwen3-30B-A3B'.replace("-think", ""),
+        API_TOKEN=os.environ.get("HF_TOKEN", None),
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_new_tokens=2048,
+        temperature=1e-6,
+        use_vllm=True,
+        think=("think" in 'Qwen/Qwen3-30B-A3B')
+    )
 
 
     # ----------- Databrick LLMs -----------
