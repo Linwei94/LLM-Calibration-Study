@@ -275,9 +275,10 @@ class MMLUProEval(Eval):
             )
         
         
-        if self.conf_mode == "batch_eval_verbal_linguistic_shared_sampling":
+        if self.conf_mode == "batch_eval_vall":
             # load cache
-            regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, self.conf_mode, self.num_examples, None)
+            regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, "sampling", self.num_examples, None)
+            self.cache_found = True
             if os.path.exists(regen_stored_path):
                 print("Fetching from cache")
                 with open(regen_stored_path, 'rb') as f:
@@ -305,7 +306,7 @@ class MMLUProEval(Eval):
                 tokenizer_mode="auto",
                 tensor_parallel_size=num_gpus
             )
-            sampling_params = SamplingParams(temperature=0, max_tokens=None, logprobs=5, seed=42, stop=[tokenizer.eos_token])
+            sampling_params = SamplingParams(temperature=0, max_tokens=(None if enable_thinking else 1024), logprobs=5, seed=42, stop=[tokenizer.eos_token])
 
             # prepare batch
             inference_batch = []
