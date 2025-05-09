@@ -140,3 +140,4 @@ test_vertexai.sh
 hf_models/
 results/*
 scripts/*
+cache_linwei/*
