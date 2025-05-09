@@ -140,4 +140,9 @@ test_vertexai.sh
 hf_models/
 results/*
 scripts/*
+<<<<<<< HEAD
 cache_linwei/*
+=======
+cache_copy/*
+scripts/run_eval.sh
+>>>>>>> 9c80d55b1e581a2471f64508604438774e5ffcf8

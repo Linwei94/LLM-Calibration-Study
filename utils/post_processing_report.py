@@ -28,6 +28,10 @@ HTML_JINJA = """
 <summary>Log Probability:</summary>
 <p>{{ logprobs }}</p>
 </details>
+<details>
+<summary>Linguistic Judge Response:</summary>
+<p>{{ linguistic_judge_response }}</p>
+</details>
 """
 
 
