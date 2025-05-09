@@ -55,7 +55,8 @@ def main():
 
     simpleqa_grader = all_models["meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"]
     equality_checker = all_models["meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"]
-    decisiveness_grader = common.get_model_dict("Qwen/Qwen3-30B-A3B")["Qwen/Qwen3-30B-A3B"]
+    # decisiveness_grader = common.get_model_dict("Qwen/Qwen3-30B-A3B")["Qwen/Qwen3-30B-A3B"]
+    decisiveness_grader = common.get_model_dict("Qwen/Qwen3-0.6B")["Qwen/Qwen3-0.6B"]
     decisiveness_grader.get_logprobs = False
 
 

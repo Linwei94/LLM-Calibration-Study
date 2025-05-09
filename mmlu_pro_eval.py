@@ -288,7 +288,6 @@ class MMLUProEval(Eval):
                 print("No cache found. Please sample first.")
                 sys.exit()
 
-
             # load vllm model for evaluation
             print("vllm batch eval")
             # set up vLLM mode 
@@ -313,7 +312,6 @@ class MMLUProEval(Eval):
             for i in tqdm(range(len(self.examples)), desc="Prepare prompt batch"):
                 response = self.examples[i]["response"]
                 response_text = remove_verbal_confidence(normalize_response(response)) # remove verbal confidence to avoid judgement biases
-                extracted_answer = extract_answer(response_text=response)
                 question = format_multichoice_question(self.examples[i], conf_mode="decisiveness_grading", choices=0)
                 
                 prompt = [sampler._pack_message("system", sampler.system_message), 
@@ -427,17 +425,12 @@ class MMLUProEval(Eval):
                 tokenizer_mode="auto",
                 tensor_parallel_size=num_gpus
             )
-            sampling_params = SamplingParams(temperature=0, max_tokens=1024, logprobs=5, seed=42, stop=[tokenizer.eos_token])
+            sampling_params = SamplingParams(temperature=0, max_tokens=2048, logprobs=5, seed=42, stop=[tokenizer.eos_token])
             inference_batch = []
             for i in tqdm(range(len(self.examples)), desc="Prepare verbal linguistic judge prompt batch"):
                 response = self.examples[i]["response"]
                 response_text = remove_verbal_confidence(normalize_response(response)) # remove verbal confidence to avoid judgement biases
-                # print(response_text)
-                question = format_multichoice_question(self.examples[i], conf_mode="decisiveness_grading", choices=0)
-                response = self.examples[i]["response"]
-                response = truncate_by_words(response)
-                response_text = remove_verbal_confidence(normalize_response(response)) # remove verbal confidence to avoid judgement biases
-                extracted_answer = extract_answer(response_text=response)
+                response_text = truncate_by_words(response_text)
                 question = format_multichoice_question(self.examples[i], conf_mode="decisiveness_grading", choices=0)
                 
                 prompt = [sampler._pack_message("system", sampler.system_message), 
@@ -453,7 +446,7 @@ class MMLUProEval(Eval):
                     self.examples[i]["linguistic_judge_response"] = judge_generated_text
                 else:
                     score_patterns = [
-                        r"[Cc]onfidence [Ss]core:\s*([0-9]*\.?[0-9]+)",
+                        r"[Cc]onfidence [Ss]core:\s*([0-1]*\.?[0-9]+)",
                         r"confidence score is\s*([0-1]*\.?[0-9]+)",
                         r"answer is\s*([0-1]*\.?[0-9]+)",
                     ]
