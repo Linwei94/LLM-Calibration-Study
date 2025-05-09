@@ -140,3 +140,5 @@ test_vertexai.sh
 hf_models/
 results/*
 scripts/*
+cache_copy/*
+scripts/run_eval.sh

@@ -19,14 +19,17 @@ def get_model_dict(model_name: str):
 
     hf_models = [
         "meta-llama/Llama-3.2-3B-Instruct",
+        "meta-llama/Llama-3.1-405B-Instruct",
+        "meta-llama/Llama-3.3-70B-Instruct",
+        "meta-llama/Llama-3.1-8B-Instruct",
         "Qwen/Qwen2.5-3B-Instruct",
         "Qwen/Qwen2.5-7B-Instruct",
         "Qwen/Qwen2.5-32B-Instruct",
         "Qwen/Qwen2.5-72B-Instruct",
-        "meta-llama/Llama-3.1-405B-Instruct",
-        "meta-llama/Llama-3.3-70B-Instruct",
-        "meta-llama/Llama-3.1-8B-Instruct",
-        "deepseek-ai/DeepSeek-R1",
+        "Qwen/Qwen2.5-3B-Instruct-think",
+        "Qwen/Qwen2.5-7B-Instruct-think",
+        "Qwen/Qwen2.5-32B-Instruct-think",
+        "Qwen/Qwen2.5-72B-Instruct-think",
         "Qwen/Qwen3-0.6B",
         "Qwen/Qwen3-0.6B-FP8",
         "Qwen/Qwen3-0.6B-Base",
@@ -46,7 +49,7 @@ def get_model_dict(model_name: str):
         "Qwen/Qwen3-32B",
         "Qwen/Qwen3-30B-A3B",
         "Qwen/Qwen3-30B-A3B-Base",
-        "Qwen/Qwen3-30B-A3B-FP8"
+        "Qwen/Qwen3-30B-A3B-FP8",
         "Qwen/Qwen3-0.6B-think",
         "Qwen/Qwen3-0.6B-FP8-think",
         "Qwen/Qwen3-0.6B-Base-think",
@@ -66,7 +69,23 @@ def get_model_dict(model_name: str):
         "Qwen/Qwen3-32B-think",
         "Qwen/Qwen3-30B-A3B-think",
         "Qwen/Qwen3-30B-A3B-Base-think",
-        "Qwen/Qwen3-30B-A3B-FP8-think"
+        "Qwen/Qwen3-30B-A3B-FP8-think",
+        "google/gemma-3-27b-it",
+        "google/gemma-2-27b-it",
+        "google/gemma-2-9b-it",
+        "google/gemma-2b-it",
+        "google/gemma-3-1b-it",
+        "google/gemma-3-4b-it",
+        "google/gemma-3-12b-it",
+        "mistralai/Mixtral-8x7B-Instruct-v0.1",
+        "mistralai/Mixtral-8x7B-v0.1",
+        "mistralai/Mistral-7B-Instruct-v0.1",
+        "mistralai/Mistral-Small-3.1-24B-Base-2503",
+        "mistralai/Mistral-Large-Instruct-2411",
+        "mistralai/Mistral-Nemo-Instruct-2407",
+        "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+        "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
+        "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
     ]
 
 
@@ -194,6 +213,16 @@ def get_model_dict(model_name: str):
                 use_vllm=True,
                 think=("think" in model_name)
             )
+    
+    models['Qwen/Qwen3-30B-A3B'] = HFChatCompletionSampler(
+        model='Qwen/Qwen3-30B-A3B'.replace("-think", ""),
+        API_TOKEN=os.environ.get("HF_TOKEN", None),
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_new_tokens=2048,
+        temperature=1e-6,
+        use_vllm=True,
+        think=("think" in 'Qwen/Qwen3-30B-A3B')
+    )
 
 
     # ----------- Databrick LLMs -----------
