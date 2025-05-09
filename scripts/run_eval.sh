@@ -5,6 +5,7 @@ models=(
     "deepseek-reasoner"
     "gpt-4.1-mini"
     "gpt-4.1-nano"
+    "gpt-4o-2024-08-06"
     "meta-llama/Llama-3.2-3B-Instruct-Turbo"
     "meta-llama/Llama-4-Scout-17B-16E-Instruct"
     "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"
