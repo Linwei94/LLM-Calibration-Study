@@ -311,6 +311,7 @@ class MMLUProEval(Eval):
         if sampler.base_url == "" and self.conf_mode == "sampling":
             print("vllm")
             # set up vLLM mode 
+            enable_thinking = hasattr(sampler, "think") and sampler.think
             tokenizer = sampler.tokenizer
             visible_gpus = os.environ.get("CUDA_VISIBLE_DEVICES", "")
             if visible_gpus:
@@ -325,7 +326,7 @@ class MMLUProEval(Eval):
                 tokenizer_mode="auto",
                 tensor_parallel_size=num_gpus
             )
-            sampling_params = SamplingParams(temperature=0, max_tokens=None, logprobs=5, seed=42, stop=[tokenizer.eos_token])
+            sampling_params = SamplingParams(temperature=0, max_tokens=(None if enable_thinking else 1024), logprobs=5, seed=42, stop=[tokenizer.eos_token])
 
             # prepare batch
             inference_batch = []
@@ -333,7 +334,8 @@ class MMLUProEval(Eval):
                 # prompt = format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0)
                 prompt = [sampler._pack_message("system", sampler.system_message), 
                           sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")]
-                inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True, enable_thinking=True))
+                
+                inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True, enable_thinking=enable_thinking))
             outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
             for i, output in enumerate(outputs):
                 generated_text = output.outputs[0].text
