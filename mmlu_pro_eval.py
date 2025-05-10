@@ -355,7 +355,7 @@ class MMLUProEval(Eval):
 
                 for idx, response in zip(batch_indices, decoded_outputs):
                     example = self.examples[idx]
-                    if "gemma-3" in sampler.mode:
+                    if "gemma-3" in sampler.model.lower():
                         generated_text = "Explanation:\n" + response.split("model\nExplanation:")[-1].strip()
                     else:
                         generated_text = response.split("Assistant: ")[-1].strip()
