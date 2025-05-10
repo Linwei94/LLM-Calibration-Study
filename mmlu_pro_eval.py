@@ -204,6 +204,7 @@ class MMLUProEval(Eval):
                         logit_perplexity_confidence = calculate_logit_perplexity(logprobs)
                     else:
                         logit_perplexity_confidence = None 
+                    confidence = verbal_numerical_confidence
 
 
                 case "batch_eval_all":
@@ -294,50 +295,94 @@ class MMLUProEval(Eval):
             )
         
         # ---------------------------------- Local transformers for sampling -----------------------------------
-        if sampler.base_url == "" and self.conf_mode == "sampling":
+        if sampler.base_url == "" and self.conf_mode == "sampling-hf":
+            self.conf_mode = "sampling"
             enable_thinking = hasattr(sampler, "think") and sampler.think
             tokenizer = sampler.tokenizer
             hf_model = sampler.get_hf_model()
+            tokenizer.pad_token = tokenizer.eos_token
             inference_batch = []
+            batch_size = 4
+            indexed_inference_batch = []
             for i in tqdm(range(len(self.examples)), desc="Prepare prompt batch"):
-                prompt = [sampler._pack_message("system", sampler.system_message), 
-                        sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")]
-                inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True, enable_thinking=enable_thinking))
-            stopping_criteria = StoppingCriteriaList([EOSStoppingCriteria(tokenizer.eos_token_id, len(self.examples))])
-            tokenized_inputs = tokenizer(inference_batch, padding=True, truncation=True, return_tensors="pt")
-            tokenized_inputs = {k: v.to(hf_model.device) for k, v in tokenized_inputs.items()}
-            with torch.no_grad():
-                outputs = hf_model.generate(
-                    input_ids=tokenized_inputs["input_ids"],
-                    attention_mask=tokenized_inputs["attention_mask"],
-                    max_new_tokens=1024,
-                    do_sample=True,
-                    return_dict_in_generate=True, 
-                    output_logits=True,
-                    output_scores=True,
-                    pad_token_id=tokenizer.eos_token_id,
-                    stopping_criteria=stopping_criteria,
+                prompt = [
+                    sampler._pack_message("system", sampler.system_message),
+                    sampler._pack_message(
+                        content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0),
+                        role="user"
+                    )
+                ]
+                prompt_str = tokenizer.apply_chat_template(
+                    prompt,
+                    tokenize=False,
+                    add_generation_prompt=True,
+                    enable_thinking=enable_thinking
                 )
-            decoded_outputs = tokenizer.batch_decode(outputs.sequences, skip_special_tokens=True)
-            for i, response in enumerate(decoded_outputs):
-                generated_text = response.split("Assistant: ")[-1].strip()
-                self.examples[i]["prompt_messages"] = [sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")] # such formatting to fit later analysis pipeline
-                self.examples[i]["response"] = generated_text
-                print(generated_text)
+                indexed_inference_batch.append((i, prompt_str))
+            for start_idx in tqdm(range(0, len(indexed_inference_batch), batch_size), desc="Inference batches"):
+                end_idx = start_idx + batch_size
+                batch = indexed_inference_batch[start_idx:end_idx]
+                batch_indices, batch_prompts = zip(*batch)
+                batch_examples = [self.examples[i] for i in batch_indices]
 
-            try:
-                log_probs_lst = hf_model.compute_transition_scores(
-                    outputs.sequences,
-                    outputs.scores,
-                    normalize_logits=True
-                ).cpu().numpy(force=True)
+                tokenized_inputs = tokenizer(
+                    list(batch_prompts),
+                    padding=True,
+                    truncation=True,
+                    return_tensors="pt"
+                )
+                tokenized_inputs = {k: v.to(hf_model.device) for k, v in tokenized_inputs.items()}
 
-                for i, logprobs in enumerate(log_probs_lst):
-                    self.examples[i]["logprobs"] = (logprobs)
-                    self.examples[i]["top_logprobs"] = None
-            except:
-                log_probs_lst = [None] * len(outputs.sequences)
-            
+                input_ids = tokenized_inputs["input_ids"]
+                prompt_lengths = (input_ids != tokenizer.pad_token_id).sum(dim=1)
+
+                with torch.no_grad():
+                    outputs = hf_model.generate(
+                        **tokenized_inputs,
+                        max_new_tokens=1024,
+                        do_sample=True,
+                        return_dict_in_generate=True,
+                        output_logits=True,
+                        output_scores=True,
+                        pad_token_id=tokenizer.eos_token_id,
+                    )
+                torch.cuda.empty_cache()
+
+                generated_sequences = [
+                    seq[prompt_len:] for seq, prompt_len in zip(outputs.sequences, prompt_lengths)
+                ]
+                decoded_outputs = tokenizer.batch_decode(generated_sequences, skip_special_tokens=True)
+
+                for idx, response in zip(batch_indices, decoded_outputs):
+                    example = self.examples[idx]
+                    if "gemma-3" in sampler.mode:
+                        generated_text = "Explanation:\n" + response.split("model\nExplanation:")[-1].strip()
+                    else:
+                        generated_text = response.split("Assistant: ")[-1].strip()
+                    example["prompt_messages"] = [
+                        sampler._pack_message(
+                            content=format_multichoice_question(example, conf_mode="sampling", choices=0),
+                            role="user"
+                        )
+                    ]
+                    example["response"] = generated_text
+                    print(f"[{idx}] {generated_text}")
+
+                try:
+                    log_probs_lst = hf_model.compute_transition_scores(
+                        outputs.sequences,
+                        outputs.scores,
+                        normalize_logits=True
+                    ).cpu().numpy(force=True)
+
+                    for i, logprobs in enumerate(log_probs_lst):
+                        self.examples[batch_indices[i]]["logprobs"] = logprobs
+                        self.examples[batch_indices[i]]["top_logprobs"] = None
+                except Exception as e:
+                    for i in batch_indices:
+                        self.examples[i]["logprobs"] = None
+                        self.examples[i]["top_logprobs"] = None
+
 
             model_name = sampler.model + ("-think" if hasattr(sampler, "think") and sampler.think else "")
             regen_stored_path = shared_sampling_path("mmlu_pro", model_name, self.conf_mode, self.num_examples, None)
