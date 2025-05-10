@@ -34,6 +34,9 @@ class HFChatCompletionSampler(SamplerBase):
         self.get_logprobs = True
         self.think = think
 
+    def get_hf_model(self):
+        return AutoModelForCausalLM.from_pretrained(self.model, device_map="auto", torch_dtype=torch.bfloat16)
+
     def _pack_message(self, role: str, content: Any) -> Dict:
         return {"role": str(role), "content": str(content)}
 

@@ -24,12 +24,31 @@ import openai
 from openai import AsyncOpenAI
 from vllm import LLM, SamplingParams
 from tqdm import tqdm
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, StoppingCriteriaList, StoppingCriteria
 from torch.nn import DataParallel
+import multiprocessing as mp
+
+# Set start method at the very beginning of the script
+mp.set_start_method("spawn", force=True)
 
 
 pickle_write_lock = threading.Lock()
 
+class EOSStoppingCriteria(StoppingCriteria):
+    def __init__(self, eos_token_id, total):
+        self.eos_token_id = eos_token_id
+        self.pbar = tqdm(total=total, desc="Generating", dynamic_ncols=True, position=0)
+
+    def __call__(self, input_ids, scores, **kwargs):
+        # Update progress bar after generating a token
+        self.pbar.update(1)
+        
+        # Stop if EOS token is reached
+        if input_ids[0, -1] == self.eos_token_id:
+            self.pbar.set_postfix({'status': 'EOS token reached'})
+            return True  # Stop generation if EOS token is reached
+        
+        return False  # Keep generating until EOS is reached
 
 def preprocess(test_df):
     res_df = []
@@ -274,62 +293,59 @@ class MMLUProEval(Eval):
                 verbal_numerical_confidence=verbal_numerical_confidence, logit_perplexity_confidence=logit_perplexity_confidence, verbal_linguistic_confidence=verbal_linguistic_confidence
             )
         
-        
-        if self.conf_mode == "batch_eval_vall":
-            # load cache
-            regen_stored_path = shared_sampling_path("mmlu_pro", sampler.model, "sampling", self.num_examples, None)
-            self.cache_found = True
-            if os.path.exists(regen_stored_path):
-                print("Fetching from cache")
-                with open(regen_stored_path, 'rb') as f:
-                    self.examples = pickle.load(f)
-            else:
-                # exit with error
-                print("No cache found. Please sample first.")
-                sys.exit()
-
-            # load vllm model for evaluation
-            print("vllm batch eval")
-            # set up vLLM mode 
-            tokenizer = self.decisiveness_grader.tokenizer
-            visible_gpus = os.environ.get("CUDA_VISIBLE_DEVICES", "")
-            if visible_gpus:
-                num_gpus = len(visible_gpus.split(','))
-            else:
-                num_gpus = torch.cuda.device_count()  # fallback
-
-            llm = LLM(
-                model=self.decisiveness_grader.model,
-                max_model_len=None,
-                trust_remote_code=True,
-                tokenizer_mode="auto",
-                tensor_parallel_size=num_gpus
-            )
-            sampling_params = SamplingParams(temperature=0, max_tokens=(None if enable_thinking else 1024), logprobs=5, seed=42, stop=[tokenizer.eos_token])
-
-            # prepare batch
+        # ---------------------------------- Local transformers for sampling -----------------------------------
+        if sampler.base_url == "" and self.conf_mode == "sampling":
+            enable_thinking = hasattr(sampler, "think") and sampler.think
+            tokenizer = sampler.tokenizer
+            hf_model = sampler.get_hf_model()
             inference_batch = []
             for i in tqdm(range(len(self.examples)), desc="Prepare prompt batch"):
-                response = self.examples[i]["response"]
-                response_text = remove_verbal_confidence(normalize_response(response)) # remove verbal confidence to avoid judgement biases
-                question = format_multichoice_question(self.examples[i], conf_mode="decisiveness_grading", choices=0)
-                
                 prompt = [sampler._pack_message("system", sampler.system_message), 
-                          sampler._pack_message(content=LINGUISTIC_CONFIDENCE_GRADER_PROMPT.format(Question=question, Response=response_text), role="user")]
-                inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True, enable_thinking=True))
-            outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
-            conf_list = []
-            for i, output in enumerate(outputs):
-                generated_text = output.outputs[0].text
-                # print(generated_text)
-                score_pattern = r"[Cc]onfidence [Ss]core:\s*([0-9]*\.?[0-9]+)"
-                scores = re.findall(score_pattern, generated_text)
-                print(f"deceiveness score: {np.mean([float(score) for score in scores])}")
-                conf_list.append(np.mean([float(score) for score in scores]))
-            # save conf_list
-            torch.save(conf_list, "mmlu_pro_conf_list.pt")
+                        sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")]
+                inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True, enable_thinking=enable_thinking))
+            stopping_criteria = StoppingCriteriaList([EOSStoppingCriteria(tokenizer.eos_token_id, len(self.examples))])
+            tokenized_inputs = tokenizer(inference_batch, padding=True, truncation=True, return_tensors="pt")
+            tokenized_inputs = {k: v.to(hf_model.device) for k, v in tokenized_inputs.items()}
+            with torch.no_grad():
+                outputs = hf_model.generate(
+                    input_ids=tokenized_inputs["input_ids"],
+                    attention_mask=tokenized_inputs["attention_mask"],
+                    max_new_tokens=1024,
+                    do_sample=True,
+                    return_dict_in_generate=True, 
+                    output_logits=True,
+                    output_scores=True,
+                    pad_token_id=tokenizer.eos_token_id,
+                    stopping_criteria=stopping_criteria,
+                )
+            decoded_outputs = tokenizer.batch_decode(outputs.sequences, skip_special_tokens=True)
+            for i, response in enumerate(decoded_outputs):
+                generated_text = response.split("Assistant: ")[-1].strip()
+                self.examples[i]["prompt_messages"] = [sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")] # such formatting to fit later analysis pipeline
+                self.examples[i]["response"] = generated_text
+                print(generated_text)
+
+            try:
+                log_probs_lst = hf_model.compute_transition_scores(
+                    outputs.sequences,
+                    outputs.scores,
+                    normalize_logits=True
+                ).cpu().numpy(force=True)
+
+                for i, logprobs in enumerate(log_probs_lst):
+                    self.examples[i]["logprobs"] = (logprobs)
+                    self.examples[i]["top_logprobs"] = None
+            except:
+                log_probs_lst = [None] * len(outputs.sequences)
+            
+
+            model_name = sampler.model + ("-think" if hasattr(sampler, "think") and sampler.think else "")
+            regen_stored_path = shared_sampling_path("mmlu_pro", model_name, self.conf_mode, self.num_examples, None)
+            with open(regen_stored_path, 'wb') as f:
+                pickle.dump(self.examples, f)
+                print(f"Shared sampling with vLLM completed and saved to: {regen_stored_path}")
             sys.exit()
-        
+
         # ---------------------------------- Local vLLM for sampling -----------------------------------
         if sampler.base_url == "" and self.conf_mode == "sampling":
             print("vllm")
@@ -349,7 +365,7 @@ class MMLUProEval(Eval):
                 tokenizer_mode="auto",
                 tensor_parallel_size=num_gpus
             )
-            sampling_params = SamplingParams(temperature=0, max_tokens=(None if enable_thinking else 2048), logprobs=5, seed=42, stop=[tokenizer.eos_token])
+            sampling_params = SamplingParams(temperature=0, max_tokens=(10240 if enable_thinking else 2048), logprobs=5, seed=42, stop=[tokenizer.eos_token])
 
             # prepare batch
             
