@@ -7,7 +7,7 @@ from ..sampler.chat_completion_sampler import (
 from ..sampler.o_chat_completion_sampler import OChatCompletionSampler
 from ..sampler.claude_sampler import ClaudeCompletionSampler, CLAUDE_SYSTEM_MESSAGE_LMSYS
 from ..sampler.hfmodel_sampler import HFChatCompletionSampler
-# from ..sampler.google_ai_sampler import GoogleAISampler
+from ..sampler.google_ai_sampler import GoogleAISampler
 
 # from google.auth import default
 # from google.auth.transport.requests import Request
@@ -449,22 +449,22 @@ def get_model_dict(model_name: str):
 
     # Google AI Studio
     # --------------------------------------------------------------
-    # google_models = [
-    #     "gemini-2.5-flash-preview-04-17",
-    #     "gemini-2.5-pro-preview-05-06",
-    #     "gemini-2.0-flash",
-    #     "gemini-2.0-flash-lite",
-    #     "gemini-1.5-flash",
-    #     "gemini-1.5-flash-8b",
-    #     "gemini-1.5-pro",
-    # ]
+    google_models = [
+        "gemini-2.5-flash-preview-04-17",
+        "gemini-2.5-pro-preview-05-06",
+        "gemini-2.0-flash",
+        "gemini-2.0-flash-lite",
+        "gemini-1.5-flash",
+        "gemini-1.5-flash-8b",
+        "gemini-1.5-pro",
+    ]
 
-    # for gm in google_models:
-    #     models[gm] = GoogleAISampler(
-    #             model=gm,
-    #             api_key=os.environ["GOOGLE_AI_KEY"],
-    #             get_logprobs=True
-    #     )
+    for gm in google_models:
+        models[gm] = GoogleAISampler(
+                model=gm,
+                api_key=os.environ["GOOGLE_AI_KEY"],
+                get_logprobs=True
+        )
     # --------------------------------------------------------------
 
     # ----------- Google LLMs -----------

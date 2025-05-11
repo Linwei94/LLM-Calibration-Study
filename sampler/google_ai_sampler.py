@@ -62,6 +62,7 @@ class GoogleAISampler(SamplerBase):
     def __call__(self, message_list: MessageList) -> str:
         trial = 0
         contents = [m["content"] for m in message_list]
+        null_response_patience = 10
         while True:
             try:
                 if self.get_logprobs:
@@ -79,7 +80,16 @@ class GoogleAISampler(SamplerBase):
                                                                     system_instruction=self.system_message,
                                                                     max_output_tokens=self.max_tokens,
                                                                     temperature=0))
-                return response.text
+                if response.text:
+                    return response.text
+                else:
+                    if null_response_patience > 0:
+                        null_response_patience -= 1 
+                        print("Null Response", null_response_patience)
+                        continue
+                    else:
+                        print("Null Response Returned")
+                        return None
                 
             # NOTE: BadRequestError is triggered once for MMMU, please uncomment if you are reruning MMMU
             except Exception as e:

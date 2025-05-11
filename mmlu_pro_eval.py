@@ -21,10 +21,7 @@ from .utils.post_processing_report import *
 from .utils.post_processing_answer import *
 from .utils.post_processing_confidence import *
 import threading
-import asyncio
-import openai
 from openai import AsyncOpenAI
-from vllm import LLM, SamplingParams
 from tqdm import tqdm
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from torch.nn import DataParallel
@@ -189,13 +186,13 @@ class MMLUProEval(Eval):
                         logit_perplexity_confidence = None 
 
                     # only evaluate a response when it has extracted answer and confidence and its token lenght < 10240
-                    tokens = approx_tokenizer(response_text, return_tensors="pt")
-                    token_length = len(tokens["input_ids"][0])
-                    if response is not None and verbal_numerical_confidence is not None and token_length < 10240:
-                        verbal_linguistic_confidence, judge_response = linguistic_confidence_score(self.decisiveness_grader, format_multichoice_question(row, conf_mode="decisiveness_grading", choices=0), remove_verbal_confidence(response_text))
-                        print(verbal_linguistic_confidence)
-                    else:
-                        verbal_linguistic_confidence, judge_response = None, None
+                    # tokens = approx_tokenizer(response_text, return_tensors="pt")
+                    # token_length = len(tokens["input_ids"][0])
+                    # if response is not None and verbal_numerical_confidence is not None and token_length < 10240:
+                    #     verbal_linguistic_confidence, judge_response = linguistic_confidence_score(self.decisiveness_grader, format_multichoice_question(row, conf_mode="decisiveness_grading", choices=0), remove_verbal_confidence(response_text))
+                    #     print(verbal_linguistic_confidence)
+                    # else:
+                    #     verbal_linguistic_confidence, judge_response = None, None
 
                     confidence = verbal_numerical_confidence
 
@@ -388,6 +385,7 @@ class MMLUProEval(Eval):
         
         # ---------------------------------- Local vLLM for sampling -----------------------------------
         if sampler.base_url == "" and self.conf_mode == "sampling":
+            from vllm import LLM, SamplingParams
             print("vllm")
             # set up vLLM mode 
             enable_thinking = hasattr(sampler, "think") and sampler.think
