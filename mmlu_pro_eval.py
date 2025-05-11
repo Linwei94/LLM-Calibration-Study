@@ -283,6 +283,7 @@ class MMLUProEval(Eval):
             enable_thinking = hasattr(sampler, "think") and sampler.think
             tokenizer = sampler.tokenizer
             hf_model = sampler.get_hf_model()
+            hf_model.config.use_flash_attention = False
             tokenizer.pad_token = tokenizer.eos_token
             inference_batch = []
             batch_size = 1
