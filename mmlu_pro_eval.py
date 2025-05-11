@@ -322,7 +322,7 @@ class MMLUProEval(Eval):
                 with torch.no_grad():
                     outputs = hf_model.generate(
                         **tokenized_inputs,
-                        max_new_tokens=1024,
+                        max_new_tokens=2048,
                         do_sample=True,
                         return_dict_in_generate=True,
                         output_logits=True,
