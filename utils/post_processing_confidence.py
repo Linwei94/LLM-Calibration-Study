@@ -47,8 +47,20 @@ def empirical_semantic_confidence(lnll_lst, response_list, labels):
 # faithful response uncertainty
 # ------------------------------------------------------------------------------------------------------
 def remove_verbal_confidence(text):
-    cleaned_text = re.sub(r'[Cc]onfidence:?\s*(\d+)?%?\r?\n?', '', text, flags=re.MULTILINE)
-    cleaned_text = re.sub(r'\(0-100\):?\s*(\d+)?%?\r?\n?', '', cleaned_text, flags=re.MULTILINE)
+    text = normalize_response(text)
+    confidence_patterns = [
+        r"[Cc]onfidence\s*\(0-100\):\s*[\(]?[\[]?(\d+)[\)]?[\]]?%?",  # e.g., Confidence (0-100): 90%
+        r"[Cc]onfidence[:]?\s*(\d+)%?",             # e.g., Confidence: 90%
+        r"[Cc]onfidence [\(0-100\)]?:\s*\[(\d+)%?\]"
+        r"[Cc]onfidence [Ll]evel\s*\(0-100\):\s*(\d+)%?",  # e.g., Confidence (0-100): 90%
+        r"[Cc]onfidence [Ll]evel[:]?\s*(\d+)%?",             # e.g., Confidence: 90%
+        r"[Cc]onfidence [Ll]evel[\(0-100\)]?:\s*\[(\d+)%?\]",
+        r"[Cc]onfidence \(100\):\s*\w*,\s*(\d+)%?",
+        r"[Cc]onfidence\s*\(\d+\)\s*:\s*(\d+)%?",
+        r"[Cc]onfidence\s*[\(]?(\d+)[\)]?%?",
+    ]
+    for pat in confidence_patterns:
+        cleaned_text = re.sub(pat, '', text, flags=re.MULTILINE)
     return cleaned_text
 
 

@@ -31,7 +31,7 @@ from torch.nn import DataParallel
 
 
 pickle_write_lock = threading.Lock()
-
+approx_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-4-Scout-17B-16E-Instruct", trust_remote_code=True)
 
 def preprocess(test_df):
     res_df = []
@@ -70,7 +70,7 @@ class MMLUProEval(Eval):
             confidence = 0
             judge_response = ""
             logprobs = None 
-            verbal_numerical_confidence = 0
+            verbal_numerical_confidence = None
             verbal_linguistic_confidence = None
             logit_perplexity_confidence = None
 
@@ -187,6 +187,16 @@ class MMLUProEval(Eval):
                         logit_perplexity_confidence = calculate_logit_perplexity(logprobs)
                     else:
                         logit_perplexity_confidence = None 
+
+                    # only evaluate a response when it has extracted answer and confidence and its token lenght < 10240
+                    tokens = approx_tokenizer(response_text, return_tensors="pt")
+                    token_length = len(tokens["input_ids"][0])
+                    if response is not None and verbal_numerical_confidence is not None and token_length < 10240:
+                        verbal_linguistic_confidence, judge_response = linguistic_confidence_score(self.decisiveness_grader, format_multichoice_question(row, conf_mode="decisiveness_grading", choices=0), remove_verbal_confidence(response_text))
+                        print(verbal_linguistic_confidence)
+                    else:
+                        verbal_linguistic_confidence, judge_response = None, None
+
                     confidence = verbal_numerical_confidence
 
 
@@ -264,11 +274,11 @@ class MMLUProEval(Eval):
                 score=score,
                 correct_answer=row["answer"],
                 extracted_answer=extracted_answer,
-                extracted_answer_confidence=confidence,
+                extracted_answer_confidence="Verbal Numerical=" + str(verbal_numerical_confidence) + ", Verbal Linguistic=" + str(verbal_linguistic_confidence) + ", Logit Perplexity=" + str(logit_perplexity_confidence),
                 subject=category,
                 logprobs = logprobs,
                 conf_mode = self.conf_mode,
-                linguistic_judge_response = judge_response + "\n\n" + str(verbal_linguistic_confidence)
+                linguistic_judge_response = judge_response
             )
             convo = prompt_messages + [dict(content=response_text, role="assistant")]
             return SingleEvalResult(
