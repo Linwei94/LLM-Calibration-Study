@@ -68,7 +68,9 @@ class ChatCompletionSampler(SamplerBase):
         return {"role": str(role), "content": content}
 
     def __call__(self, message_list: MessageList) -> str:
-        if self.system_message:
+        if self.system_message and (self.model == "o1-mini-2024-09-12" or self.model == "o3-mini-2025-01-31" or self.model == "o4-mini-2025-04-16"):
+            message_list = message_list
+        else:
             message_list = [self._pack_message("system", self.system_message)] + message_list
         trial = 0
         null_response_patience = 10
@@ -169,12 +171,21 @@ class ChatCompletionSampler(SamplerBase):
 
                 else:
                     print(self.model, "No logprobs")
-                    response = self.client.chat.completions.create(
-                        model=self.model,
-                        messages=message_list,
-                        temperature=self.temperature,
-                        max_tokens=self.max_tokens
-                    )
+                    if (self.model == "o1-mini-2024-09-12" or self.model == "o3-mini-2025-01-31" or self.model == "o4-mini-2025-04-16"):
+                        print("mini")
+                        response = self.client.chat.completions.create(
+                            model=self.model,
+                            messages=message_list,
+                            max_completion_tokens=self.max_tokens  # Must be `max_completion_tokens`!
+                        )
+                    else: 
+                        response = self.client.chat.completions.create(
+                            model=self.model,
+                            messages=message_list,
+                            temperature=self.temperature,
+                            max_tokens=self.max_tokens
+                        )
+
                 if response.choices[0].message.content:
                     return response.choices[0].message.content
                 else:

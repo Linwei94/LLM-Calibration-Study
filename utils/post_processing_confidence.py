@@ -80,7 +80,8 @@ def calculate_logit_perplexity(logprobs):
 
 
 # login(os.environ["HF_TOKEN"])
-relevance_model = CrossEncoder("sentence-transformers/all-MiniLM-L6-v2")
+# relevance_model = CrossEncoder("sentence-transformers/all-MiniLM-L6-v2")
+relevance_model = None 
 def token_sar_confidence(top_logprobs: list[dict[str, float]]) -> float:
     """
     Compute SAR-based confidence from only top_logprobs (one per token).
