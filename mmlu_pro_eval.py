@@ -9,6 +9,8 @@ import pickle
 import os
 import sys
 import time
+
+from huggingface_hub import hf_hub_download
 from datasets import load_dataset
 from filelock import FileLock
 from . import common
@@ -24,31 +26,12 @@ import openai
 from openai import AsyncOpenAI
 from vllm import LLM, SamplingParams
 from tqdm import tqdm
-from transformers import AutoTokenizer, AutoModelForCausalLM, StoppingCriteriaList, StoppingCriteria
+from transformers import AutoTokenizer, AutoModelForCausalLM
 from torch.nn import DataParallel
-import multiprocessing as mp
-
-# Set start method at the very beginning of the script
-mp.set_start_method("spawn", force=True)
 
 
 pickle_write_lock = threading.Lock()
 
-class EOSStoppingCriteria(StoppingCriteria):
-    def __init__(self, eos_token_id, total):
-        self.eos_token_id = eos_token_id
-        self.pbar = tqdm(total=total, desc="Generating", dynamic_ncols=True, position=0)
-
-    def __call__(self, input_ids, scores, **kwargs):
-        # Update progress bar after generating a token
-        self.pbar.update(1)
-        
-        # Stop if EOS token is reached
-        if input_ids[0, -1] == self.eos_token_id:
-            self.pbar.set_postfix({'status': 'EOS token reached'})
-            return True  # Stop generation if EOS token is reached
-        
-        return False  # Keep generating until EOS is reached
 
 def preprocess(test_df):
     res_df = []
@@ -88,7 +71,7 @@ class MMLUProEval(Eval):
             judge_response = ""
             logprobs = None 
             verbal_numerical_confidence = 0
-            verbal_linguistic_confidence = 0
+            verbal_linguistic_confidence = None
             logit_perplexity_confidence = None
 
             match self.conf_mode:
@@ -390,12 +373,14 @@ class MMLUProEval(Eval):
                 pickle.dump(self.examples, f)
                 print(f"Shared sampling with vLLM completed and saved to: {regen_stored_path}")
             sys.exit()
-
+        # ----------------------------------------------------------------------------------------------
+        
         # ---------------------------------- Local vLLM for sampling -----------------------------------
         if sampler.base_url == "" and self.conf_mode == "sampling":
             print("vllm")
             # set up vLLM mode 
             enable_thinking = hasattr(sampler, "think") and sampler.think
+            is_qwen = "qwen" in sampler.model.lower()
             tokenizer = sampler.tokenizer
             visible_gpus = os.environ.get("CUDA_VISIBLE_DEVICES", "")
             if visible_gpus:
@@ -403,29 +388,62 @@ class MMLUProEval(Eval):
             else:
                 num_gpus = torch.cuda.device_count()  # fallback
 
-            llm = LLM(
-                model=sampler.model,
-                max_model_len=None,
-                trust_remote_code=True,
-                tokenizer_mode="auto",
-                tensor_parallel_size=num_gpus
-            )
-            sampling_params = SamplingParams(temperature=0, max_tokens=(10240 if enable_thinking else 2048), logprobs=5, seed=42, stop=[tokenizer.eos_token])
+            if "gguf" in sampler.model.lower():
+                repo_id, filename = sampler.model.split("@")[0], sampler.model.split("@")[1]
+                path = hf_hub_download(repo_id=repo_id, filename=filename)
+                llm = LLM(
+                    model=path,
+                    max_model_len=None,
+                    trust_remote_code=True,
+                    tokenizer=repo_id.replace("-GGUF", ""),
+                    tensor_parallel_size=num_gpus
+                )
+            else:
+                llm = LLM(
+                    model=sampler.model,
+                    max_model_len=None,
+                    trust_remote_code=True,
+                    tokenizer_mode="auto",
+                    tensor_parallel_size=num_gpus
+                )
+            sampling_params = SamplingParams(temperature=0, max_tokens=(None if enable_thinking else 2048), logprobs=5, seed=42, stop=[tokenizer.eos_token])
 
             # prepare batch
-            
-            try:
-                inference_batch = []
-                for i in tqdm(range(len(self.examples)), desc="Prepare prompt batch"):
-                    prompt = [sampler._pack_message("system", sampler.system_message), 
-                            sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")]
-                    inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True, enable_thinking=enable_thinking))
-            except jinja2.exceptions.TemplateError:
-                inference_batch = []
-                for i in tqdm(range(len(self.examples)), desc="Prepare prompt batch"):
-                    prompt = [sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")]
-                    inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True, enable_thinking=enable_thinking))
-            outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
+            if is_qwen:
+                try:
+                    inference_batch = []
+                    for i in tqdm(range(len(self.examples)), desc="Prepare prompt batch"):
+                        prompt = [sampler._pack_message("system", sampler.system_message), 
+                                sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")]
+                        inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True, enable_thinking=enable_thinking))
+                    outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
+                except jinja2.exceptions.TemplateError:
+                    inference_batch = []
+                    for i in tqdm(range(len(self.examples)), desc="Prepare prompt batch"):
+                        prompt = [sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")]
+                        inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True, enable_thinking=enable_thinking))
+                    outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
+            else:
+                try:
+                    inference_batch = []
+                    for i in tqdm(range(len(self.examples)), desc="Prepare prompt batch"):
+                        prompt = [sampler._pack_message("system", sampler.system_message), 
+                                sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")]
+                        inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True))
+                    outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
+                except jinja2.exceptions.TemplateError:
+                    inference_batch = []
+                    for i in tqdm(range(len(self.examples)), desc="Prepare prompt batch"):
+                        prompt = [sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")]
+                        inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True))
+                    outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
+                except:
+                    inference_batch = []
+                    for i in tqdm(range(len(self.examples)), desc="Prepare prompt batch"):
+                        prompt = format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0)
+                        inference_batch.append(prompt)
+                    outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
+            # outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
             for i, output in enumerate(outputs):
                 generated_text = output.outputs[0].text
                 # print(generated_text)
