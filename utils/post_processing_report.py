@@ -5,6 +5,7 @@ import numpy as np
 import regex as re
 from ..custom_types import EvalResult, Message, SingleEvalResult
 from .metrics import calculate_ece
+import pandas as pd
 
 
 
@@ -26,6 +27,10 @@ HTML_JINJA = """
 <details>
 <summary>Log Probability:</summary>
 <p>{{ logprobs }}</p>
+</details>
+<details>
+<summary>Linguistic Judge Response:</summary>
+<p>{{ linguistic_judge_response }}</p>
 </details>
 """
 

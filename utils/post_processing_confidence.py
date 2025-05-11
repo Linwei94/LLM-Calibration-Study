@@ -72,11 +72,16 @@ def linguistic_confidence_score(sampler, question, response) -> tuple[str, float
 # Logits-based confidence
 # ------------------------------------------------------------------------------------------------------
 def calculate_logit_perplexity(logprobs):
-    return float(np.exp(np.array([p for p in logprobs if p is not None])).mean()) 
+    if logprobs:
+        arr = np.array([p for p in logprobs if p is not None])
+        if len(arr)> 0:
+            return float(np.exp(arr).mean()) 
+    return None
 
 
-login(os.environ["HF_TOKEN"])
-relevance_model = CrossEncoder("sentence-transformers/all-MiniLM-L6-v2")
+# login(os.environ["HF_TOKEN"])
+# relevance_model = CrossEncoder("sentence-transformers/all-MiniLM-L6-v2")
+relevance_model = None 
 def token_sar_confidence(top_logprobs: list[dict[str, float]]) -> float:
     """
     Compute SAR-based confidence from only top_logprobs (one per token).

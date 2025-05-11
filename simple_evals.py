@@ -55,7 +55,8 @@ def main():
 
     simpleqa_grader = all_models["meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"]
     equality_checker = all_models["meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"]
-    decisiveness_grader = all_models["meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"]
+    decisiveness_grader = common.get_model_dict("Qwen/Qwen3-30B-A3B-think")["Qwen/Qwen3-30B-A3B-think"]
+    # decisiveness_grader = common.get_model_dict("Qwen/Qwen3-0.6B")["Qwen/Qwen3-0.6B"]
     decisiveness_grader.get_logprobs = False
 
 
@@ -108,6 +109,8 @@ def main():
     evals = {
         eval_name: get_evals(eval_name, args.debug, args.conf_mode, args.regenerate) for eval_name in args.benchmark.split(",")
     }
+    os.makedirs("LLM-Calibration-Study/cache", exist_ok=True)
+    os.makedirs("LLM-Calibration-Study/results", exist_ok=True)
     print(evals)
     debug_suffix = "_DEBUG" if args.debug else ""
     print(debug_suffix)

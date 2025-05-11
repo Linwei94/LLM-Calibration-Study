@@ -133,6 +133,13 @@ dmypy.json
 *.DS_Store
 .vscode/
 run.sh
+eval.sh
+cluster.sh
 test_vertexai.py
 test_vertexai.sh
 hf_models/
+results/*
+scripts/*
+cache_linwei/*
+cache_copy/*
+scripts/run_eval.sh

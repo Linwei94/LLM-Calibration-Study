@@ -21,48 +21,48 @@ MULTILINGUAL_ANSWER_PATTERN_TEMPLATE = (
 )
 # All the different ways "Answer" is written in different languages
 MULTILINGUAL_ANSWER_REGEXES = [
-    "Answer\s*:",
-    "Answer\s*:​​​​​​",  # Korean invisible character
-    "উত্তর\s*:",
-    "उत्तर\s*:",
-    "উত্তরঃ",
-    "উত্তর\s*:",
-    "Antwort\s*:",
-    "답변\s*:",
-    "정답\s*:",
-    "답\s*:",
-    "答案\s*：",
-    "答案\s*:",
-    "答\s*：",
-    "答\s*:",
-    "答复\s*：",
-    "答曰\s*：",
-    "الإجابة:",
-    "الجواب:",
-    "إجابة:",
-    "الإجابة النهائية:",
-    "الإجابة الصحيحة:",
-    "الإجابة الصحيحة هي:",
-    "الإجابة هي:",
-    "الجواب النهائي:",
-    "Respuesta\s*:",
-    "Risposta\s*:",
-    "答え\s*:",
-    "答え\s*：",
-    "回答\s*:",
-    "回答\s*：",
-    "解答\s*:",
-    "Jawaban\s*:",
-    "Réponse\s*:",
-    "Resposta\s*:",
-    "Jibu\s*:",
-    "Idahun\s*:",
-    "Ìdáhùn\s*:",
-    "Idáhùn\s*:",
-    "Àmọ̀nà\s*:",
-    "Àdáhùn\s*:",
-    "Ànúgọ\s*:",
-    "Àṣàyàn\s*:",
+    r"Answer\s*:",
+    r"Answer\s*:​​​​​​",  # Korean invisible character
+    r"উত্তর\s*:",
+    r"उत्तर\s*:",
+    r"উত্তরঃ",
+    r"উত্তর\s*:",
+    r"Antwort\s*:",
+    r"답변\s*:",
+    r"정답\s*:",
+    r"답\s*:",
+    r"答案\s*：",
+    r"答案\s*:",
+    r"答\s*：",
+    r"答\s*:",
+    r"答复\s*：",
+    r"答曰\s*：",
+    r"الإجابة:",
+    r"الجواب:",
+    r"إجابة:",
+    r"الإجابة النهائية:",
+    r"الإجابة الصحيحة:",
+    r"الإجابة الصحيحة هي:",
+    r"الإجابة هي:",
+    r"الجواب النهائي:",
+    r"Respuesta\s*:",
+    r"Risposta\s*:",
+    r"答え\s*:",
+    r"答え\s*：",
+    r"回答\s*:",
+    r"回答\s*：",
+    r"解答\s*:",
+    r"Jawaban\s*:",
+    r"Réponse\s*:",
+    r"Resposta\s*:",
+    r"Jibu\s*:",
+    r"Idahun\s*:",
+    r"Ìdáhùn\s*:",
+    r"Idáhùn\s*:",
+    r"Àmọ̀nà\s*:",
+    r"Àdáhùn\s*:",
+    r"Ànúgọ\s*:",
+    r"Àṣàyàn\s*:",
 ]
 
 
@@ -220,22 +220,23 @@ def normalize_response(response: str) -> str:
     """
     Normalize the response by removing markdown and LaTeX formatting that may prevent a match.
     """
-
-    return (
-        response.replace("**", "")
-        .replace("$\\boxed{", "")
-        .replace("}$", "")
-        .replace("\\$", "")
-        .replace("$\\text{", "")
-        .replace("$", "")
-        .replace("\\mathrm{", "")
-        .replace("\\{", "")
-        .replace("\\text", "")
-        .replace("\\(", "")
-        .replace("\\mathbf{", "")
-        .replace("{", "")
-        .replace("\\boxed", "")
-    )
+    if response:
+        return (
+            response.replace("**", "")
+            .replace("$\\boxed{", "")
+            .replace("}$", "")
+            .replace("\\$", "")
+            .replace("$\\text{", "")
+            .replace("$", "")
+            .replace("\\mathrm{", "")
+            .replace("\\{", "")
+            .replace("\\text", "")
+            .replace("\\(", "")
+            .replace("\\mathbf{", "")
+            .replace("{", "")
+            .replace("\\boxed", "")
+        )
+    return ""
 
 def normalize_extracted_answer(extracted_answer: str) -> str:
     return (
@@ -432,6 +433,7 @@ def extract_answer_and_confidence(response_text: str, options) -> tuple[str | No
 
 
 def consolidated_answer_extraction(benchmark: str, response_text: str, row: dict | None = None, choices_dict: dict | None = None , with_verbal_confidence: bool = False) -> tuple[str, float] | str:
+    
     """a single function that handles answer extraction for different benchmarks
 
     Args:
@@ -471,5 +473,77 @@ def consolidated_answer_extraction(benchmark: str, response_text: str, row: dict
             extracted_answer, _ = extract_answer_and_confidence(response_text, options=options)
         if extracted_answer is None or extracted_answer not in option_letters:
             extracted_answer = extract_mcq_answer("\n".join(response_text.splitlines()[-10:]), benchmark)
-
         return extracted_answer
+    
+# -------------------------------------------------------------------------------------------------------------
+def extract_answer(response_text: str):
+    response_text = normalize_response(response_text)
+    answer_patterns = [
+        r"[Aa]nswer:?[\s]*[\n]*([A-J])",   
+        r"[Aa]nswer:[\s]*[\n]*\(?([A-J])\)?", 
+        r"[Aa]nswer:[\s]*[\n]*\[?([A-J])\]?",  
+        r"[Aa]nswer:[\s]*[\n]*([A-J])[,)]",         
+        r"[Aa]nswer:[\s]*[\n]*([A-J])\s*,?.*",
+        r"Answer:\n([A-J])\nConfidence",         
+        r"answer is\s*\[?\(?([A-J])\]?\)?",   
+        r"answer should be\s*\[?\(?([A-J])\]?\)?",   
+        r"best option is \(?([A-J])\)?",
+        r"best match is option \(?([A-J])\)?",
+        r"the closest is \(?([A-J])\)?",
+        r"Answer:\n*^([A-J])$",
+        r"^([A-J])$"
+    ]
+    # max_search_scope = len(response_text.splitlines())
+    # for end in range(3, max_search_scope, 10):
+    search_scope =  "\n".join(response_text.splitlines()[::-1])
+    extracted_answer = None
+    # Default answer extracrion from Simple Evals
+    for answer_regex in MULTILINGUAL_ANSWER_REGEXES:
+        regex = MULTILINGUAL_ANSWER_PATTERN_TEMPLATE.format(answer_regex)
+        match = re.search(regex, search_scope)
+        if match:
+            extracted_answer = normalize_extracted_answer(match.group(1)).strip()
+            if extracted_answer in "ABCDEFGHIJ":
+                return extracted_answer
+    # More complex extraction regex
+    for pattern in answer_patterns:
+        match = re.search(pattern, search_scope, re.IGNORECASE)
+        if match:
+            extracted_answer = normalize_extracted_answer(match.group(1)).strip()
+            if extracted_answer in "ABCDEFGHIJ":
+                return extracted_answer
+        match = re.search(pattern, search_scope, re.MULTILINE)
+        if match:
+            extracted_answer = normalize_extracted_answer(match.group(1)).strip()
+            if extracted_answer in "ABCDEFGHIJ":
+                return extracted_answer
+    return None
+
+
+def extract_verbal_numerical_confidence(response_text: str):
+    response_text = normalize_response(response_text)
+    confidence_patterns = [
+        r"[Cc]onfidence\s*\(0-100\):\s*[\(]?[\[]?(\d+)[\)]?[\]]?%?",  # e.g., Confidence (0-100): 90%
+        r"[Cc]onfidence[:]?\s*(\d+)%?",             # e.g., Confidence: 90%
+        r"[Cc]onfidence [\(0-100\)]?:\s*\[(\d+)%?\]"
+        r"[Cc]onfidence [Ll]evel\s*\(0-100\):\s*(\d+)%?",  # e.g., Confidence (0-100): 90%
+        r"[Cc]onfidence [Ll]evel[:]?\s*(\d+)%?",             # e.g., Confidence: 90%
+        r"[Cc]onfidence [Ll]evel[\(0-100\)]?:\s*\[(\d+)%?\]",
+        r"[Cc]onfidence \(100\):\s*\w*,\s*(\d+)%?",
+        r"[Cc]onfidence\s*\(\d+\)\s*:\s*(\d+)%?",
+        r"[Cc]onfidence\s*[\(]?(\d+)[\)]?%?",
+    ]
+    confidence = None
+    # max_search_scope = len(response_text.splitlines())
+    # for end in range(3, max_search_scope, 10):
+    search_scope =  "\n".join(response_text.splitlines()[::-1])
+    for pat in confidence_patterns:
+        match = re.search(pat, search_scope, re.IGNORECASE)
+        if match:
+            try:
+                confidence = int(match.group(1))
+                if confidence >= 0 and confidence <= 100:
+                    return confidence / 100
+            except:
+                pass
+    return confidence

@@ -29,11 +29,12 @@ class ChatCompletionSampler(SamplerBase):
         max_tokens: int = 1024,
         base_url=None,
         api_key=None,
-        get_logprobs = False
+        get_logprobs = False,
+        think = False
     ):
         # self.api_key_name = "OPENAI_API_KEY"
         if base_url:
-            if any(provider in base_url for provider in ["google", "databricks", "together", "deepseek", "local"]):
+            if any(provider in base_url for provider in ["google", "databricks", "together", "deepseek", "local", "anthropic", "x.ai"]):
                 self.client = OpenAI(base_url=base_url, api_key=api_key)
         else:
             OpenAI.api_key = os.environ["OPENAI_API_KEY"]
@@ -47,6 +48,7 @@ class ChatCompletionSampler(SamplerBase):
         self.get_logprobs = get_logprobs
         self.logprobs = None
         self.top_logprobs = None
+        self.think = think
 
     def _handle_image(
         self, image: str, encoding: str = "base64", format: str = "png", fovea: int = 768
@@ -66,13 +68,21 @@ class ChatCompletionSampler(SamplerBase):
         return {"role": str(role), "content": content}
 
     def __call__(self, message_list: MessageList) -> str:
-        if self.system_message:
+        if self.system_message and (self.model == "o1-mini-2024-09-12" or self.model == "o3-mini-2025-01-31" or self.model == "o4-mini-2025-04-16"):
+            message_list = message_list
+        else:
             message_list = [self._pack_message("system", self.system_message)] + message_list
         trial = 0
+        null_response_patience = 10
         while True:
             try:
                 if self.get_logprobs:
                     if self.base_url and "together" in self.base_url:
+
+                        for i in range(len(message_list)):
+                            if not self.think and "qwen" in self.model.lower():
+                                message_list[i]["content"] = "/no_think " + message_list[i]["content"]
+
                         print(self.model, "Together API")
                         response = self.client.chat.completions.create(
                             model=self.model,
@@ -94,7 +104,6 @@ class ChatCompletionSampler(SamplerBase):
 
                         if self.model == "meta-llama/Llama-2-70b-hf":
                             print(response)
-                        return response.choices[0].message.content
                     
                     elif self.base_url and "databricks" in self.base_url:
                         print(self.model, "Databricks API")
@@ -108,7 +117,6 @@ class ChatCompletionSampler(SamplerBase):
                         )
                         self.top_logprobs = [t.top_logprobs for t in response.choices[0].logprobs.content]
                         self.logprobs = [t.logprob for t in response.choices[0].logprobs.content]
-                        return response.choices[0].message.content
                     
                     elif self.base_url and "local" in self.base_url:
                         print(self.model, "vLLM API")
@@ -126,7 +134,6 @@ class ChatCompletionSampler(SamplerBase):
                             top_logprob_lst.append({t.token: t. logprob for t in top_list})
                         self.top_logprobs = top_logprob_lst
                         self.logprobs = [t.logprob for t in response.choices[0].logprobs.content]
-                        return response.choices[0].message.content
                     
                     elif self.base_url and "deepseek" in self.base_url: 
                         print(self.model, "Deep Seek API")
@@ -144,7 +151,6 @@ class ChatCompletionSampler(SamplerBase):
                             top_logprob_lst.append({t.token: t. logprob for t in top_list})
                         self.top_logprobs = top_logprob_lst
                         self.logprobs = [t.logprob for t in response.choices[0].logprobs.content]
-                        return response.choices[0].message.content
                     
                     else:
                         print(self.model, "OpenAI API")
@@ -162,17 +168,34 @@ class ChatCompletionSampler(SamplerBase):
                             top_logprob_lst.append({t.token: t. logprob for t in top_list})
                         self.top_logprobs = top_logprob_lst
                         self.logprobs = [t.logprob for t in response.choices[0].logprobs.content]
-                        return response.choices[0].message.content
 
                 else:
                     print(self.model, "No logprobs")
-                    response = self.client.chat.completions.create(
-                        model=self.model,
-                        messages=message_list,
-                        temperature=self.temperature,
-                        max_tokens=self.max_tokens
-                    )
+                    if (self.model == "o1-mini-2024-09-12" or self.model == "o3-mini-2025-01-31" or self.model == "o4-mini-2025-04-16"):
+                        print("mini")
+                        response = self.client.chat.completions.create(
+                            model=self.model,
+                            messages=message_list,
+                            max_completion_tokens=self.max_tokens  # Must be `max_completion_tokens`!
+                        )
+                    else: 
+                        response = self.client.chat.completions.create(
+                            model=self.model,
+                            messages=message_list,
+                            temperature=self.temperature,
+                            max_tokens=self.max_tokens
+                        )
+
+                if response.choices[0].message.content:
                     return response.choices[0].message.content
+                else:
+                    if null_response_patience > 0:
+                        null_response_patience -= 1 
+                        print("Null Response", null_response_patience)
+                        continue
+                    else:
+                        print("Null Response Returned")
+                        return response.choices[0].message.content
                 
             # NOTE: BadRequestError is triggered once for MMMU, please uncomment if you are reruning MMMU
             except openai.BadRequestError as e:

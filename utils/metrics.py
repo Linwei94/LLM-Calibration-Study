@@ -1,11 +1,14 @@
 import torch
+import pandas as pd
 
 def calculate_ece(confidences, accuracies, n_bins=10) -> float:
     """
     Calculate the expected calibration error (ECE) given a list of confidence scores (0-1) and accuracy scores (0 or 1).
     """
-    confidences = torch.tensor(confidences)
-    accuracies = torch.tensor(accuracies)
+    df = pd.DataFrame({"conf": confidences, "acc": accuracies}).dropna()
+
+    confidences = torch.tensor(df["conf"].tolist())
+    accuracies = torch.tensor(df["acc"].tolist())
     bin_boundaries = torch.linspace(0, 1, n_bins + 1)
     bin_lowers = bin_boundaries[:-1]
     bin_uppers = bin_boundaries[1:]

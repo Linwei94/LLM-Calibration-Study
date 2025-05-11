@@ -77,7 +77,7 @@ python -m LLM-Calibration-Study.simple_evals --model gemini-1.5-flash --benchmar
 conda activate llm-uncertainty
 python -m LLM-Calibration-Study.simple_evals --model gemini-1.5-flash-8b --benchmark mmlu_pro --conf_mode sampling
 
-conda activate llm-uncertainty
+
 python -m LLM-Calibration-Study.simple_evals --model gemini-1.5-pro --benchmark mmlu_pro --conf_mode sampling
 
 
@@ -92,26 +92,46 @@ python -m LLM-Calibration-Study.simple_evals --model gemini-1.5-pro --benchmark 
 "Qwen/Qwen3-30B-A3B-Base",
 "Qwen/Qwen3-30B-A3B-FP8"
 
+
+conda activate llm-uncertainty
 # Lab 1
 # CUDA_VISIBLE_DEVICES=0 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-0.6B-Base --benchmark mmlu_pro --conf_mode sampling
-CUDA_VISIBLE_DEVICES=0 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-8B-Base --benchmark mmlu_pro --conf_mode sampling
-CUDA_VISIBLE_DEVICES=1 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-0.6B --benchmark mmlu_pro --conf_mode sampling
-CUDA_VISIBLE_DEVICES=3 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-0.6B-FP8 --benchmark mmlu_pro --conf_mode sampling
-CUDA_VISIBLE_DEVICES=2 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-4B --benchmark mmlu_pro --conf_mode sampling
-
+# CUDA_VISIBLE_DEVICES=1 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-0.6B --benchmark mmlu_pro --conf_mode sampling
+# CUDA_VISIBLE_DEVICES=3 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-0.6B-FP8 --benchmark mmlu_pro --conf_mode sampling
+# CUDA_VISIBLE_DEVICES=2 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-4B --benchmark mmlu_pro --conf_mode sampling
+# CUDA_VISIBLE_DEVICES=1 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-1.7B-FP8 --benchmark mmlu_pro --conf_mode sampling
+# CUDA_VISIBLE_DEVICES=3 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-1.7B-Base --benchmark mmlu_pro --conf_mode sampling
 
 # Lab 2
-CUDA_VISIBLE_DEVICES=0 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-1.7B-FP8 --benchmark mmlu_pro --conf_mode sampling
-CUDA_VISIBLE_DEVICES=1 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-1.7B --benchmark mmlu_pro --conf_mode sampling
-CUDA_VISIBLE_DEVICES=3 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-1.7B-Base --benchmark mmlu_pro --conf_mode sampling
-CUDA_VISIBLE_DEVICES=2 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-4B-FP8 --benchmark mmlu_pro --conf_mode sampling
+CUDA_VISIBLE_DEVICES=0,1,2,3 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-4B-FP8 --benchmark mmlu_pro --conf_mode sampling
+# CUDA_VISIBLE_DEVICES=3 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-1.7B --benchmark mmlu_pro --conf_mode sampling
+# CUDA_VISIBLE_DEVICES=0 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-4B-Base --benchmark mmlu_pro --conf_mode sampling
+CUDA_VISIBLE_DEVICES=0,1,2,3 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-8B-Base --benchmark mmlu_pro --conf_mode sampling
 
 # Lab 0: device 3 is actually 0
+# CUDA_VISIBLE_DEVICES=3,2,1 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-14B --benchmark mmlu_pro --conf_mode sampling
 CUDA_VISIBLE_DEVICES=3 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-14B --benchmark mmlu_pro --conf_mode sampling
 CUDA_VISIBLE_DEVICES=0 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-8B-FP8 --benchmark mmlu_pro --conf_mode sampling
-CUDA_VISIBLE_DEVICES=1 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-4B-Base --benchmark mmlu_pro --conf_mode sampling
 CUDA_VISIBLE_DEVICES=2 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-8B --benchmark mmlu_pro --conf_mode sampling
 
 
 # Overseas
 CUDA_VISIBLE_DEVICES=1,2,3 python -m LLM-Calibration-Study.simple_evals --model Qwen/Qwen3-32B --benchmark mmlu_pro --conf_mode sampling
+
+
+conda activate llm-uncertainty
+python -m LLM-Calibration-Study.simple_evals --model grok-3-beta --benchmark mmlu_pro --conf_mode sampling
+python -m LLM-Calibration-Study.simple_evals --model grok-3-mini-beta --benchmark mmlu_pro --conf_mode sampling
+python -m LLM-Calibration-Study.simple_evals --model grok-2-1212 --benchmark mmlu_pro --conf_mode sampling
+
+
+python -m LLM-Calibration-Study.simple_evals --model claude-3-7-sonnet-20250219 --benchmark mmlu_pro --conf_mode sampling
+python -m LLM-Calibration-Study.simple_evals --model claude-3-5-haiku-20241022 --benchmark mmlu_pro --conf_mode sampling
+python -m LLM-Calibration-Study.simple_evals --model claude-3-5-sonnet-20241022 --benchmark mmlu_pro --conf_mode sampling
+python -m LLM-Calibration-Study.simple_evals --model claude-3-5-sonnet-20240620 --benchmark mmlu_pro --conf_mode sampling
+python -m LLM-Calibration-Study.simple_evals --model claude-3-haiku-20240307 --benchmark mmlu_pro --conf_mode sampling
+
+
+
+# Need organisation verification!!!
+python -m LLM-Calibration-Study.simple_evals --model o3 --benchmark mmlu_pro --conf_mode sampling --examples 100 
