@@ -26,7 +26,7 @@ class HFChatCompletionSampler(SamplerBase):
             else:
                 self.tokenizer = AutoTokenizer.from_pretrained(model, trust_remote_code=True)
         if not use_vllm:
-            self.client: AutoModelForCausalLM = AutoModelForCausalLM.from_pretrained(model, device_map="auto", torch_dtype=torch.bfloat16)
+            self.client: AutoModelForCausalLM = AutoModelForCausalLM.from_pretrained(model, device_map="auto", torch_dtype=torch.bfloat16, attn_implementation="eager")
         self.model = model
         self.system_message = system_message
         self.max_new_tokens = max_new_tokens
@@ -36,6 +36,9 @@ class HFChatCompletionSampler(SamplerBase):
         self.base_url = ""
         self.get_logprobs = True
         self.think = think
+
+    def get_hf_model(self):
+        return AutoModelForCausalLM.from_pretrained(self.model, device_map="auto", torch_dtype=torch.bfloat16, attn_implementation="eager")
 
     def _pack_message(self, role: str, content: Any) -> Dict:
         return {"role": str(role), "content": str(content)}

@@ -285,7 +285,7 @@ class MMLUProEval(Eval):
             hf_model = sampler.get_hf_model()
             tokenizer.pad_token = tokenizer.eos_token
             inference_batch = []
-            batch_size = 4
+            batch_size = 1
             indexed_inference_batch = []
             for i in tqdm(range(len(self.examples)), desc="Prepare prompt batch"):
                 prompt = [
