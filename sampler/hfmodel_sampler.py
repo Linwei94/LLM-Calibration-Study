@@ -21,7 +21,10 @@ class HFChatCompletionSampler(SamplerBase):
         if model_dir:
             self.tokenizer = AutoTokenizer.from_pretrained(model_dir, trust_remote_code=True)
         else:
-            self.tokenizer = AutoTokenizer.from_pretrained(model, trust_remote_code=True)
+            if "gguf" in model.lower():
+                self.tokenizer = AutoTokenizer.from_pretrained(model.split("@")[0].replace("-GGUF", ""), trust_remote_code=True)
+            else:
+                self.tokenizer = AutoTokenizer.from_pretrained(model, trust_remote_code=True)
         if not use_vllm:
             self.client: AutoModelForCausalLM = AutoModelForCausalLM.from_pretrained(model, device_map="auto", torch_dtype=torch.bfloat16)
         self.model = model

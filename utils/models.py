@@ -18,12 +18,18 @@ def get_model_dict(model_name: str):
     """
 
     hf_models = [
+        "Qwen/Qwen3-14B-GGUF@Qwen3-14B-Q4_K_M.gguf",
+        "Qwen/Qwen3-14B-AWQ",
+        "Qwen/Qwen3-32B-GGUF",
+        "Qwen/Qwen3-32B-AWQ",
         "meta-llama/Llama-3.2-3B-Instruct",
         "meta-llama/Llama-3.1-405B-Instruct",
         "meta-llama/Llama-3.3-70B-Instruct",
         "meta-llama/Llama-3.1-8B-Instruct",
+        "meta-llama/Llama-3.2-1B-Instruct",
         "Qwen/Qwen2.5-3B-Instruct",
         "Qwen/Qwen2.5-7B-Instruct",
+        "Qwen/Qwen2.5-14B-Instruct",
         "Qwen/Qwen2.5-32B-Instruct",
         "Qwen/Qwen2.5-72B-Instruct",
         "Qwen/Qwen2.5-3B-Instruct-think",
@@ -213,16 +219,6 @@ def get_model_dict(model_name: str):
                 use_vllm=True,
                 think=("think" in model_name)
             )
-    
-    models['Qwen/Qwen3-30B-A3B'] = HFChatCompletionSampler(
-        model='Qwen/Qwen3-30B-A3B'.replace("-think", ""),
-        API_TOKEN=os.environ.get("HF_TOKEN", None),
-        system_message=OPENAI_SYSTEM_MESSAGE_API,
-        max_new_tokens=2048,
-        temperature=1e-6,
-        use_vllm=True,
-        think=("think" in 'Qwen/Qwen3-30B-A3B')
-    )
 
 
     # ----------- Databrick LLMs -----------
