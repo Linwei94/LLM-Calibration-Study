@@ -28,7 +28,17 @@ from torch.nn import DataParallel
 
 
 pickle_write_lock = threading.Lock()
-approx_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-4-Scout-17B-16E-Instruct", trust_remote_code=True)
+approx_tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-4-Maverick-17B-128E-Instruct", trust_remote_code=True)
+
+# increased token threshold for linguistic confidence judging
+special_token_allowance = [
+    "Qwen/Qwen3-235B-A22B-fp8-tput-think",
+    "Qwen/Qwen3-32B-think",
+    "Qwen/Qwen3-4B-think",
+    "Qwen/Qwen3-8B-think",
+    "Qwen/Qwen3-30B-A3B-think",
+    "Qwen/Qwen3-14B-think",
+]
 
 def preprocess(test_df):
     res_df = []
@@ -188,11 +198,12 @@ class MMLUProEval(Eval):
                     # only evaluate a response when it has extracted answer and confidence and its token lenght < 10240
                     tokens = approx_tokenizer(response_text, return_tensors="pt")
                     token_length = len(tokens["input_ids"][0])
-                    # if response is not None and verbal_numerical_confidence is not None and token_length < 10240:
-                    #     verbal_linguistic_confidence, judge_response = linguistic_confidence_score(self.decisiveness_grader, format_multichoice_question(row, conf_mode="decisiveness_grading", choices=0), remove_verbal_confidence(response_text))
-                    #     print(verbal_linguistic_confidence)
-                    # else:
-                    #     verbal_linguistic_confidence, judge_response = None, None
+                    token_cap = 10240 if sampler.model in special_token_allowance else 1024
+                    if response is not None and verbal_numerical_confidence is not None and token_length < token_cap:
+                        verbal_linguistic_confidence, judge_response = linguistic_confidence_score(self.decisiveness_grader, format_multichoice_question(row, conf_mode="decisiveness_grading", choices=0), remove_verbal_confidence(response_text))
+                        print(verbal_linguistic_confidence)
+                    else:
+                        verbal_linguistic_confidence, judge_response = None, None
 
                     confidence = verbal_numerical_confidence
 
