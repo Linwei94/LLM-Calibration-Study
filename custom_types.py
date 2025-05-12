@@ -49,6 +49,7 @@ class SingleEvalResult:
     verbal_numerical_confidence: float | None = 0
     logit_perplexity_confidence: float | None = 0
     verbal_linguistic_confidence: float | None = 0
+    token_length: int | None = None
     
 
 

@@ -117,6 +117,43 @@ def get_model_dict(model_name: str):
             max_tokens=2048,
             get_logprobs=True
         )
+    elif model_name == "gpt-4o-2024-08-06":
+        models["gpt-4o-2024-08-06"] = ChatCompletionSampler(
+            model="gpt-4o-2024-08-06",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=2048,
+            get_logprobs=True
+        )
+    elif model_name == "gpt-4o-mini-2024-07-18":
+        models["gpt-4o-mini-2024-07-18"] = ChatCompletionSampler(
+            model="gpt-4o-mini-2024-07-18",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=2048,
+            get_logprobs=True
+        )
+    elif model_name == "o1-mini-2024-09-12":
+        models["o1-mini-2024-09-12"] = ChatCompletionSampler(
+            model="o1-mini-2024-09-12",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=2048,
+            get_logprobs=True
+        )
+    elif model_name == "o3-mini-2025-01-31":
+        models["o3-mini-2025-01-31"] = ChatCompletionSampler(
+            model="o3-mini-2025-01-31",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=2048,
+            get_logprobs=True
+        )
+    elif model_name == "o4-mini-2025-04-16":
+        models["o4-mini-2025-04-16"] = ChatCompletionSampler(
+            model="o4-mini-2025-04-16",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=2048,
+            get_logprobs=True
+        )
+
+    
     elif model_name == "o3-2025-04-16":
         models["o3-2025-04-16"] = ChatCompletionSampler(
             model="o3-2025-04-16",

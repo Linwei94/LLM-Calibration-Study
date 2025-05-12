@@ -186,8 +186,8 @@ class MMLUProEval(Eval):
                         logit_perplexity_confidence = None 
 
                     # only evaluate a response when it has extracted answer and confidence and its token lenght < 10240
-                    # tokens = approx_tokenizer(response_text, return_tensors="pt")
-                    # token_length = len(tokens["input_ids"][0])
+                    tokens = approx_tokenizer(response_text, return_tensors="pt")
+                    token_length = len(tokens["input_ids"][0])
                     # if response is not None and verbal_numerical_confidence is not None and token_length < 10240:
                     #     verbal_linguistic_confidence, judge_response = linguistic_confidence_score(self.decisiveness_grader, format_multichoice_question(row, conf_mode="decisiveness_grading", choices=0), remove_verbal_confidence(response_text))
                     #     print(verbal_linguistic_confidence)
@@ -281,7 +281,8 @@ class MMLUProEval(Eval):
             return SingleEvalResult(
                 html=html, score=score, metrics={category: score}, convo=convo, confidence=(confidence), 
                 category=category, correct_answer=row["answer"], extracted_answer=extracted_answer,
-                verbal_numerical_confidence=verbal_numerical_confidence, logit_perplexity_confidence=logit_perplexity_confidence, verbal_linguistic_confidence=verbal_linguistic_confidence
+                verbal_numerical_confidence=verbal_numerical_confidence, logit_perplexity_confidence=logit_perplexity_confidence, verbal_linguistic_confidence=verbal_linguistic_confidence,
+                token_length=token_length
             )
         
         # ---------------------------------- Local transformers for sampling -----------------------------------
@@ -622,7 +623,8 @@ class MMLUProEval(Eval):
                     "extracted_answer": [result.extracted_answer],
                     "verbal_numerical_confidence": [result.verbal_numerical_confidence],
                     "logit_perplexity_confidence": [result.logit_perplexity_confidence],
-                    "verbal_linguistic_confidence": [result.verbal_linguistic_confidence]
+                    "verbal_linguistic_confidence": [result.verbal_linguistic_confidence],
+                    "token_length": [result.token_length],
                 })
                 results_df = pd.concat([results_df, new_row], ignore_index=True)
             file_stem = f"""mmlu_pro_{model_name.split("/")[-1]}_{self.conf_mode}_{self.num_examples}"""
