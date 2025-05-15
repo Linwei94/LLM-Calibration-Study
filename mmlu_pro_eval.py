@@ -74,12 +74,15 @@ class MMLUProEval(Eval):
         def fn(row: dict):
 
             extracted_answer = None
+            semantic_entropy_answer = None
             confidence = 0
             judge_response = ""
             logprobs = None 
             verbal_numerical_confidence = None
             verbal_linguistic_confidence = None
             logit_perplexity_confidence = None
+            semantic_entropy = None
+            token_length = None
 
             match self.conf_mode:
                 
@@ -199,11 +202,11 @@ class MMLUProEval(Eval):
                     tokens = approx_tokenizer(response_text, return_tensors="pt")
                     token_length = len(tokens["input_ids"][0])
                     token_cap = 10240 if sampler.model in special_token_allowance else 1024
-                    if response is not None and verbal_numerical_confidence is not None and token_length < token_cap:
-                        verbal_linguistic_confidence, judge_response = linguistic_confidence_score(self.decisiveness_grader, format_multichoice_question(row, conf_mode="decisiveness_grading", choices=0), remove_verbal_confidence(response_text))
-                        print(verbal_linguistic_confidence)
-                    else:
-                        verbal_linguistic_confidence, judge_response = None, None
+                    # if response is not None and verbal_numerical_confidence is not None and token_length < token_cap:
+                    #     verbal_linguistic_confidence, judge_response = linguistic_confidence_score(self.decisiveness_grader, format_multichoice_question(row, conf_mode="decisiveness_grading", choices=0), remove_verbal_confidence(response_text))
+                    #     print(verbal_linguistic_confidence)
+                    # else:
+                    #     verbal_linguistic_confidence, judge_response = None, None
 
                     confidence = verbal_numerical_confidence
 
@@ -256,7 +259,7 @@ class MMLUProEval(Eval):
                     current_progress = self.examples.copy()
                     current_progress = [eg for eg in self.examples if "logprobs" in eg.keys()]
 
-                    if self.conf_mode in ["sampling", "eval_all"] or "_shared_sampling" in self.conf_mode:
+                    if self.conf_mode in ["sampling", "eval_all", "semantic_entropy"] or "_shared_sampling" in self.conf_mode:
                         self.regenerate = True
                         model_name = sampler.model + ("-think" if hasattr(sampler, "think") and sampler.think else "")
                         progress_temp_path = shared_sampling_path(f"tmp_mmlu_pro", model_name, self.conf_mode, self.num_examples, None)
@@ -268,6 +271,19 @@ class MMLUProEval(Eval):
                             pickle.dump(current_progress, f)
                         print("Progress saved")
                     return 
+                
+
+                case "semantic_entropy":
+                    if not self.cache_found:
+                        print("Please sample responses before evaluating.")
+                        sys.exit()
+                    response = row["response"] 
+                    prompt_messages = row["prompt_messages"] 
+                    logprobs = row["logprobs"]
+                    top_logprobs = row["top_logprobs"]
+                    multi_responses = row["rep_responses"]
+                    response_text = normalize_response(response)
+                    semantic_entropy_answer, semantic_entropy = mcq_semantic_entropy(multi_responses)
 
                 case _:
                     raise Exception(f"Unrecognized confidence type: {self.conf_mode}")
@@ -282,7 +298,7 @@ class MMLUProEval(Eval):
                 score=score,
                 correct_answer=row["answer"],
                 extracted_answer=extracted_answer,
-                extracted_answer_confidence="Verbal Numerical=" + str(verbal_numerical_confidence) + ", Verbal Linguistic=" + str(verbal_linguistic_confidence) + ", Logit Perplexity=" + str(logit_perplexity_confidence),
+                extracted_answer_confidence="Verbal Numerical=" + str(verbal_numerical_confidence) + ", Verbal Linguistic=" + str(verbal_linguistic_confidence) + ", Logit Perplexity=" + str(logit_perplexity_confidence) + ", Semantic Entropy=" + str(semantic_entropy),
                 subject=category,
                 logprobs = logprobs,
                 conf_mode = self.conf_mode,
@@ -292,7 +308,11 @@ class MMLUProEval(Eval):
             return SingleEvalResult(
                 html=html, score=score, metrics={category: score}, convo=convo, confidence=(confidence), 
                 category=category, correct_answer=row["answer"], extracted_answer=extracted_answer,
-                verbal_numerical_confidence=verbal_numerical_confidence, logit_perplexity_confidence=logit_perplexity_confidence, verbal_linguistic_confidence=verbal_linguistic_confidence,
+                verbal_numerical_confidence=verbal_numerical_confidence, 
+                logit_perplexity_confidence=logit_perplexity_confidence, 
+                verbal_linguistic_confidence=verbal_linguistic_confidence,
+                semantic_entropy_answer=semantic_entropy_answer,
+                semantic_entropy=semantic_entropy,
                 token_length=token_length
             )
         
@@ -427,8 +447,8 @@ class MMLUProEval(Eval):
                     tokenizer_mode="auto",
                     tensor_parallel_size=num_gpus
                 )
-            sampling_params = SamplingParams(temperature=0, max_tokens=(None if enable_thinking else 2048), logprobs=5, seed=42, stop=[tokenizer.eos_token])
-
+            sampling_params = SamplingParams(temperature=1, max_tokens=(10240 if enable_thinking else 2048), logprobs=5, seed=42, stop=[tokenizer.eos_token])
+            batch_replication = 10
             # prepare batch
             if is_qwen:
                 try:
@@ -437,12 +457,14 @@ class MMLUProEval(Eval):
                         prompt = [sampler._pack_message("system", sampler.system_message), 
                                 sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")]
                         inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True, enable_thinking=enable_thinking))
+                    inference_batch = inference_batch * batch_replication
                     outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
                 except jinja2.exceptions.TemplateError:
                     inference_batch = []
                     for i in tqdm(range(len(self.examples)), desc="Prepare prompt batch"):
                         prompt = [sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")]
                         inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True, enable_thinking=enable_thinking))
+                    inference_batch = inference_batch * batch_replication
                     outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
             else:
                 try:
@@ -451,33 +473,79 @@ class MMLUProEval(Eval):
                         prompt = [sampler._pack_message("system", sampler.system_message), 
                                 sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")]
                         inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True))
+                    inference_batch = inference_batch * batch_replication
                     outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
                 except jinja2.exceptions.TemplateError:
                     inference_batch = []
                     for i in tqdm(range(len(self.examples)), desc="Prepare prompt batch"):
                         prompt = [sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")]
                         inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True))
+                    inference_batch = inference_batch * batch_replication
                     outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
                 except:
                     inference_batch = []
                     for i in tqdm(range(len(self.examples)), desc="Prepare prompt batch"):
                         prompt = format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0)
                         inference_batch.append(prompt)
+                    inference_batch = inference_batch * batch_replication
                     outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
             # outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
-            for i, output in enumerate(outputs):
-                generated_text = output.outputs[0].text
-                # print(generated_text)
-                self.examples[i]["prompt_messages"] = [sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")] # such formatting to fit later analysis pipeline
-                self.examples[i]["response"] = generated_text
-                prob_dict_list = output.outputs[0].logprobs
-                top_logprob_lst = []
-                logprobs = []
-                for d in prob_dict_list:
-                    top_logprob_lst.append({x.decoded_token: x.logprob for x in d.values()})
-                    logprobs += [x.logprob for x in d.values() if x.rank == 1]
-                self.examples[i]["logprobs"] = (logprobs)
-                self.examples[i]["top_logprobs"] = (top_logprob_lst)
+
+            # for i, output in enumerate(outputs):
+            #     generated_text = output.outputs[0].text
+            #     # print(generated_text)
+            #     self.examples[i]["prompt_messages"] = [sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")] # such formatting to fit later analysis pipeline
+            #     self.examples[i]["response"] = generated_text
+            #     prob_dict_list = output.outputs[0].logprobs
+            #     top_logprob_lst = []
+            #     logprobs = []
+            #     for d in prob_dict_list:
+            #         top_logprob_lst.append({x.decoded_token: x.logprob for x in d.values()})
+            #         logprobs += [x.logprob for x in d.values() if x.rank == 1]
+            #     self.examples[i]["logprobs"] = (logprobs)
+            #     self.examples[i]["top_logprobs"] = (top_logprob_lst)
+
+            num_outputs_per_example = batch_replication
+            for i in range(0, len(outputs), num_outputs_per_example):
+                example_idx = i // num_outputs_per_example
+
+                # Prepare prompt
+                self.examples[example_idx]["prompt_messages"] = [
+                    sampler._pack_message(
+                        content=format_multichoice_question(self.examples[example_idx], conf_mode="sampling", choices=0),
+                        role="user"
+                    )
+                ]
+
+                # Initialize lists to store repeated outputs
+                self.examples[example_idx]["rep_responses"] = []
+                self.examples[example_idx]["rep_logprobs"] = []
+                self.examples[example_idx]["rep_top_logprobs"] = []
+
+                for j in range(num_outputs_per_example):
+                    output = outputs[i + j]
+                    generated_text = output.outputs[0].text
+                    prob_dict_list = output.outputs[0].logprobs
+
+                    # Extract logprobs
+                    top_logprob_lst = []
+                    logprobs = []
+
+                    for d in prob_dict_list:
+                        top_logprob_lst.append({x.decoded_token: x.logprob for x in d.values()})
+                        logprobs += [x.logprob for x in d.values() if x.rank == 1]
+
+                    # Save all 10 to rep_* keys
+                    self.examples[example_idx]["rep_responses"].append(generated_text)
+                    self.examples[example_idx]["rep_logprobs"].append(logprobs)
+                    self.examples[example_idx]["rep_top_logprobs"].append(top_logprob_lst)
+
+                    # Save the first one separately
+                    if j == 0:
+                        self.examples[example_idx]["response"] = generated_text
+                        self.examples[example_idx]["logprobs"] = logprobs
+                        self.examples[example_idx]["top_logprobs"] = top_logprob_lst
+
 
             model_name = sampler.model + ("-think" if hasattr(sampler, "think") and sampler.think else "")
             regen_stored_path = shared_sampling_path("mmlu_pro", model_name, self.conf_mode, self.num_examples, None)
@@ -583,7 +651,7 @@ class MMLUProEval(Eval):
         # ----------------------------------------------------------------------------------------------
 
         model_name = sampler.model + ("-think" if hasattr(sampler, "think") and sampler.think else "")
-        if self.conf_mode in ["sampling", "eval_all"] or "_shared_sampling" in self.conf_mode:
+        if self.conf_mode in ["sampling", "eval_all", "semantic_entropy"] or "_shared_sampling" in self.conf_mode:
             self.regenerate = True
             regen_stored_path = shared_sampling_path("mmlu_pro", model_name, self.conf_mode, self.num_examples, None)
         else:
@@ -627,7 +695,6 @@ class MMLUProEval(Eval):
         if self.conf_mode == "eval_all":
             results_df = pd.DataFrame()
             for result in results:
-                pass
                 new_row = pd.DataFrame({
                     "category":[result.category],
                     "correct_answer": [result.correct_answer],
@@ -641,5 +708,21 @@ class MMLUProEval(Eval):
             file_stem = f"""mmlu_pro_{model_name.split("/")[-1]}_{self.conf_mode}_{self.num_examples}"""
             csv_filename = f"""LLM-Calibration-Study/results/{file_stem}.csv"""
             results_df.to_csv(csv_filename)
+        
+        elif self.conf_mode == "semantic_entropy":
+            semantic_confidences = []
+            semantic_answers = []
+            for result in results:
+                semantic_confidences.append(result.semantic_entropy)
+                semantic_answers.append(result.semantic_entropy_answer)
+            file_stem = f"""mmlu_pro_{model_name.split("/")[-1]}_{"eval_all"}_{self.num_examples}"""
+            csv_filename = f"""LLM-Calibration-Study/results/{file_stem}.csv"""
+            print(semantic_answers)
+            if os.path.exists(csv_filename):
+                results_df = pd.read_csv(csv_filename)
+                results_df["semantic_entrory_answer"] = semantic_answers
+                results_df["semantic_confidences"] = semantic_confidences
+                results_df.to_csv(csv_filename)
+
 
         return common.aggregate_results(results)

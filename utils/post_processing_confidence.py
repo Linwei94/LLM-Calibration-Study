@@ -15,31 +15,50 @@ from  .query_templates import *
 
 # Semantic-based Confidence
 # ------------------------------------------------------------------------------------------------------
-def get_semantic_clusters(multi_response):
-    lnll_lst = [(x)[1] for x in multi_response]
-    response_list = [x[0] for x in multi_response]
-    distance_threshold = 0.3
-    model_name="all-MiniLM-L6-v2"
-    embeddings = SentenceTransformer(model_name).encode(response_list)
-    clustering = AgglomerativeClustering(n_clusters=None, distance_threshold=distance_threshold, metric="cosine", linkage="average")
-    labels = clustering.fit_predict(embeddings)
-    return response_list, lnll_lst, labels
+# def get_semantic_clusters(multi_response):
+#     lnll_lst = [(x)[1] for x in multi_response]
+#     response_list = [x[0] for x in multi_response]
+#     distance_threshold = 0.3
+#     model_name="all-MiniLM-L6-v2"
+#     embeddings = SentenceTransformer(model_name).encode(response_list)
+#     clustering = AgglomerativeClustering(n_clusters=None, distance_threshold=distance_threshold, metric="cosine", linkage="average")
+#     labels = clustering.fit_predict(embeddings)
+#     return response_list, lnll_lst, labels
 
 
-def get_mcq_clusters(multi_response, test = "mmlu"):
-    lnll_lst = [(x)[1] for x in multi_response]
-    response_list = [x[0] for x in multi_response]
-    choice_map = dict()
-    choice_map = {'A': 1, 'B': 2, 'C': 3, 'D': 4, 'a': 1, 'b': 2, 'c': 3, 'd': 4}
-    labels = [choice_map.get(mcq_regex_extractors[test](c), 0) for c in response_list]
-    return response_list, lnll_lst, labels
+# def get_mcq_clusters(multi_response, test = "mmlu"):
+#     lnll_lst = [(x)[1] for x in multi_response]
+#     response_list = [x[0] for x in multi_response]
+#     choice_map = dict()
+#     choice_map = {'A': 1, 'B': 2, 'C': 3, 'D': 4, 'a': 1, 'b': 2, 'c': 3, 'd': 4}
+#     labels = [choice_map.get(mcq_regex_extractors[test](c), 0) for c in response_list]
+#     return response_list, lnll_lst, labels
 
 
-def empirical_semantic_confidence(lnll_lst, response_list, labels):
-    counts = Counter(labels)
-    opt_cluster, opt_conf = max([(int(cluster_id), count/sum(counts.values())) for cluster_id, count in counts.items()], key=lambda x: x[1])
-    optimal_response, index = max([(response_list[i], i) for i, label in enumerate(labels) if label == opt_cluster], key=lambda x: x[1])
-    return optimal_response, opt_conf, index
+# def empirical_semantic_confidence(lnll_lst, response_list, labels):
+#     counts = Counter(labels)
+#     opt_cluster, opt_conf = max([(int(cluster_id), count/sum(counts.values())) for cluster_id, count in counts.items()], key=lambda x: x[1])
+#     optimal_response, index = max([(response_list[i], i) for i, label in enumerate(labels) if label == opt_cluster], key=lambda x: x[1])
+#     return optimal_response, opt_conf, index
+
+def mcq_semantic_entropy(multi_responses: list[str]) -> tuple[str, float]:
+    answer_list: list = []
+    
+    for r in multi_responses:
+        try:
+            ans = extract_answer(normalize_response(r))
+        except:
+            ans = None
+        answer_list.append(ans)
+
+    counter = Counter(answer_list)
+    majority_answer, weight = counter.most_common(1)[0]
+
+    weight /= len(answer_list)
+    print(answer_list)
+    return majority_answer, weight
+
+
 # ------------------------------------------------------------------------------------------------------
 
 
