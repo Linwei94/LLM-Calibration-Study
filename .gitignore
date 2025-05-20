@@ -146,3 +146,4 @@ scripts/*
 cache_linwei/*
 cache_copy/*
 scripts/run_eval.sh
+cache_single_generation
