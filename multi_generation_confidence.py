@@ -275,7 +275,6 @@ for file in files:
             lambda row: mcq_consistency_confidence(row["single_answer"], row["multi_answers"]),
             axis=1
         )
-        display(df)
         df.to_csv("semantic_results/" + file)
 
 semantic_df = pd.DataFrame()
