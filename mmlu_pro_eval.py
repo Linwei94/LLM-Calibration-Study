@@ -434,7 +434,7 @@ class MMLUProEval(Eval):
                 path = hf_hub_download(repo_id=repo_id, filename=filename)
                 llm = LLM(
                     model=path,
-                    max_model_len=20000,
+                    max_model_len=15000,
                     trust_remote_code=True,
                     tokenizer=repo_id.replace("-GGUF", ""),
                     tensor_parallel_size=num_gpus
@@ -442,7 +442,7 @@ class MMLUProEval(Eval):
             else:
                 llm = LLM(
                     model=sampler.model,
-                    max_model_len=20000,
+                    max_model_len=15000,
                     trust_remote_code=True,
                     tokenizer_mode="auto",
                     tensor_parallel_size=num_gpus
