@@ -523,11 +523,11 @@ def extract_answer(response_text: str):
 def extract_verbal_numerical_confidence(response_text: str):
     response_text = normalize_response(response_text)
     confidence_patterns = [
-        r"[Cc]onfidence\s*\(0-100\):\s*[\(]?[\[]?(\d+)[\)]?[\]]?%?",  # e.g., Confidence (0-100): 90%
-        r"[Cc]onfidence[:]?\s*(\d+)%?",             # e.g., Confidence: 90%
+        r"[Cc]onfidence\s*\(0-100\):\s*[\(]?[\[]?(\d+)[\)]?[\]]?%?", 
+        r"[Cc]onfidence[:]?\s*(\d+)%?",   
         r"[Cc]onfidence [\(0-100\)]?:\s*\[(\d+)%?\]"
-        r"[Cc]onfidence [Ll]evel\s*\(0-100\):\s*(\d+)%?",  # e.g., Confidence (0-100): 90%
-        r"[Cc]onfidence [Ll]evel[:]?\s*(\d+)%?",             # e.g., Confidence: 90%
+        r"[Cc]onfidence [Ll]evel\s*\(0-100\):\s*(\d+)%?", 
+        r"[Cc]onfidence [Ll]evel[:]?\s*(\d+)%?",      
         r"[Cc]onfidence [Ll]evel[\(0-100\)]?:\s*\[(\d+)%?\]",
         r"[Cc]onfidence \(100\):\s*\w*,\s*(\d+)%?",
         r"[Cc]onfidence\s*\(\d+\)\s*:\s*(\d+)%?",

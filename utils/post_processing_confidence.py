@@ -15,31 +15,50 @@ from  .query_templates import *
 
 # Semantic-based Confidence
 # ------------------------------------------------------------------------------------------------------
-def get_semantic_clusters(multi_response):
-    lnll_lst = [(x)[1] for x in multi_response]
-    response_list = [x[0] for x in multi_response]
-    distance_threshold = 0.3
-    model_name="all-MiniLM-L6-v2"
-    embeddings = SentenceTransformer(model_name).encode(response_list)
-    clustering = AgglomerativeClustering(n_clusters=None, distance_threshold=distance_threshold, metric="cosine", linkage="average")
-    labels = clustering.fit_predict(embeddings)
-    return response_list, lnll_lst, labels
+# def get_semantic_clusters(multi_response):
+#     lnll_lst = [(x)[1] for x in multi_response]
+#     response_list = [x[0] for x in multi_response]
+#     distance_threshold = 0.3
+#     model_name="all-MiniLM-L6-v2"
+#     embeddings = SentenceTransformer(model_name).encode(response_list)
+#     clustering = AgglomerativeClustering(n_clusters=None, distance_threshold=distance_threshold, metric="cosine", linkage="average")
+#     labels = clustering.fit_predict(embeddings)
+#     return response_list, lnll_lst, labels
 
 
-def get_mcq_clusters(multi_response, test = "mmlu"):
-    lnll_lst = [(x)[1] for x in multi_response]
-    response_list = [x[0] for x in multi_response]
-    choice_map = dict()
-    choice_map = {'A': 1, 'B': 2, 'C': 3, 'D': 4, 'a': 1, 'b': 2, 'c': 3, 'd': 4}
-    labels = [choice_map.get(mcq_regex_extractors[test](c), 0) for c in response_list]
-    return response_list, lnll_lst, labels
+# def get_mcq_clusters(multi_response, test = "mmlu"):
+#     lnll_lst = [(x)[1] for x in multi_response]
+#     response_list = [x[0] for x in multi_response]
+#     choice_map = dict()
+#     choice_map = {'A': 1, 'B': 2, 'C': 3, 'D': 4, 'a': 1, 'b': 2, 'c': 3, 'd': 4}
+#     labels = [choice_map.get(mcq_regex_extractors[test](c), 0) for c in response_list]
+#     return response_list, lnll_lst, labels
 
 
-def empirical_semantic_confidence(lnll_lst, response_list, labels):
-    counts = Counter(labels)
-    opt_cluster, opt_conf = max([(int(cluster_id), count/sum(counts.values())) for cluster_id, count in counts.items()], key=lambda x: x[1])
-    optimal_response, index = max([(response_list[i], i) for i, label in enumerate(labels) if label == opt_cluster], key=lambda x: x[1])
-    return optimal_response, opt_conf, index
+# def empirical_semantic_confidence(lnll_lst, response_list, labels):
+#     counts = Counter(labels)
+#     opt_cluster, opt_conf = max([(int(cluster_id), count/sum(counts.values())) for cluster_id, count in counts.items()], key=lambda x: x[1])
+#     optimal_response, index = max([(response_list[i], i) for i, label in enumerate(labels) if label == opt_cluster], key=lambda x: x[1])
+#     return optimal_response, opt_conf, index
+
+def mcq_semantic_entropy(multi_responses: list[str]) -> tuple[str, float]:
+    answer_list: list = []
+    
+    for r in multi_responses:
+        try:
+            ans = extract_answer(normalize_response(r))
+        except:
+            ans = None
+        answer_list.append(ans)
+
+    counter = Counter(answer_list)
+    majority_answer, weight = counter.most_common(1)[0]
+
+    weight /= len(answer_list)
+    print(answer_list)
+    return majority_answer, weight
+
+
 # ------------------------------------------------------------------------------------------------------
 
 
@@ -47,8 +66,20 @@ def empirical_semantic_confidence(lnll_lst, response_list, labels):
 # faithful response uncertainty
 # ------------------------------------------------------------------------------------------------------
 def remove_verbal_confidence(text):
-    cleaned_text = re.sub(r'[Cc]onfidence:?\s*(\d+)?%?\r?\n?', '', text, flags=re.MULTILINE)
-    cleaned_text = re.sub(r'\(0-100\):?\s*(\d+)?%?\r?\n?', '', cleaned_text, flags=re.MULTILINE)
+    text = normalize_response(text)
+    confidence_patterns = [
+        r"[Cc]onfidence\s*\(0-100\):\s*[\(]?[\[]?(\d+)[\)]?[\]]?%?",  # e.g., Confidence (0-100): 90%
+        r"[Cc]onfidence[:]?\s*(\d+)%?",             # e.g., Confidence: 90%
+        r"[Cc]onfidence [\(0-100\)]?:\s*\[(\d+)%?\]"
+        r"[Cc]onfidence [Ll]evel\s*\(0-100\):\s*(\d+)%?",  # e.g., Confidence (0-100): 90%
+        r"[Cc]onfidence [Ll]evel[:]?\s*(\d+)%?",             # e.g., Confidence: 90%
+        r"[Cc]onfidence [Ll]evel[\(0-100\)]?:\s*\[(\d+)%?\]",
+        r"[Cc]onfidence \(100\):\s*\w*,\s*(\d+)%?",
+        r"[Cc]onfidence\s*\(\d+\)\s*:\s*(\d+)%?",
+        r"[Cc]onfidence\s*[\(]?(\d+)[\)]?%?",
+    ]
+    for pat in confidence_patterns:
+        cleaned_text = re.sub(pat, '', text, flags=re.MULTILINE)
     return cleaned_text
 
 

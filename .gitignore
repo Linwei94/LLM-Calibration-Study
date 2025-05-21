@@ -138,8 +138,12 @@ cluster.sh
 test_vertexai.py
 test_vertexai.sh
 hf_models/
-results/*
+results/model_stats.csv
+results/*.html
+results/*.json
+results/linguistic-judges/
 scripts/*
 cache_linwei/*
 cache_copy/*
 scripts/run_eval.sh
+cache_single_generation

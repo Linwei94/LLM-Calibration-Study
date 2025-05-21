@@ -10,7 +10,7 @@ fi
 MODEL_NAME=$1
 REMOTE=${2:-huangtao3@101.230.144.229}  # 默认远程服务器账号@IP
 REMOTE_PORT=8003
-LOCAL_DIR="/hdd/.cache/huggingface"
+LOCAL_DIR="/home/ivany/.cache/huggingface"
 REMOTE_DIR="~/.cache/huggingface/hub/"
 
 # 把 / 替换成 --
@@ -21,6 +21,7 @@ echo "🔵 Downloading model: $MODEL_NAME ..."
 huggingface-cli download "$MODEL_NAME"
 
 # 检查是否成功
+echo $LOCAL_DIR/hub/$MODEL_CACHE_DIR
 if [ ! -d $LOCAL_DIR/hub/$MODEL_CACHE_DIR ]; then
   echo "❌ Model download failed!"
   exit 1
