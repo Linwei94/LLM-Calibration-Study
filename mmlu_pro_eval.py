@@ -489,7 +489,7 @@ class MMLUProEval(Eval):
                         inference_batch.append(prompt)
                     inference_batch = inference_batch * batch_replication
                     outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
-            outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
+            # outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
 
             for i, output in enumerate(outputs):
                 generated_text = output.outputs[0].text

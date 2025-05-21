@@ -390,6 +390,15 @@ def get_model_dict(model_name: str):
             max_tokens=2048,
             get_logprobs=True
     )
+    
+    models["mistralai/Mistral-Small-24B-Instruct-2501"] = ChatCompletionSampler(
+            base_url = "https://api.together.xyz/v1",
+            api_key = os.environ['TOGETHER_API_KEY'],
+            model="mistralai/Mistral-Small-24B-Instruct-2501",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
+            max_tokens=2048,
+            get_logprobs=True
+    )
 
     # Deep Seek API
     # --------------------------------------------------------------
