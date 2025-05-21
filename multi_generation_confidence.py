@@ -242,41 +242,43 @@ def mcq_consistency_confidence(first_answer: str, answer_list: list[str]) -> tup
 
 dir = "cache_multi_generation"
 files = os.listdir(dir)
-
+targets = ["mmlu_pro_shared_sampling_Qwen3-14B-Base_full_0"]
 for file in files:
-    if file in os.listdir("cache"):
-        print(dir + "/" + file)
-        with open(dir + "/" + file, 'rb') as f:
-            multi = pickle.load(f)
-        with open("cache/" + file, "rb") as f:
-            single = pickle.load(f)
-        prompt_messages = [eg["prompt_messages"] for eg in multi]
-        correct_answer = [eg["answer"] for eg in multi]
-        multi_responses = [eg["rep_responses"] for eg in multi]
-        multi_logprobs = [eg["rep_logprobs"] for eg in multi]
-        single_response = [eg["response"] for eg in single]
-        single_logprobs = [eg["logprobs"] for eg in single]
-        df  = pd.DataFrame({
-            "prompt_messages": prompt_messages,
-            "correct_answer": correct_answer,
-            "single_answer": process_single_response(single_response),
-            "multi_answers": process_multi_responses(multi_responses),
-            "multi_responses": multi_responses,
-            "multi_logprobs": multi_logprobs,
-            "single_response": single_response,
-            "single_logprobs": single_logprobs
-        })
-        df[["majority_answer", "majority_confidence"]] = df["multi_answers"].apply(
-            lambda x: pd.Series(mcq_majority_vote(x))
-        )
-        df["majority_accuracy"] = df["majority_answer"] == df["correct_answer"]
-        df["consistency_accuracy"] = df["single_answer"] == df["correct_answer"]
-        df["consistency_confidence"] = df.apply(
-            lambda row: mcq_consistency_confidence(row["single_answer"], row["multi_answers"]),
-            axis=1
-        )
-        display(df)
-        df.to_csv("semantic_results/" + file)
+    if file in os.listdir("cache") and file in targets:
+        try:
+            print(dir + "/" + file)
+            with open(dir + "/" + file, 'rb') as f:
+                multi = pickle.load(f)
+            with open("cache/" + file, "rb") as f:
+                single = pickle.load(f)
+            prompt_messages = [eg["prompt_messages"] for eg in multi]
+            correct_answer = [eg["answer"] for eg in multi]
+            multi_responses = [eg["rep_responses"] for eg in multi]
+            multi_logprobs = [eg["rep_logprobs"] for eg in multi]
+            single_response = [eg["response"] for eg in single]
+            single_logprobs = [eg["logprobs"] for eg in single]
+            df  = pd.DataFrame({
+                "prompt_messages": prompt_messages,
+                "correct_answer": correct_answer,
+                "single_answer": process_single_response(single_response),
+                "multi_answers": process_multi_responses(multi_responses),
+                "multi_responses": multi_responses,
+                "multi_logprobs": multi_logprobs,
+                "single_response": single_response,
+                "single_logprobs": single_logprobs
+            })
+            df[["majority_answer", "majority_confidence"]] = df["multi_answers"].apply(
+                lambda x: pd.Series(mcq_majority_vote(x))
+            )
+            df["majority_accuracy"] = df["majority_answer"] == df["correct_answer"]
+            df["consistency_accuracy"] = df["single_answer"] == df["correct_answer"]
+            df["consistency_confidence"] = df.apply(
+                lambda row: mcq_consistency_confidence(row["single_answer"], row["multi_answers"]),
+                axis=1
+            )
+            df.to_csv("semantic_results/" + file)
+        except:
+            print("Error", file)
 
 semantic_df = pd.DataFrame()
 for file in os.listdir("semantic_results"):
@@ -296,4 +298,5 @@ for file in os.listdir("semantic_results"):
         "majority_auroc": safe_roc_auc_score(df["majority_accuracy"], df["majority_confidence"]),
     })
     semantic_df = pd.concat([semantic_df, row], ignore_index=True)
-semantic_df.sort_values(by="model")
+
+semantic_df.sort_values(by="model").to_csv("semantic_results/multi_generation_results.csv")
