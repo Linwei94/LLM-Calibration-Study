@@ -18,20 +18,10 @@ def get_model_dict(model_name: str):
     hf_models = [
         "Qwen/Qwen3-14B-AWQ",
         "Qwen/Qwen3-32B-AWQ",
-        "meta-llama/Llama-3.2-3B-Instruct",
-        "meta-llama/Llama-3.1-405B-Instruct",
-        "meta-llama/Llama-3.3-70B-Instruct",
-        "meta-llama/Llama-3.1-8B-Instruct",
-        "meta-llama/Llama-3.2-1B-Instruct",
         "Qwen/Qwen2.5-3B-Instruct",
         "Qwen/Qwen2.5-7B-Instruct",
         "Qwen/Qwen2.5-14B-Instruct",
         "Qwen/Qwen2.5-32B-Instruct",
-        "Qwen/Qwen2.5-72B-Instruct",
-        "Qwen/Qwen2.5-3B-Instruct-think",
-        "Qwen/Qwen2.5-7B-Instruct-think",
-        "Qwen/Qwen2.5-32B-Instruct-think",
-        "Qwen/Qwen2.5-72B-Instruct-think",
         "Qwen/Qwen3-0.6B",
         "Qwen/Qwen3-0.6B-FP8",
         "Qwen/Qwen3-0.6B-Base",
@@ -47,31 +37,16 @@ def get_model_dict(model_name: str):
         "Qwen/Qwen3-14B-FP8",
         "Qwen/Qwen3-14B-Base",
         "Qwen/Qwen3-14B",
-        "Qwen/Qwen3-32B-FP8",
         "Qwen/Qwen3-32B",
         "Qwen/Qwen3-30B-A3B",
         "Qwen/Qwen3-30B-A3B-Base",
-        "Qwen/Qwen3-30B-A3B-FP8",
         "Qwen/Qwen3-0.6B-think",
-        "Qwen/Qwen3-0.6B-FP8-think",
-        "Qwen/Qwen3-0.6B-Base-think",
-        "Qwen/Qwen3-1.7B-FP8-think",
         "Qwen/Qwen3-1.7B-think",
-        "Qwen/Qwen3-1.7B-Base-think",
-        "Qwen/Qwen3-4B-FP8-think",
         "Qwen/Qwen3-4B-think",
-        "Qwen/Qwen3-4B-Base-think",
-        "Qwen/Qwen3-8B-FP8-think",
         "Qwen/Qwen3-8B-think",
-        "Qwen/Qwen3-8B-Base-think",
-        "Qwen/Qwen3-14B-FP8-think",
-        "Qwen/Qwen3-14B-Base-think",
         "Qwen/Qwen3-14B-think",
-        "Qwen/Qwen3-32B-FP8-think",
         "Qwen/Qwen3-32B-think",
         "Qwen/Qwen3-30B-A3B-think",
-        "Qwen/Qwen3-30B-A3B-Base-think",
-        "Qwen/Qwen3-30B-A3B-FP8-think",
         "google/gemma-3-27b-it",
         "google/gemma-2-27b-it",
         "google/gemma-2-9b-it",
@@ -79,8 +54,6 @@ def get_model_dict(model_name: str):
         "google/gemma-3-1b-it",
         "google/gemma-3-4b-it",
         "google/gemma-3-12b-it",
-        "mistralai/Mixtral-8x7B-Instruct-v0.1",
-        "mistralai/Mixtral-8x7B-v0.1",
         "mistralai/Mistral-7B-Instruct-v0.1",
         "mistralai/Mistral-Small-3.1-24B-Base-2503",
         "mistralai/Mistral-Large-Instruct-2411",
@@ -90,7 +63,6 @@ def get_model_dict(model_name: str):
         "microsoft/Phi-4-mini-reasoning",
         "microsoft/Phi-4-mini-instruct",
         "microsoft/Phi-4-reasoning",
-        "microsoft/phi-4",
         "microsoft/Phi-3.5-mini-instruct",
         "microsoft/Phi-3.5-MoE-instruct",
         "microsoft/Phi-3-mini-128k-instruct",
@@ -158,98 +130,6 @@ def get_model_dict(model_name: str):
         )
 
     
-    elif model_name == "o3-2025-04-16":
-        models["o3-2025-04-16"] = ChatCompletionSampler(
-            model="o3-2025-04-16",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-            get_logprobs=True
-        )
-    elif model_name == "gpt-4o-2024-11-20_assistant":
-        models["gpt-4o-2024-11-20_assistant"] = ChatCompletionSampler(
-            model="gpt-4o-2024-11-20",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-        )
-    elif model_name == "gpt-4o-2024-11-20_chatgpt":
-        models["gpt-4o-2024-11-20_chatgpt"] = ChatCompletionSampler(
-            model="gpt-4o-2024-11-20",
-            system_message=OPENAI_SYSTEM_MESSAGE_CHATGPT,
-            max_tokens=2048,
-        )
-    elif model_name == "gpt-4o-mini":
-        models["gpt-4o-mini"] = ChatCompletionSampler(
-            model="gpt-4o-mini",
-            system_message=OPENAI_SYSTEM_MESSAGE_CHATGPT,
-            max_tokens=2048,
-        )
-    elif model_name == "o1":
-        models["o1"] = OChatCompletionSampler(
-            model="o1",
-        )
-    elif model_name == "o1-preview":
-        models["o1-preview"] = OChatCompletionSampler(
-            model="o1-preview",
-        )
-    elif model_name == "o1-mini":
-        models["o1-mini"] = OChatCompletionSampler(
-            model="o1-mini",
-        )
-    elif model_name == "o3-mini":
-        models["o3-mini"] = OChatCompletionSampler(
-            model="o3-mini",
-        )
-    elif model_name == "o3-mini_high":
-        models["o3-mini_high"] = OChatCompletionSampler(
-            model="o3-mini",
-            reasoning_effort="high",
-        )
-    elif model_name == "o3-mini_low":
-        models["o3-mini_low"] = OChatCompletionSampler(
-            model="o3-mini",
-            reasoning_effort="low",
-        )
-    elif model_name == "gpt-4-turbo-2024-04-09_assistant":
-        models["gpt-4-turbo-2024-04-09_assistant"] = ChatCompletionSampler(
-            model="gpt-4-turbo-2024-04-09",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-        )
-    elif model_name == "gpt-4-turbo-2024-04-09_chatgpt":
-        models["gpt-4-turbo-2024-04-09_chatgpt"] = ChatCompletionSampler(
-            model="gpt-4-turbo-2024-04-09",
-            system_message=OPENAI_SYSTEM_MESSAGE_CHATGPT,
-        )
-    elif model_name == "gpt-4o_assistant":
-        models["gpt-4o_assistant"] = ChatCompletionSampler(
-            model="gpt-4o",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-        )
-    elif model_name == "gpt-4o_chatgpt":
-        models["gpt-4o_chatgpt"] = ChatCompletionSampler(
-            model="gpt-4o",
-            system_message=OPENAI_SYSTEM_MESSAGE_CHATGPT,
-            max_tokens=2048,
-        )
-    elif model_name == "gpt-4o-mini-2024-07-18":
-        models["gpt-4o-mini-2024-07-18"] = ChatCompletionSampler(
-            model="gpt-4o-mini-2024-07-18",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-        )
-    elif model_name == "gpt-4.5-preview-2025-02-27":
-        models["gpt-4.5-preview-2025-02-27"] = ChatCompletionSampler(
-            model="gpt-4.5-preview-2025-02-27",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-        )
-    elif model_name == "claude-3-opus-20240229_empty":
-        models["claude-3-opus-20240229_empty"] = ClaudeCompletionSampler(
-            model="claude-3-opus-20240229",
-            system_message=CLAUDE_SYSTEM_MESSAGE_LMSYS,
-        )
-
-    
     elif model_name in hf_models:
         models[model_name] = HFChatCompletionSampler(
                 model=model_name.replace("-think", ""),
@@ -277,34 +157,6 @@ def get_model_dict(model_name: str):
             base_url = "https://api.together.xyz/v1",
             api_key = os.environ['TOGETHER_API_KEY'],
             model="meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-            get_logprobs=True
-    )
-
-    # Erroneous API outputs
-    models["meta-llama/Llama-2-70b-hf"] = ChatCompletionSampler(
-            base_url = "https://api.together.xyz/v1",
-            api_key = os.environ['TOGETHER_API_KEY'],
-            model="meta-llama/Llama-2-70b-hf",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-            get_logprobs=False
-    )
-
-    models["meta-llama/Llama-3.3-70B-Instruct-Turbo"] = ChatCompletionSampler(
-            base_url = "https://api.together.xyz/v1",
-            api_key = os.environ['TOGETHER_API_KEY'],
-            model="meta-llama/Llama-3.3-70B-Instruct-Turbo",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-            get_logprobs=True
-    )
-    
-    models["meta-llama/Llama-2-70b-hf"] = ChatCompletionSampler(
-            base_url = "https://api.together.xyz/v1",
-            api_key = os.environ['TOGETHER_API_KEY'],
-            model="meta-llama/Llama-2-70b-hf",
             system_message=OPENAI_SYSTEM_MESSAGE_API,
             max_tokens=2048,
             get_logprobs=True
@@ -369,26 +221,6 @@ def get_model_dict(model_name: str):
             max_tokens=2048,
             get_logprobs=True,
             think=False
-    )
-
-    # free
-    models["meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"] = ChatCompletionSampler(
-            base_url = "https://api.together.xyz/v1",
-            api_key = os.environ['TOGETHER_API_KEY'],
-            model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-            get_logprobs=True
-    )
-
-    # free
-    models["deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"] = ChatCompletionSampler(
-            base_url = "https://api.together.xyz/v1",
-            api_key = os.environ['TOGETHER_API_KEY'],
-            model="deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-            get_logprobs=True
     )
     
     models["mistralai/Mistral-Small-24B-Instruct-2501"] = ChatCompletionSampler(
@@ -487,8 +319,6 @@ def get_model_dict(model_name: str):
     # Google AI Studio
     # --------------------------------------------------------------
     google_models = [
-        "gemini-2.5-flash-preview-04-17",
-        "gemini-2.5-pro-preview-05-06",
         "gemini-2.0-flash",
         "gemini-2.0-flash-lite",
         "gemini-1.5-flash",
