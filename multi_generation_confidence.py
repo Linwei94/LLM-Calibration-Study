@@ -246,11 +246,11 @@ def mcq_consistency_confidence(first_answer: str, answer_list: list[str]) -> tup
         return None
     
 for file in files:
-    if file in os.listdir("cache"):
+    if file in os.listdir("cache_single_generation"):
         print(dir + "/" + file)
         with open(dir + "/" + file, 'rb') as f:
             multi = pickle.load(f)
-        with open("cache/" + file, "rb") as f:
+        with open("cache_single_generation/" + file, "rb") as f:
             single = pickle.load(f)
 
         all_res = []
