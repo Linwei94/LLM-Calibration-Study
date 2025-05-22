@@ -447,7 +447,7 @@ class MMLUProEval(Eval):
                     tokenizer_mode="auto",
                     tensor_parallel_size=num_gpus
                 )
-            sampling_params = SamplingParams(temperature=1, max_tokens=(10240 if enable_thinking else 2048), logprobs=5, seed=42, stop=[tokenizer.eos_token])
+            sampling_params = SamplingParams(temperature=1, max_tokens=(10240 if enable_thinking else 2048), logprobs=5, stop=[tokenizer.eos_token])
             batch_replication = 10
             # prepare batch
             if is_qwen:
@@ -523,7 +523,7 @@ class MMLUProEval(Eval):
                 self.examples[example_idx]["rep_top_logprobs"] = []
 
                 for j in range(num_outputs_per_example):
-                    output = outputs[i + j]
+                    output = outputs[i + j]                     # corrected in post processing
                     generated_text = output.outputs[0].text
                     prob_dict_list = output.outputs[0].logprobs
 
