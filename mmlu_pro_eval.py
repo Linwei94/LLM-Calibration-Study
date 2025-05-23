@@ -103,7 +103,6 @@ class MMLUProEval(Eval):
                         row["top_logprobs"] = sampler.top_logprobs
                     logprobs = row["logprobs"]
                     response_text = normalize_response(response)
-                    # extracted_answer, confidence = consolidated_answer_extraction(benchmark="mmlu_pro", response_text=response_text, row=row, with_verbal_confidence=True)
                     extracted_answer = extract_answer(response_text=response)
                     confidence = extract_verbal_numerical_confidence(response_text=response_text)
 
@@ -125,7 +124,6 @@ class MMLUProEval(Eval):
                         row["top_logprobs"] = sampler.top_logprobs
                     logprobs = row["logprobs"]
                     response_text = remove_verbal_confidence(normalize_response(response)) # remove verbal confidence to avoid judgement biases
-                    # extracted_answer = consolidated_answer_extraction(benchmark="mmlu_pro", response_text=response_text, row=row, with_verbal_confidence=False)
                     extracted_answer = extract_answer(response_text=response)
                     confidence, judge_response = linguistic_confidence_score(self.decisiveness_grader, format_multichoice_question(row, conf_mode="decisiveness_grading", choices=0), response_text)
 
@@ -149,7 +147,6 @@ class MMLUProEval(Eval):
                         row["top_logprobs"] = sampler.top_logprobs
 
                     response_text = normalize_response(response)
-                    # extracted_answer = consolidated_answer_extraction(benchmark="mmlu_pro", response_text=response_text, row=row, with_verbal_confidence=False)
                     extracted_answer = extract_answer(response_text=response)
                     logprobs = row["logprobs"]
                     confidence = calculate_logit_perplexity(logprobs)
@@ -209,29 +206,6 @@ class MMLUProEval(Eval):
                         verbal_linguistic_confidence, judge_response = None, None
 
                     confidence = verbal_numerical_confidence
-
-
-                case "batch_eval_all":
-                    if not self.cache_found:
-                        print("Please sample responses before evaluating.")
-                        sys.exit()
-                    response = row["response"] 
-                    prompt_messages = row["prompt_messages"] 
-                    logprobs = row["logprobs"]
-                    top_logprobs = row["top_logprobs"]
-
-                    # extract answer 
-                    response_text = normalize_response(response)
-                    extracted_answer = extract_answer(response_text=response_text)
-                    verbal_numerical_confidence = extract_verbal_numerical_confidence(response_text=response_text)
-                    if logprobs is not None:
-                        logit_perplexity_confidence = calculate_logit_perplexity(logprobs)
-                    else:
-                        logit_perplexity_confidence = None 
-                    verbal_linguistic_confidence = row["linguistic_confidence"]
-                    
-                    confidence = verbal_numerical_confidence
-                    judge_response = row["linguistic_judge_response"]
 
 
                 case "sampling":
@@ -448,7 +422,7 @@ class MMLUProEval(Eval):
                     tensor_parallel_size=num_gpus
                 )
             sampling_params = SamplingParams(temperature=1, max_tokens=(10240 if enable_thinking else 2048), logprobs=5, stop=[tokenizer.eos_token])
-            batch_replication = 10
+            batch_replication = 1
             # prepare batch
             if is_qwen:
                 try:
@@ -489,62 +463,62 @@ class MMLUProEval(Eval):
                         inference_batch.append(prompt)
                     inference_batch = inference_batch * batch_replication
                     outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
-            # outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
 
-            # for i, output in enumerate(outputs):
-            #     generated_text = output.outputs[0].text
-            #     # print(generated_text)
-            #     self.examples[i]["prompt_messages"] = [sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")] # such formatting to fit later analysis pipeline
-            #     self.examples[i]["response"] = generated_text
-            #     prob_dict_list = output.outputs[0].logprobs
-            #     top_logprob_lst = []
-            #     logprobs = []
-            #     for d in prob_dict_list:
-            #         top_logprob_lst.append({x.decoded_token: x.logprob for x in d.values()})
-            #         logprobs += [x.logprob for x in d.values() if x.rank == 1]
-            #     self.examples[i]["logprobs"] = (logprobs)
-            #     self.examples[i]["top_logprobs"] = (top_logprob_lst)
+            for i, output in enumerate(outputs):
+                generated_text = output.outputs[0].text
+                # print(generated_text)
+                self.examples[i]["prompt_messages"] = [sampler._pack_message(content=format_multichoice_question(self.examples[i], conf_mode="sampling", choices=0), role="user")] # such formatting to fit later analysis pipeline
+                self.examples[i]["response"] = generated_text
+                prob_dict_list = output.outputs[0].logprobs
+                top_logprob_lst = []
+                logprobs = []
+                for d in prob_dict_list:
+                    top_logprob_lst.append({x.decoded_token: x.logprob for x in d.values()})
+                    logprobs += [x.logprob for x in d.values() if x.rank == 1]
+                self.examples[i]["logprobs"] = (logprobs)
+                self.examples[i]["top_logprobs"] = (top_logprob_lst)
 
-            num_outputs_per_example = batch_replication
-            for i in range(0, len(outputs), num_outputs_per_example):
-                example_idx = i // num_outputs_per_example
+            ## uncomment to run multi-generation
+            # num_outputs_per_example = batch_replication
+            # for i in range(0, len(outputs), num_outputs_per_example):
+            #     example_idx = i // num_outputs_per_example
 
-                # Prepare prompt
-                self.examples[example_idx]["prompt_messages"] = [
-                    sampler._pack_message(
-                        content=format_multichoice_question(self.examples[example_idx], conf_mode="sampling", choices=0),
-                        role="user"
-                    )
-                ]
+            #     # Prepare prompt
+            #     self.examples[example_idx]["prompt_messages"] = [
+            #         sampler._pack_message(
+            #             content=format_multichoice_question(self.examples[example_idx], conf_mode="sampling", choices=0),
+            #             role="user"
+            #         )
+            #     ]
 
-                # Initialize lists to store repeated outputs
-                self.examples[example_idx]["rep_responses"] = []
-                self.examples[example_idx]["rep_logprobs"] = []
-                self.examples[example_idx]["rep_top_logprobs"] = []
+            #     # Initialize lists to store repeated outputs
+            #     self.examples[example_idx]["rep_responses"] = []
+            #     self.examples[example_idx]["rep_logprobs"] = []
+            #     self.examples[example_idx]["rep_top_logprobs"] = []
 
-                for j in range(num_outputs_per_example):
-                    output = outputs[i + j]                     # corrected in post processing
-                    generated_text = output.outputs[0].text
-                    prob_dict_list = output.outputs[0].logprobs
+            #     for j in range(num_outputs_per_example):
+            #         output = outputs[i + j]                     # corrected in post processing
+            #         generated_text = output.outputs[0].text
+            #         prob_dict_list = output.outputs[0].logprobs
 
-                    # Extract logprobs
-                    top_logprob_lst = []
-                    logprobs = []
+            #         # Extract logprobs
+            #         top_logprob_lst = []
+            #         logprobs = []
 
-                    for d in prob_dict_list:
-                        top_logprob_lst.append({x.decoded_token: x.logprob for x in d.values()})
-                        logprobs += [x.logprob for x in d.values() if x.rank == 1]
+            #         for d in prob_dict_list:
+            #             top_logprob_lst.append({x.decoded_token: x.logprob for x in d.values()})
+            #             logprobs += [x.logprob for x in d.values() if x.rank == 1]
 
-                    # Save all 10 to rep_* keys
-                    self.examples[example_idx]["rep_responses"].append(generated_text)
-                    self.examples[example_idx]["rep_logprobs"].append(logprobs)
-                    self.examples[example_idx]["rep_top_logprobs"].append(top_logprob_lst)
+            #         # Save all 10 to rep_* keys
+            #         self.examples[example_idx]["rep_responses"].append(generated_text)
+            #         self.examples[example_idx]["rep_logprobs"].append(logprobs)
+            #         self.examples[example_idx]["rep_top_logprobs"].append(top_logprob_lst)
 
-                    # Save the first one separately
-                    if j == 0:
-                        self.examples[example_idx]["response"] = generated_text
-                        self.examples[example_idx]["logprobs"] = logprobs
-                        self.examples[example_idx]["top_logprobs"] = top_logprob_lst
+            #         # Save the first one separately
+            #         if j == 0:
+            #             self.examples[example_idx]["response"] = generated_text
+            #             self.examples[example_idx]["logprobs"] = logprobs
+            #             self.examples[example_idx]["top_logprobs"] = top_logprob_lst
 
 
             model_name = sampler.model + ("-think" if hasattr(sampler, "think") and sampler.think else "")
@@ -553,101 +527,6 @@ class MMLUProEval(Eval):
                 pickle.dump(self.examples, f)
                 print(f"Shared sampling with vLLM completed and saved to: {regen_stored_path}")
             sys.exit()
-        # ----------------------------------------------------------------------------------------------
-
-        # Batch eval all
-        # ----------------------------------------------------------------------------------------------
-        elif self.conf_mode == "batch_eval_all":
-            def truncate_by_words(text, max_words=10240):
-                words = text.split()
-                if len(words) < max_words:
-                    print("truncated")
-                    return ' '.join(words[:max_words])
-                else:
-                    return text
-            model_name = sampler.model + ("-think" if hasattr(sampler, "think") and sampler.think else "")
-            regen_stored_path = shared_sampling_path("mmlu_pro", model_name, "sampling", self.num_examples, None)
-            print(regen_stored_path)
-            if os.path.exists(regen_stored_path):
-                print("Fetching from cache")
-                self.cache_found = True
-                with open(regen_stored_path, 'rb') as f:
-                    self.examples = pickle.load(f)
-            else:
-                # exit with error
-                print("No cache found. Please sample first.")
-                sys.exit()
-            print("vllm batch eval")
-            # set up vLLM mode 
-            tokenizer = self.decisiveness_grader.tokenizer
-            visible_gpus = os.environ.get("CUDA_VISIBLE_DEVICES", "")
-            if visible_gpus:
-                num_gpus = len(visible_gpus.split(','))
-            else:
-                num_gpus = torch.cuda.device_count()  # fallback
-
-            llm = LLM(
-                model=self.decisiveness_grader.model,
-                max_model_len=None,
-                trust_remote_code=True,
-                tokenizer_mode="auto",
-                tensor_parallel_size=num_gpus
-            )
-            sampling_params = SamplingParams(temperature=0, max_tokens=2048, logprobs=5, seed=42, stop=[tokenizer.eos_token])
-            inference_batch = []
-            for i in tqdm(range(len(self.examples)), desc="Prepare verbal linguistic judge prompt batch"):
-                response = self.examples[i]["response"]
-                response_text = remove_verbal_confidence(normalize_response(response)) # remove verbal confidence to avoid judgement biases
-                response_text = truncate_by_words(response_text)
-                question = format_multichoice_question(self.examples[i], conf_mode="decisiveness_grading", choices=0)
-                
-                prompt = [sampler._pack_message("system", sampler.system_message), 
-                          sampler._pack_message(content=LINGUISTIC_CONFIDENCE_GRADER_PROMPT.format(Question=question, Response=response_text), role="user")]
-                inference_batch.append(tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True, enable_thinking=True))
-
-            outputs = llm.generate(inference_batch, sampling_params, use_tqdm=True)
-            # conf_list = []
-            for i, output in enumerate(outputs):
-                judge_generated_text = output.outputs[0].text
-                if extract_answer(self.examples[i]["response"]) == None or extract_verbal_numerical_confidence(self.examples[i]["response"]) == None:
-                    self.examples[i]["linguistic_confidence"] = None 
-                    self.examples[i]["linguistic_judge_response"] = judge_generated_text
-                else:
-                    score_patterns = [
-                        r"[Cc]onfidence [Ss]core:\s*([0-1]*\.?[0-9]+)",
-                        r"confidence score is\s*([0-1]*\.?[0-9]+)",
-                        r"answer is\s*([0-1]*\.?[0-9]+)",
-                    ]
-                    for score_pattern in score_patterns:
-                        scores = re.findall(score_pattern, judge_generated_text)
-                        if scores:
-                            print(f"deceiveness score: {np.mean([float(score) for score in scores])}")
-                            # conf_list.append(np.mean([float(score) for score in scores]))
-                            self.examples[i]["linguistic_confidence"] = np.mean([float(score) for score in scores])
-                            break
-                        else:
-                            print("No score")
-                            self.examples[i]["linguistic_confidence"] = None 
-                    self.examples[i]["linguistic_judge_response"] = judge_generated_text
-                
-                
-            # self.conf_mode = "eval_all"
-            results = common.map_with_progress(fn, self.examples)
-            results_df = pd.DataFrame()
-            for result in results:
-                new_row = pd.DataFrame({
-                    "category":[result.category],
-                    "correct_answer": [result.correct_answer],
-                    "extracted_answer": [result.extracted_answer],
-                    "verbal_numerical_confidence": [result.verbal_numerical_confidence],
-                    "logit_perplexity_confidence": [result.logit_perplexity_confidence],
-                    "verbal_linguistic_confidence": [result.verbal_linguistic_confidence]
-                })
-                results_df = pd.concat([results_df, new_row], ignore_index=True)
-            file_stem = f"""mmlu_pro_{model_name.split("/")[-1]}_{self.conf_mode}_{self.num_examples}"""
-            csv_filename = f"""LLM-Calibration-Study/results/{file_stem}.csv"""
-            results_df.to_csv(csv_filename)
-            return common.aggregate_results(results)
         # ----------------------------------------------------------------------------------------------
 
         model_name = sampler.model + ("-think" if hasattr(sampler, "think") and sampler.think else "")

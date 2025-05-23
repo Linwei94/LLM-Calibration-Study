@@ -50,14 +50,9 @@ def main():
     # grading_sampler = ChatCompletionSampler(model="gpt-4o")
     # grading_sampler = ChatCompletionSampler(model="gpt-4o-mini")
 
-    # grading_sampler = all_models["google-llama-3.1-405b-instruct-maas"]
-    # equality_checker = ChatCompletionSampler(model="gpt-4-turbo-preview")
-
     simpleqa_grader = all_models["meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"]
     equality_checker = all_models["meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"]
     decisiveness_grader = all_models["meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8"]
-    # decisiveness_grader = common.get_model_dict("Qwen/Qwen3-30B-A3B-think")["Qwen/Qwen3-30B-A3B-think"]
-    # decisiveness_grader = common.get_model_dict("Qwen/Qwen3-0.6B")["Qwen/Qwen3-0.6B"]
     decisiveness_grader.get_logprobs = False
 
 
